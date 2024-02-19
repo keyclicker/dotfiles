@@ -1,0 +1,21 @@
+{
+  "title": "Global Vi CapsLock",
+  "rules": [
+    {
+      "description": "Global Vi CapsLock",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "caps_lock"
+          },
+          "to": [
+            {
+              "key_code": "escape"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    }
+  ]
+}

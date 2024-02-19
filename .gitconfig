@@ -1,0 +1,8 @@
+[user]
+	email = nickeyclicker@gmail.com
+	name = keyclicker
+	signingkey = 0D357FC831321F40
+[commit]
+	gpgsign = true
+[gpg]
+	program = /opt/homebrew/bin/gpg

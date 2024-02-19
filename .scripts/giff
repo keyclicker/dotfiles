@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+# Check if at least one argument is provided
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <input_file> [start_time] [end_time]"
+  exit 1
+fi
+
+input_file="$1"
+start_time=${2:-0} # Default start time is 0 if not provided
+end_time=${3:-}    # No default for end time; it's optional
+
+output_file="${input_file%.*}.gif.mp4"
+
+# Construct ffmpeg command
+ffmpeg_cmd="ffmpeg -i \"$input_file\" -vf \"scale=640:-1:flags=lanczos\" -c:v libx264 -preset veryslow -crf 28 -pix_fmt yuv420p -an"
+
+# Add start time if provided
+if [ -n "$start_time" ]; then
+  ffmpeg_cmd+=" -ss $start_time"
+fi
+
+# Add end time if provided
+if [ -n "$end_time" ]; then
+  ffmpeg_cmd+=" -to $end_time"
+fi
+
+ffmpeg_cmd+=" \"$output_file\""
+
+# Execute the command
+eval $ffmpeg_cmd
+
+echo "Output saved to $output_file"
