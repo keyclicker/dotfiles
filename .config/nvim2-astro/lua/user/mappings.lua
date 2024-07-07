@@ -85,6 +85,32 @@ return {
     -- swap \ and | for easier access
     ["\\"] = { "<cmd>vsplit<cr>", desc = "Vertical Split" },
     ["|"] = { "<cmd>split<cr>", desc = "Horizontal Split" },
+
+    -- quickfix
+    ["[q"] = { "<cmd>cprev<cr>", desc = "Previous Quickfix" },
+    ["]q"] = { "<cmd>cnext<cr>", desc = "Next Quickfix" },
+
+    ---------------------------------------------------------------------------
+    -- CodeForces Mappings
+    ---------------------------------------------------------------------------
+
+    ["<leader>k"] = { name = "CodeForces" },
+
+    ["<leader>kg"] = {
+      function() require("user.codeforces").generate() end,
+      desc = "Generate files",
+    },
+
+    ["<leader>kr"] = {
+      function() require("user.codeforces").run_file() end,
+      desc = "Run current file",
+    },
+
+    ["<leader>ks"] = {
+      function() require("user.codeforces").debug_file() end,
+      desc = "Debug current file",
+    },
+
     ---------------------------------------------------------------------------
     -- Testing
     ---------------------------------------------------------------------------

@@ -70,7 +70,14 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-history-substring-search zsh-syntax-highlighting zsh-vi-mode)
+plugins=(
+	git
+	zsh-autosuggestions
+	zsh-history-substring-search
+	zsh-syntax-highlighting
+	zsh-vi-mode
+	poetry
+)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -108,9 +115,9 @@ alias em="emacsclient -c -a \"emacs\""
 
 # nvim
 
-alias kick="NVIM_APPNAME=nvim.kick nvim"
-alias astro="NVIM_APPNAME=nvim.astro nvim"
-alias lazy="NVIM_APPNAME=nvim.lazy nvim"
+alias kick="NVIM_APPNAME=nvim-kick nvim"
+alias astro="NVIM_APPNAME=nvim-astro nvim"
+alias lazy="NVIM_APPNAME=nvim-lazy nvim"
 
 # alias udex="cd ~/Root/Programming/Udex/udex/front/; nvim"
 # alias dot="cd ~/.dotfiles; nvim"
@@ -121,14 +128,27 @@ alias lazy="NVIM_APPNAME=nvim.lazy nvim"
 export PATH="$HOME/.scripts:$PATH"
 # alias stowdot="stow ~/.dotfiles"
 
-export EDITOR='nvim'
+export EDITOR="nvim"
 export GPG_TTY=$(tty)
-export DYLD_LIBRARY_PATH="/usr/local/mysql/lib:$PATH"
-export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
+# export DYLD_LIBRARY_PATH="/usr/local/mysql/lib:$PATH"
+export PATH="/Library/PostgreSQL/16/bin:$PATH"
+# export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
 
 export PATH="$HOME/.emacs.d/bin:$PATH"
-export PATH="$HOME/Library/Python/3./bin:$PATH"
-
+# export PATH="$HOME/Library/Python/3./bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
+
 	[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 	[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+
+# Created by `pipx` on 2024-04-30 11:04:43
+export PATH="$PATH:/Users/keyclicker/.local/bin"
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+
+# Locale
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8

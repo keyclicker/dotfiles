@@ -17,6 +17,9 @@ return {
     icons_enabled = true, -- disable icons in the UI (disable if no nerd font is available, requires :PackerSync after changing)
     ui_notifications_enabled = true, -- disable notifications when toggling UI elements
     resession_enabled = false, -- enable experimental resession.nvim session management (will be default in AstroNvim v4)
+
+    -- python3_host_prog = "/Users/keyclicker/Library/Caches/pypoetry/virtualenvs/udex-back-7Hcw2od7-py3.12/bin/python3",
+    python3_host_prog = "/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3", -- set the python3 host program path
   },
 }
 -- If you need more control, you can use the function()...end notation

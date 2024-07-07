@@ -1,2 +1,4 @@
 .DS_Store
-nvim.lazy/
+nvim.*/
+!nvim.kick/
+!nvim.astro/

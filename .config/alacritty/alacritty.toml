@@ -11,7 +11,8 @@ bold_italic = {  style = "Bold Italic" }
 size = 14
 
 [window]
-option_as_alt = 'OnlyLeft'
+# option_as_alt = 'OnlyLeft'
+option_as_alt = 'Both'
 
 # TokyoNight Alacritty Colors
 # Default colors
