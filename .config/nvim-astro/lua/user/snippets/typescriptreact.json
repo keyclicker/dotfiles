@@ -1,0 +1,81 @@
+{
+  "Auto-Component": {
+    "scope": "typescriptreact",
+    "prefix": "scom",
+    "body": [
+      "export interface ${TM_FILENAME_BASE}Props {",
+      "}",
+      "",
+      "/**",
+      "* $1",
+      "*/",
+      "function ${TM_FILENAME_BASE} ({} : ${TM_FILENAME_BASE}Props) {",
+      "  return (",
+      "    <$2>",
+      "       $3",
+      "    </$2>",
+      "  )",
+      "}",
+      "",
+      "export default ${TM_FILENAME_BASE}"
+    ],
+    "description": ""
+  },
+
+  "Describe Component": {
+    "scope": "typescriptreact",
+    "prefix": "sdesc",
+    "body": ["describe('<$1>', () => {", "})"],
+    "description": ""
+  },
+
+  "It component": {
+    "scope": "typescriptreact",
+    "prefix": "sit",
+    "body": ["it('$1', () => {", "  render(<$2/>)", "})"],
+    "description": ""
+  },
+
+  "It matches shallow": {
+    "scope": "typescriptreact",
+    "prefix": "smats",
+    "body": [
+      "it('matches shallow snapshot', () => {",
+      "  const renderer = ShallowRenderer.createRenderer()",
+      "  const view = renderer.render(",
+      "    <$1/>",
+      "  )",
+      "  expect(view).toMatchSnapshot()",
+      "})"
+    ],
+    "description": ""
+  },
+
+  "It matches snapshot": {
+    "scope": "typescriptreact",
+    "prefix": "smat",
+    "body": [
+      "it('matches snapshot', () => {",
+      "  const { asFragment } = render(",
+      "    <$1/>",
+      "  )",
+      "  expect(asFragment()).toMatchSnapshot()",
+      "})"
+    ],
+    "description": ""
+  },
+
+  "Test Imports": {
+    "scope": "typescriptreact",
+    "prefix": "stim",
+    "body": [
+      "import '@testing-library/jest-dom'",
+      "import { render, screen } from '@testing-library/react'",
+      "import ShallowRenderer from 'react-test-renderer/shallow'",
+      "",
+      "import $1 from './$1'",
+      ""
+    ],
+    "description": ""
+  }
+}

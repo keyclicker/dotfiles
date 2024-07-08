@@ -1,0 +1,69 @@
+snippet sfcom "Auto File Component - ": 
+        export interface ${TM_FILENAME_BASE}Props {
+        }
+        
+        /**
+        * $1
+        */
+        function ${TM_FILENAME_BASE} ({} : ${TM_FILENAME_BASE}Props) {
+          return (
+            <$2>
+               $3
+            </$2>
+          )
+        }
+        
+        export default ${TM_FILENAME_BASE}
+
+
+snippet scom "Auto Component - ": 
+        interface $1Props {
+        }
+        
+        /**
+        * $2
+        */
+        function $1 ({} : $1Props) {
+          return (
+            <$3>
+               $4
+            </$3>
+          )
+        }
+        
+
+
+snippet sdesc "Describe Component - ": 
+        describe('<$1>', () => {
+        })
+
+snippet sit "It component - ": 
+        it('$1', () => {
+          render(<$2/>)
+        })
+
+snippet smats "It matches shallow - ": 
+        it('matches shallow snapshot', () => {
+          const renderer = ShallowRenderer.createRenderer()
+          const view = renderer.render(
+            <$1/>
+          )
+          expect(view).toMatchSnapshot()
+        })
+
+snippet smat "It matches snapshot - ": 
+        it('matches snapshot', () => {
+          const { asFragment } = render(
+            <$1/>
+          )
+          expect(asFragment()).toMatchSnapshot()
+        })
+
+snippet stim "Test Imports - ": 
+        import '@testing-library/jest-dom'
+        import { render, screen } from '@testing-library/react'
+        import ShallowRenderer from 'react-test-renderer/shallow'
+        
+        import $1 from './$1'
+        
+
