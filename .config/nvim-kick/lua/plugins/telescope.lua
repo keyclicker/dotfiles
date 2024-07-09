@@ -65,7 +65,11 @@ return { -- Fuzzy Finder (files, lsp, etc)
             -- ['<C-/>'] = require('telescope.actions').which_key,
           },
         },
-
+        path_display = {
+          filename_first = {
+            reverse_directories = false,
+          },
+        },
         sorting_strategy = 'ascending',
         layout_strategy = 'flex',
         layout_config = {
@@ -130,8 +134,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
       winblend = 10,
       sorting_strategy = 'ascending',
       layout_strategy = 'vertical',
+      previewer = false,
       layout_config = {
-        preview_cutoff = 1 / 0,
         prompt_position = 'top',
         width = 0.50,
         height = 0.75,

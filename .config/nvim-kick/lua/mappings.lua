@@ -10,12 +10,12 @@ vim.keymap.set('n', '<leader>W', '<cmd>wall<CR>', { desc = 'Write all buffers' }
 vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = 'Quit current window' })
 vim.keymap.set('n', '<leader>Q', '<cmd>qall<CR>', { desc = 'Quit all windows' })
 vim.keymap.set('n', '<leader>c', '<cmd>bd<CR>', { desc = 'Close current buffer' })
-vim.keymap.set('n', '<leader>C', '<cmd>%bd', { desc = 'Close all buffers' })
+vim.keymap.set('n', '<leader>C', '<cmd>%bd<CR>', { desc = 'Close all buffers' })
 
 -- Neotree
 
 -- Explorer
-vim.keymap.set('n', '<leader>E', '<cmd>Exlorer<cr>', { desc = 'Open netrw' })
+-- vim.keymap.set('n', '<leader>E', '<cmd>Exlorer<cr>', { desc = 'Open netrw' })
 
 -- Next and previous buffer
 vim.keymap.set('n', '<C-M-n>', '<cmd>bn<CR>', { desc = 'Next buffer' })
@@ -82,7 +82,12 @@ vim.keymap.set('n', '[q', '<cmd>cprev<CR>', { desc = 'Go to previous Quickfix it
 vim.keymap.set('n', ']q', '<cmd>cnext<CR>', { desc = 'Go to next Quickfix item' })
 -- TODO: lnext / lprev
 
-vim.keymap.set('n', '<leader>S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = 'Search and replace current word' })
+vim.keymap.set(
+  'n',
+  '<leader>S',
+  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+  { desc = 'Search and replace current word' }
+)
 -- vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 -- don't know why, but I will keep it here

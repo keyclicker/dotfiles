@@ -77,15 +77,30 @@ vim.opt.cmdheight = 0
 -- Make status line global
 vim.opt.laststatus = 3
 
----------------------------------------
---          Diagnostics
----------------------------------------
+-----------------------------------------------------------
+--          Diagnostics and LSP style
+-----------------------------------------------------------
+
+local border = 'rounded'
+
 vim.diagnostic.config {
   float = {
     source = true,
     header = '',
     prefix = '',
-    border = 'rounded',
-    width = 80,
+    border = border,
+    max_width = 80,
+    max_height = 20,
   },
 }
+
+local lspfloat = {
+  source = true,
+  header = '',
+  border = border,
+  max_width = 80,
+  max_height = 20,
+}
+
+vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, lspfloat)
+vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, lspfloat)
