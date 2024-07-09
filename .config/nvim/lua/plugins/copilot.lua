@@ -46,5 +46,9 @@ return {
       copilot_node_command = 'node', -- Node.js version must be > 18.x
       server_opts_overrides = {},
     }
+
+    vim.keymap.set('n', '<leader>tc', function()
+      require('copilot.suggestion').toggle_auto_trigger()
+    end, { desc = 'Toggle Copilot' })
   end,
 }

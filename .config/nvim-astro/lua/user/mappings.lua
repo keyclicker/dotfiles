@@ -70,7 +70,6 @@ return {
       function()
         local prev = vim.diagnostic.config().virtual_text
         local next = not prev
-
         vim.diagnostic.config { virtual_text = next }
       end,
       desc = "Toggle Diagnostics",

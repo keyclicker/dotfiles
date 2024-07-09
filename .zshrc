@@ -113,11 +113,8 @@ alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
 alias em="emacsclient -c -a \"emacs\""
 
-# nvim
-
-alias kick="NVIM_APPNAME=nvim-kick nvim"
+# nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"
-alias lazy="NVIM_APPNAME=nvim-lazy nvim"
 
 # alias udex="cd ~/Root/Programming/Udex/udex/front/; nvim"
 # alias dot="cd ~/.dotfiles; nvim"
