@@ -7,6 +7,9 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- Set the python3 host program path
+vim.g.python3_host_prog = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3'
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -73,3 +76,16 @@ vim.opt.cmdheight = 0
 
 -- Make status line global
 vim.opt.laststatus = 3
+
+---------------------------------------
+--          Diagnostics
+---------------------------------------
+vim.diagnostic.config {
+  float = {
+    source = true,
+    header = '',
+    prefix = '',
+    border = 'rounded',
+    width = 80,
+  },
+}

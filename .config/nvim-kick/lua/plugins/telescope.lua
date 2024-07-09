@@ -1,3 +1,5 @@
+local helpers = require 'utils.helpers'
+
 return { -- Fuzzy Finder (files, lsp, etc)
   'nvim-telescope/telescope.nvim',
   event = 'VimEnter',
@@ -106,7 +108,20 @@ return { -- Fuzzy Finder (files, lsp, etc)
     --                          Most used
     ---------------------------------------------------------------------------
     vim.keymap.set('n', '<leader>p', builtin.find_files, { desc = 'Search Files' })
+    vim.keymap.set('n', '<leader>P', function()
+      builtin.find_files {
+        hidden = true,
+        prompt_title = 'Search All Files',
+      }
+    end, { desc = 'Search All Files' })
+
     vim.keymap.set('n', '<leader>g', builtin.live_grep, { desc = 'Live grep' })
+    vim.keymap.set('n', '<leader>G', function()
+      builtin.live_grep {
+        hidden = true,
+        prompt_title = 'Live Grep (All Files)',
+      }
+    end, { desc = 'Live grep (all files)' })
 
     ---------------------------------------------------------------------------
     --                           Dropdowns
@@ -129,7 +144,10 @@ return { -- Fuzzy Finder (files, lsp, etc)
     end, { desc = 'Fuzzily search in current buffer' })
 
     vim.keymap.set('n', '<leader><leader>', function()
-      builtin.buffers(dropdown_theme)
+      builtin.buffers(helpers.merge(dropdown_theme, {
+        initial_mode = 'normal',
+        sort_lastused = true,
+      }))
     end, { desc = 'Find existing buffers' })
 
     -------------------------------------------------------
@@ -141,26 +159,11 @@ return { -- Fuzzy Finder (files, lsp, etc)
       builtin.live_grep {
         grep_open_files = true,
         prompt_title = 'Live Grep in Open Files',
+        additional_args = function(_)
+          return { '--hidden' }
+        end,
       }
     end, { desc = 'Opened Files' })
-
-    -------------------------------------------------------
-    --               Search all Files
-    -------------------------------------------------------
-    local telescopeConfig = require 'telescope.config'
-    -- Clone the default Telescope configuration
-    local vimgrep_arguments = { unpack(telescopeConfig.values.vimgrep_arguments) }
-    -- I want to search in hidden/dot files.
-    table.insert(vimgrep_arguments, '--hidden')
-    -- I don't want to search in the `.git` directory.
-    table.insert(vimgrep_arguments, '--glob')
-    table.insert(vimgrep_arguments, '!**/.git/*')
-    vim.keymap.set('n', '<leader>sa', function()
-      builtin.find_files {
-        find_command = vimgrep_arguments,
-        prompt_title = 'All Files',
-      }
-    end, { desc = 'All Files' })
 
     -------------------------------------------------------
     --                 Other
