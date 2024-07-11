@@ -1,3 +1,12 @@
+local function show_macro_recording()
+  local recording_register = vim.fn.reg_recording()
+  if recording_register == '' then
+    return ''
+  else
+    return '@' .. recording_register
+  end
+end
+
 return {
   'nvim-lualine/lualine.nvim',
 
@@ -27,8 +36,8 @@ return {
         lualine_a = { 'mode' },
         lualine_b = { 'branch', 'diff' },
         lualine_c = { 'diagnostics' },
-        lualine_x = { 'searchcount' },
-        lualine_y = { 'filename', 'filetype' },
+        lualine_x = { 'searchcount', { 'macro-recording', fmt = show_macro_recording } },
+        lualine_y = { { 'filename', path = 1 }, 'filetype' },
         lualine_z = { 'location', 'progress' },
       },
       -- inactive_sections = {

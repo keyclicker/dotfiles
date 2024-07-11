@@ -1,11 +1,34 @@
--- Adds git related signs to the gutter, as well as utilities for managing changes
--- NOTE: gitsigns is already included in init.lua but contains only the base
--- config. This will add also the recommended keymaps.
-
 return {
+  {
+    'tpope/vim-fugitive',
+    cmd = { 'G', 'Git' },
+
+    init = function()
+      vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Git status' })
+    end,
+  },
+
+  -- Here is a more advanced example where we pass configuration
+  -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
+  --    require('gitsigns').setup({ ... })
+  --
+  -- See `:help gitsigns` to understand what the configuration keys do
+
+  -- Adds git related signs to the gutter, as well as utilities for managing changes
+  -- NOTE: gitsigns is already included in init.lua but contains only the base
+  -- config. This will add also the recommended keymaps.
   {
     'lewis6991/gitsigns.nvim',
     opts = {
+      signs = {
+        add = { text = '┃' },
+        change = { text = '┃' },
+        delete = { text = '_' },
+        topdelete = { text = '‾' },
+        changedelete = { text = '~' },
+        untracked = { text = '┆' },
+      },
+
       on_attach = function(bufnr)
         local gitsigns = require 'gitsigns'
 
@@ -40,6 +63,7 @@ return {
         map('v', '<leader>hr', function()
           gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
         end, { desc = 'reset git hunk' })
+
         -- normal mode
         map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
         map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })

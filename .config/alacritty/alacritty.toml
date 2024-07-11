@@ -7,7 +7,6 @@ bold_italic = {  style = "Bold Italic" }
 # defaults write org.alacritty AppleFontSmoothing -int 0
 # defaults delete org.alacritty AppleFontSmoothing
 
-
 size = 14
 
 [window]

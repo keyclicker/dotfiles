@@ -61,7 +61,7 @@ return {
     -- end
 
     vim.keymap.set('n', '<leader>;', function()
-      harpoon.ui:toggle_quick_menu(harpoon:list())
+      harpoon.ui:toggle_quick_menu(harpoon:list(), { ui_max_width = 80 })
     end, {
       desc = 'Open harpoon window',
     })

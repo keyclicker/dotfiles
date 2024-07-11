@@ -11,7 +11,7 @@ return {
     lazy = false,
     keys = {
       {
-        '<leader>f',
+        '<leader>j',
         function()
           require('conform').format { async = true, lsp_fallback = true }
         end,
@@ -38,7 +38,10 @@ return {
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettierd', 'prettier' } },
+        javascript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescript = { 'prettier' },
+        typescriptreact = { 'prettier' },
 
         cpp = { 'clang-format' },
         c = { 'clang-format' },

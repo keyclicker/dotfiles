@@ -61,8 +61,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
             ['<C-j>'] = require('telescope.actions').move_selection_next,
             ['<C-k>'] = require('telescope.actions').move_selection_previous,
 
-            -- FIXME:
-            -- ['<C-/>'] = require('telescope.actions').which_key,
+            -- FIXME: It's alacritty bug, not telescope
+            ['<C-_>'] = require('telescope.actions').which_key,
           },
         },
         path_display = {
@@ -80,6 +80,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
             preview_width = 0.55,
           },
         },
+        file_ignore_patterns = { 'poetry.lock', 'package%-lock.json' },
       },
 
       -- pickers = {}
@@ -91,6 +92,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     }
 
     -- Enable Telescope extensions if they are installed
+    pcall(require('telescope').load_extension, 'refactoring')
     pcall(require('telescope').load_extension, 'fzf')
     pcall(require('telescope').load_extension, 'ui-select')
 
@@ -119,8 +121,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
       }
     end, { desc = 'Search All Files' })
 
-    vim.keymap.set('n', '<leader>g', builtin.live_grep, { desc = 'Live grep' })
-    vim.keymap.set('n', '<leader>G', function()
+    vim.keymap.set('n', '<leader>f', builtin.live_grep, { desc = 'Live grep' })
+    vim.keymap.set('n', '<leader>F', function()
       builtin.live_grep {
         hidden = true,
         prompt_title = 'Live Grep (All Files)',
@@ -153,6 +155,19 @@ return { -- Fuzzy Finder (files, lsp, etc)
         sort_lastused = true,
       }))
     end, { desc = 'Find existing buffers' })
+
+    -- Refactoring
+    vim.keymap.set({ 'x', 'n' }, '<leader>R', function()
+      require('telescope').extensions.refactoring.refactors(helpers.merge(dropdown_theme, {
+        initial_mode = 'normal',
+        prompt_title = 'Refactoring',
+        layout_config = {
+          prompt_position = 'top',
+          width = 0.4,
+          height = 0.3,
+        },
+      }))
+    end, { desc = 'Refactoring' })
 
     -------------------------------------------------------
     --              Search opened Files

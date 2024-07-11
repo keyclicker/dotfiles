@@ -81,6 +81,9 @@ vim.opt.laststatus = 3
 --          Diagnostics and LSP style
 -----------------------------------------------------------
 
+-- Set the height of completion menu
+vim.opt.pumheight = 15
+
 local border = 'rounded'
 
 vim.diagnostic.config {
@@ -104,3 +107,10 @@ local lspfloat = {
 
 vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, lspfloat)
 vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, lspfloat)
+
+-----------------------------------------------------------
+--                     Spelling
+-----------------------------------------------------------
+vim.opt.spelllang = 'en_us'
+vim.opt.spell = true
+vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
