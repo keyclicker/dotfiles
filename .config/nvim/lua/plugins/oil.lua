@@ -12,8 +12,8 @@ return {
       keymaps = {
         ['<C-h>'] = false,
         ['<C-l>'] = false,
-        ['<C-s>'] = { 'actions.select', opts = { horizontal = true }, desc = 'Open the entry in a horizontal split' },
-        ['<C-v>'] = { 'actions.select', opts = { vertical = true }, desc = 'Open the entry in a vertical split' },
+        -- ['<C->'] = { 'actions.select', opts = { horizontal = true }, desc = 'Open the entry in a horizontal split' },
+        ['<C-s>'] = { 'actions.select', opts = { vertical = true }, desc = 'Open the entry in a vertical split' },
         ['<C-c>'] = 'actions.refresh',
       },
       win_options = {

@@ -99,3 +99,14 @@ vim.keymap.set(
 
 -- don't know why, but I will keep it here
 vim.keymap.set('n', 'Q', '<nop>', { desc = 'Disable Ex mode' })
+
+-----------------------------------------------------------
+---                  Keyboard Layouts
+-----------------------------------------------------------
+
+vim.keymap.set('n', '<leader>lu', '<cmd>set keymap=ukrainian-enhanced<CR>', { desc = 'Set Ukrainian layout' })
+vim.keymap.set('n', '<leader>lr', '<cmd>set keymap=russian-jcukenwin<CR>', { desc = 'Set Russian layout' })
+vim.keymap.set('n', '<leader>le', '<cmd>set keymap=<CR>', { desc = 'Set English layout' })
+
+-- vim.opt.iminsert = 0
+-- vim.opt.imsearch = 0
