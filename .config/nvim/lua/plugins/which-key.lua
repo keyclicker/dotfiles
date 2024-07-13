@@ -15,21 +15,23 @@
 
 return { -- Useful plugin to show you pending keybinds.
   'folke/which-key.nvim',
+  dependencies = {
+    'nvim-tree/nvim-web-devicons',
+  },
   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
   config = function() -- This is the function that runs, AFTER loading
-    require('which-key').setup()
+    local wk = require 'which-key'
+
+    wk.setup()
 
     -- Document existing key chains
-    require('which-key').register {
-      ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-      ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-      ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-      ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-      ['<leader>l'] = { name = '[L]ayout', _ = 'which_key_ignore' },
+    wk.add {
+      { '<leader>g', group = '[G]it' },
+      { '<leader>h', group = 'Git [H]unk' },
+      { '<leader>l', group = '[L]ayout' },
+      { '<leader>s', group = '[S]earch' },
+      { '<leader>t', group = '[T]oggle' },
+      { '<leader>h', group = 'Git Hunk', mode = 'v' },
     }
-    -- visual mode
-    require('which-key').register({
-      ['<leader>h'] = { 'Git Hunk' },
-    }, { mode = 'v' })
   end,
 }

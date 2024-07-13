@@ -83,7 +83,23 @@ return { -- Fuzzy Finder (files, lsp, etc)
         file_ignore_patterns = { 'poetry.lock', 'package%-lock.json' },
       },
 
-      -- pickers = {}
+      pickers = {
+        buffers = {
+          initial_mode = 'normal',
+          -- sort_lastused = true,
+          show_all_buffers = true,
+          sort_mru = true,
+          mappings = {
+            i = {
+              ['<c-d>'] = 'delete_buffer',
+            },
+            n = {
+              ['c'] = 'delete_buffer',
+            },
+          },
+        },
+      },
+
       extensions = {
         ['ui-select'] = {
           require('telescope.themes').get_dropdown(),
@@ -150,10 +166,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     end, { desc = 'Fuzzily search in current buffer' })
 
     vim.keymap.set('n', '<leader><leader>', function()
-      builtin.buffers(helpers.merge(dropdown_theme, {
-        initial_mode = 'normal',
-        sort_lastused = true,
-      }))
+      builtin.buffers(dropdown_theme)
     end, { desc = 'Find existing buffers' })
 
     -- Refactoring

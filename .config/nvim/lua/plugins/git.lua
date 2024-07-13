@@ -1,10 +1,55 @@
 return {
-  {
-    'tpope/vim-fugitive',
-    cmd = { 'G', 'Git' },
+  -- {
+  --   'tpope/vim-fugitive',
+  --   cmd = { 'G', 'Git' },
+  --
+  --   init = function()
+  --     vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Git status' })
+  --   end,
+  -- },
 
-    init = function()
-      vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Git status' })
+  {
+    'NeogitOrg/neogit',
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- required
+      'sindrets/diffview.nvim', -- optional - Diff integration
+
+      -- Only one of these is needed, not both.
+      'nvim-telescope/telescope.nvim', -- optional
+      'ibhagwan/fzf-lua', -- optional
+    },
+    config = function()
+      ng = require 'neogit'
+      ng.setup()
+
+      vim.keymap.set('n', '<leader>gs', ng.open, { desc = 'Neogit' })
+      vim.keymap.set('n', '<leader>gc', function()
+        ng.open { 'commit' }
+      end, { desc = 'Neogit commit' })
+
+      vim.keymap.set('n', '<leader>gp', function()
+        ng.open { 'push' }
+      end, { desc = 'Neogit push' })
+
+      vim.keymap.set('n', '<leader>gP', function()
+        ng.open { 'pull' }
+      end, { desc = 'Neogit pull' })
+
+      vim.keymap.set('n', '<leader>gl', function()
+        ng.open { 'log' }
+      end, { desc = 'Neogit log' })
+
+      vim.keymap.set('n', '<leader>gd', function()
+        ng.open { 'diff' }
+      end, { desc = 'Neogit diff' })
+
+      vim.keymap.set('n', '<leader>gb', function()
+        ng.open { 'branch' }
+      end, { desc = 'Neogit branch' })
+
+      vim.keymap.set('n', '<leader>gt', function()
+        ng.open { 'stash' }
+      end, { desc = 'Neogit stash' })
     end,
   },
 
