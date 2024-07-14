@@ -217,6 +217,9 @@ return { -- LSP Configuration & Plugins
 
       'clang-format',
       'cpplint',
+
+      'gopls',
+      'rust-analyzer',
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

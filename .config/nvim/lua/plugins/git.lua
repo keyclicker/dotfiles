@@ -20,7 +20,7 @@ return {
     },
     config = function()
       ng = require 'neogit'
-      ng.setup()
+      ng.setup {}
 
       vim.keymap.set('n', '<leader>gs', ng.open, { desc = 'Neogit' })
       vim.keymap.set('n', '<leader>gc', function()
