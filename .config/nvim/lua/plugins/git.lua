@@ -19,7 +19,7 @@ return {
       'ibhagwan/fzf-lua', -- optional
     },
     config = function()
-      ng = require 'neogit'
+      local ng = require 'neogit'
       ng.setup {}
 
       vim.keymap.set('n', '<leader>gs', ng.open, { desc = 'Neogit' })
