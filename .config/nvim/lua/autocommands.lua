@@ -11,3 +11,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- format_on_insert_leave = true
+-- vim.api.nvim_create_autocmd('InsertLeave', {
+--   desc = 'Format buffer on InsertLeave',
+--   group = vim.api.nvim_create_augroup('custom-autoformat', { clear = true }),
+--   callback = function()
+--     local conform = require 'conform'
+--     if format_on_insert_leave and conform then
+--       conform.format { async = true, lsp_fallback = true }
+--     end
+--   end,
+-- })
+--
+-- vim.keymap.set('n', '<leader>tf', function()
+--   format_on_insert_leave = not format_on_insert_leave
+-- end, { desc = 'Toggle format on InsertLeave' })

@@ -5,13 +5,12 @@
 -- vim.keymap.set('n', '<leader>e', '<cmd>Explore<CR>', { desc = 'Open file explorer' })
 
 -- Save and quit
+vim.keymap.set('n', '<leader>w', '<cmd>echo "Stop!"<CR>', { desc = 'which_key_ignore' })
+vim.keymap.set('n', '<leader>W', '<cmd>echo "Stop!"<CR>', { desc = 'which_key_ignore' })
 -- vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { desc = 'Write current buffer' })
 -- vim.keymap.set('n', '<leader>W', '<cmd>wall<CR>', { desc = 'Write all buffers' })
--- vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = 'Quit current window' })
--- vim.keymap.set('n', '<leader>Q', '<cmd>qall<CR>', { desc = 'Quit all windows' })
-
-vim.keymap.set('n', '<leader>w', '<cmd>echo "Stop!"<CR>', {desc = "which_key_ignore"})
-vim.keymap.set('n', '<leader>W', '<cmd>echo "Stop!"<CR>', {desc = "which_key_ignore"})
+vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = 'Quit current window' })
+vim.keymap.set('n', '<leader>Q', '<cmd>qall<CR>', { desc = 'Quit all windows' })
 vim.keymap.set('n', '<leader>c', '<cmd>bp<bar>bd#<CR>', { desc = 'Close current buffer' })
 vim.keymap.set('n', '<leader>C', '<cmd>%bd<CR>', { desc = 'Close all buffers' })
 

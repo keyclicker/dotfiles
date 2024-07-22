@@ -17,6 +17,7 @@ return { -- Useful plugin to show you pending keybinds.
   'folke/which-key.nvim',
   dependencies = {
     'nvim-tree/nvim-web-devicons',
+    'echasnovski/mini.icons',
   },
   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
   config = function() -- This is the function that runs, AFTER loading
@@ -33,6 +34,7 @@ return { -- Useful plugin to show you pending keybinds.
       { '<leader>s', group = '[S]earch' },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>u', group = 'Testing' },
+      { '<leader>m', group = 'Session [Management]' },
     }
   end,
 }
