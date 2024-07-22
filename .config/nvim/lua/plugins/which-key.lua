@@ -28,12 +28,11 @@ return { -- Useful plugin to show you pending keybinds.
     wk.add {
       { '<leader>g', group = '[G]it' },
       { '<leader>h', group = 'Git [H]unk' },
+      { '<leader>h', group = 'Git [H]unk', mode = 'v' },
       { '<leader>l', group = '[L]ayout' },
       { '<leader>s', group = '[S]earch' },
       { '<leader>t', group = '[T]oggle' },
-      { '<leader>h', group = 'Git [H]unk', mode = 'v' },
       { '<leader>u', group = 'Testing' },
-      { '<leader>d', group = '[D]ebug' },
     }
   end,
 }

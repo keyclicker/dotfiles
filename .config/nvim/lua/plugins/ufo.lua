@@ -1,7 +1,6 @@
 return {
   'kevinhwang91/nvim-ufo',
   dependencies = { 'kevinhwang91/promise-async' },
-
   event = 'BufReadPre',
   opts = {
     provider_selector = function()

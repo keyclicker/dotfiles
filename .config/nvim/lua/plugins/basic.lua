@@ -12,7 +12,7 @@ return {
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim', event = 'BufReadPre', opts = {}, keys = { { 'gc' } } },
 
   {
     'kylechui/nvim-surround',

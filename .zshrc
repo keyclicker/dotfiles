@@ -113,6 +113,7 @@ alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
+alias v="nvim ."
 
 # nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"

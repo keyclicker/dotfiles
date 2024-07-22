@@ -18,39 +18,19 @@ return {
       'nvim-telescope/telescope.nvim', -- optional
       'ibhagwan/fzf-lua', -- optional
     },
-    config = function()
-      local ng = require 'neogit'
-      ng.setup {}
+    opts = {},
 
-      vim.keymap.set('n', '<leader>gs', ng.open, { desc = 'Neogit' })
-      vim.keymap.set('n', '<leader>gc', function()
-        ng.open { 'commit' }
-      end, { desc = 'Neogit commit' })
-
-      vim.keymap.set('n', '<leader>gp', function()
-        ng.open { 'push' }
-      end, { desc = 'Neogit push' })
-
-      vim.keymap.set('n', '<leader>gP', function()
-        ng.open { 'pull' }
-      end, { desc = 'Neogit pull' })
-
-      vim.keymap.set('n', '<leader>gl', function()
-        ng.open { 'log' }
-      end, { desc = 'Neogit log' })
-
-      vim.keymap.set('n', '<leader>gd', function()
-        ng.open { 'diff' }
-      end, { desc = 'Neogit diff' })
-
-      vim.keymap.set('n', '<leader>gb', function()
-        ng.open { 'branch' }
-      end, { desc = 'Neogit branch' })
-
-      vim.keymap.set('n', '<leader>gt', function()
-        ng.open { 'stash' }
-      end, { desc = 'Neogit stash' })
-    end,
+    --stylua: ignore
+    keys = {
+      { '<leader>gs', function() require('neogit').open() end, desc = 'Neogit' },
+      { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit commit' },
+      { '<leader>gp', function() require('neogit').open { 'push' } end, desc = 'Neogit push' },
+      { '<leader>gP', function() require('neogit').open { 'pull' } end, desc = 'Neogit pull' },
+      { '<leader>gl', function() require('neogit').open { 'log' } end, desc = 'Neogit log' },
+      { '<leader>gd', function() require('neogit').open { 'diff' } end, desc = 'Neogit diff' },
+      { '<leader>gb', function() require('neogit').open { 'branch' } end, desc = 'Neogit branch' },
+      { '<leader>gz', function() require('neogit').open { 'stash' } end, desc = 'Neogit stash' },
+    },
   },
 
   -- Here is a more advanced example where we pass configuration
@@ -64,6 +44,7 @@ return {
   -- config. This will add also the recommended keymaps.
   {
     'lewis6991/gitsigns.nvim',
+    -- event = 'LazyFile',
     opts = {
       signs = {
         add = { text = '┃' },

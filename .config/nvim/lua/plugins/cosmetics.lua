@@ -20,7 +20,8 @@ return {
   -- Highlight todo, notes, etc in comments
   {
     'folke/todo-comments.nvim',
-    event = 'VimEnter',
+    cmd = { 'TodoTrouble', 'TodoTelescope' },
+    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' }, -- WARNING:
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false },
   },
@@ -28,11 +29,12 @@ return {
   -- Lua
   {
     'folke/zen-mode.nvim',
+    cmd = 'ZenMode',
     opts = {
       width = 140, -- width of the Zen window
     },
-    config = function()
-      vim.keymap.set('n', '<leader>tz', '<cmd>ZenMode<CR>', { desc = 'Toggle Zen Mode' })
-    end,
+    keys = {
+      { '<leader>tz', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
+    },
   },
 }
