@@ -112,6 +112,7 @@ alias yt="yt-dlp"
 alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
 alias em="emacsclient -c -a \"emacs\""
+alias vi="nvim"
 
 # nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"
@@ -123,7 +124,6 @@ alias astro="NVIM_APPNAME=nvim-astro nvim"
 # alias zrc="nvim ~/.dotfiles/.zshrc; source ~/.dotfiles/.zshrc"
 
 export PATH="$HOME/.scripts:$PATH"
-# alias stowdot="stow ~/.dotfiles"
 
 export EDITOR="nvim"
 export GPG_TTY=$(tty)
@@ -132,12 +132,16 @@ export PATH="/Library/PostgreSQL/16/bin:$PATH"
 # export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
 
 export PATH="$HOME/.emacs.d/bin:$PATH"
+export PATH="$HOME/.config/emacs/bin:$PATH"
 # export PATH="$HOME/Library/Python/3./bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 
 	[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 	[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
+# Locale
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # Created by `pipx` on 2024-04-30 11:04:43
 export PATH="$PATH:/Users/keyclicker/.local/bin"
@@ -145,7 +149,3 @@ export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-
-# Locale
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
