@@ -208,7 +208,7 @@ return { -- LSP Configuration & Plugins
 
       'eslint',
       'stylelint',
-      'prettier',
+      'prettierd',
       'jsonlint',
 
       'flake8',

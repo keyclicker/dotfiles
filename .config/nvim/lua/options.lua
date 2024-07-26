@@ -77,6 +77,9 @@ vim.opt.cmdheight = 0
 -- Make status line global
 vim.opt.laststatus = 3
 
+-- Line break
+vim.opt.linebreak = true
+
 -----------------------------------------------------------
 --          Diagnostics and LSP style
 -----------------------------------------------------------
@@ -111,6 +114,6 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
 -----------------------------------------------------------
 --                     Spelling
 -----------------------------------------------------------
-vim.opt.spelllang = 'en_us'
-vim.opt.spell = true
-vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
+-- vim.opt.spelllang = 'en_us'
+-- vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
+vim.opt.spell = false

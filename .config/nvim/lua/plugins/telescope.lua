@@ -169,19 +169,6 @@ return { -- Fuzzy Finder (files, lsp, etc)
       builtin.buffers(dropdown_theme)
     end, { desc = 'Find existing buffers' })
 
-    -- Refactoring
-    vim.keymap.set({ 'x', 'n' }, '<leader>R', function()
-      require('telescope').extensions.refactoring.refactors(helpers.merge(dropdown_theme, {
-        initial_mode = 'normal',
-        prompt_title = 'Refactoring',
-        layout_config = {
-          prompt_position = 'top',
-          width = 0.4,
-          height = 0.3,
-        },
-      }))
-    end, { desc = 'Refactoring' })
-
     -------------------------------------------------------
     --              Search opened Files
     -------------------------------------------------------
