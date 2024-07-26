@@ -24,17 +24,16 @@ return {
       show_hidden = true,
       natural_order = true,
       is_always_hidden = function(name, _)
-        return name == '.git'
-          or name == '.DS_Store'
-          or name == '__pycache__'
-          or name == '.mypy_cache'
-          or name == '.pytest_cache'
-          or name == '.idea'
-          or name == '.VSCodeCounter'
-          or name == '.next'
-          or name == 'coverage'
-          or name == 'node_modules'
-          or name == 'tsconfig.tsbuildinfo'
+        return name == '.DS_Store'
+          -- or name == '__pycache__'
+          -- or name == '.mypy_cache'
+          -- or name == '.pytest_cache'
+          -- or name == '.idea'
+          -- or name == '.VSCodeCounter'
+          -- or name == '.next'
+          -- or name == 'coverage'
+          -- or name == 'node_modules'
+          -- or name == 'tsconfig.tsbuildinfo'
       end,
     },
   },

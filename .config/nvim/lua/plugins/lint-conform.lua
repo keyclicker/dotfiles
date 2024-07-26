@@ -28,7 +28,7 @@ return {
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
         return {
-          timeout_ms = 500,
+          timeout_ms = 1000,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
         }
       end,
@@ -65,8 +65,18 @@ return {
         lint.linters_by_ft = {
           markdown = { 'markdownlint' },
           python = { 'pylint', 'mypy', 'flake8' },
+
           javascript = { 'eslint' },
+          javascriptreact = { 'eslint' },
+          typescript = { 'eslint' },
+          typescriptreact = { 'eslint' },
+
+          scss = { 'stylelint' },
+          css = { 'stylelint' },
+          json = { 'jsonlint' },
+
           cpp = { 'cpplint' },
+          c = { 'cpplint' },
         }
 
         -- To allow other plugins to add linters to require('lint').linters_by_ft,

@@ -16,6 +16,8 @@ return {
       vim.cmd.hi 'Comment gui=none'
     end,
   },
+  { 'rebelot/kanagawa.nvim', priority = 1000 },
+  { 'morhetz/gruvbox', priority = 1000},
 
   -- Highlight todo, notes, etc in comments
   {
