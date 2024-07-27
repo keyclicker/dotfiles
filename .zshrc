@@ -76,6 +76,7 @@ plugins=(
 	zsh-history-substring-search
 	zsh-syntax-highlighting
 	zsh-vi-mode
+	fancy-ctrl-z
 	poetry
 )
 
@@ -136,7 +137,6 @@ export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 # export PATH="$HOME/Library/Python/3./bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
-
 	[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 	[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
@@ -149,5 +149,3 @@ export PATH="$PATH:/Users/keyclicker/.local/bin"
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
-
-bindkey '^z' fg

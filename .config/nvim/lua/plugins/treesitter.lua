@@ -20,10 +20,12 @@ return { -- Highlight, edit, and navigate code
       'cmake',
       'go',
       'rust',
+      'javascript',
       'typescript',
       'tsx',
       'html',
       'css',
+      'json',
     },
     -- Autoinstall languages that are not installed
     auto_install = true,
