@@ -157,12 +157,13 @@ return { -- LSP Configuration & Plugins
     --  - settings (table): Override the default settings passed when initializing the server.
     --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
     local servers = {
-      clangd = {},
       gopls = {},
       rust_analyzer = {},
+      clangd = {},
 
       pyright = {},
       tsserver = {},
+      eslint = {},
       cssls = {},
       html = {},
 
@@ -207,7 +208,6 @@ return { -- LSP Configuration & Plugins
 
       'stylua', -- Used to format Lua code
 
-      'eslint',
       'stylelint',
       'prettierd',
       'jsonlint',
@@ -221,8 +221,8 @@ return { -- LSP Configuration & Plugins
       'clang-format',
       'cpplint',
 
-      'gopls',
-      'rust-analyzer',
+      'goimports',
+      'gofumpt',
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

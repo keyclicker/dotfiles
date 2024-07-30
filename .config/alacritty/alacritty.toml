@@ -13,6 +13,9 @@ size = 14
 # option_as_alt = 'OnlyLeft'
 option_as_alt = 'Both'
 
+[cursor]
+style = 'Beam'
+
 # TokyoNight Alacritty Colors
 # Default colors
 [colors.primary]

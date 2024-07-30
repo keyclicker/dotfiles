@@ -6,20 +6,27 @@ return { -- Highlight, edit, and navigate code
     ensure_installed = {
       'bash',
       'diff',
-      'html',
       'lua',
       'luadoc',
       'markdown',
       'markdown_inline',
       'vim',
       'vimdoc',
+
       'query',
       'python',
+
       'c',
       'cpp',
       'cmake',
+
       'go',
+      'gomod',
+      'gowork',
+      'gosum',
+
       'rust',
+
       'javascript',
       'typescript',
       'tsx',

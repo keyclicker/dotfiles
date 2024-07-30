@@ -53,6 +53,8 @@ return {
 
         cpp = { 'clang-format' },
         c = { 'clang-format' },
+
+        go = { 'gofmt', 'gofumpt' },
       },
     },
   },

@@ -75,7 +75,7 @@ plugins=(
 	zsh-autosuggestions
 	zsh-history-substring-search
 	zsh-syntax-highlighting
-	zsh-vi-mode
+	# zsh-vi-mode
 	fancy-ctrl-z
 	poetry
 )
