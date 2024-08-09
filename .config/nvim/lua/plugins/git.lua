@@ -7,6 +7,18 @@ return {
   --     vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Git status' })
   --   end,
   -- },
+  {
+    'sindrets/diffview.nvim',
+
+    opts = {},
+    cmd = { 'DiffviewOpen', 'DiffviewFileHistory' },
+
+    --stylua: ignore
+    keys = {
+      {'<leader>gd', "<cmd>DiffviewOpen<cr>", desc = 'Diffview open' },
+      {'<leader>gf', "<cmd>DiffviewFileHistory %<cr>", desc = 'Diffview file history' },
+    },
+  },
 
   {
     'NeogitOrg/neogit',
@@ -19,15 +31,16 @@ return {
       'ibhagwan/fzf-lua', -- optional
     },
     opts = {},
+    cmd = { 'Neogit' },
 
     --stylua: ignore
     keys = {
       { '<leader>gs', function() require('neogit').open() end, desc = 'Neogit' },
       { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit commit' },
-      { '<leader>gp', function() require('neogit').open { 'push' } end, desc = 'Neogit push' },
-      { '<leader>gP', function() require('neogit').open { 'pull' } end, desc = 'Neogit pull' },
+      { '<leader>gP', function() require('neogit').open { 'push' } end, desc = 'Neogit push' },
+      { '<leader>gp', function() require('neogit').open { 'pull' } end, desc = 'Neogit pull' },
       { '<leader>gl', function() require('neogit').open { 'log' } end, desc = 'Neogit log' },
-      { '<leader>gd', function() require('neogit').open { 'diff' } end, desc = 'Neogit diff' },
+      { '<leader>gD', function() require('neogit').open { 'diff' } end, desc = 'Neogit diff' },
       { '<leader>gb', function() require('neogit').open { 'branch' } end, desc = 'Neogit branch' },
       { '<leader>gz', function() require('neogit').open { 'stash' } end, desc = 'Neogit stash' },
     },
@@ -91,20 +104,20 @@ return {
         end, { desc = 'reset git hunk' })
 
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
+        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Stage hunk' })
+        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Reset hunk' })
+        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Stage buffer' })
+        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'Undo stage hunk' })
+        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Reset buffer' })
+        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Preview hunk' })
+        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Blame line' })
+        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Diff against index' })
         map('n', '<leader>hD', function()
           gitsigns.diffthis '@'
-        end, { desc = 'git [D]iff against last commit' })
+        end, { desc = 'Diff against last commit' })
         -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
+        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle git show blame line' })
+        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = 'Toggle git show Deleted' })
       end,
     },
   },

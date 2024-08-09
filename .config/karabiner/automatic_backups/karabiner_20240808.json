@@ -1453,6 +1453,22 @@
                         ]
                     },
                     {
+                        "description": "Global Vi CapsLock",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "caps_lock"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "escape"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Mandatory Right Shift",
                         "manipulators": [
                             {
@@ -2043,18 +2059,7 @@
                     "mouse_flip_y": false,
                     "mouse_swap_wheels": false,
                     "mouse_swap_xy": false,
-                    "simple_modifications": [
-                        {
-                            "from": {
-                                "key_code": "caps_lock"
-                            },
-                            "to": [
-                                {
-                                    "key_code": "escape"
-                                }
-                            ]
-                        }
-                    ],
+                    "simple_modifications": [],
                     "treat_as_built_in_keyboard": false
                 },
                 {

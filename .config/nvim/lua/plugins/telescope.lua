@@ -1,5 +1,3 @@
-local helpers = require 'utils.helpers'
-
 return { -- Fuzzy Finder (files, lsp, etc)
   'nvim-telescope/telescope.nvim',
   event = 'VimEnter',
@@ -85,7 +83,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
       pickers = {
         buffers = {
-          initial_mode = 'normal',
+          -- initial_mode = 'normal',
           -- sort_lastused = true,
           show_all_buffers = true,
           sort_mru = true,
@@ -125,6 +123,9 @@ return { -- Fuzzy Finder (files, lsp, etc)
     vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Diagnostics' })
     vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Resume' })
     vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Recent Files ("." for repeat)' })
+    vim.keymap.set('n', '<leader>ss', function()
+      builtin.colorscheme { enable_preview = true }
+    end, { desc = 'Color Scheme' })
 
     ---------------------------------------------------------------------------
     --                          Most used

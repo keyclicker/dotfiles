@@ -1,6 +1,12 @@
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Window navigation
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to window left' })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to window below' })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to window above' })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to window right' })
+
 -- Next and previous buffer
 vim.keymap.set('n', '<C-M-n>', '<cmd>bn<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<C-M-p>', '<cmd>bp<CR>', { desc = 'Previous buffer' })
