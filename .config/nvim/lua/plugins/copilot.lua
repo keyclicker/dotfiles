@@ -10,7 +10,7 @@ return {
         jump_prev = '[[',
         jump_next = ']]',
         accept = '<CR>',
-        refresh = 'gr',
+        refresh = 'gr', -- NOTE: conflict
         open = '<M-CR>',
       },
       layout = {

@@ -23,7 +23,11 @@ return { -- Useful plugin to show you pending keybinds.
   config = function() -- This is the function that runs, AFTER loading
     local wk = require 'which-key'
 
-    wk.setup()
+    wk.setup {
+      delay = function(ctx)
+        return ctx.plugin and 0 or 500
+      end,
+    }
 
     -- Document existing key chains
     wk.add {
@@ -34,7 +38,7 @@ return { -- Useful plugin to show you pending keybinds.
       { '<leader>s', group = '[S]earch' },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>u', group = 'Testing' },
-      { '<leader>m', group = 'Session [Management]' },
+      { '<leader>m', group = 'Session [M]anagement' },
     }
   end,
 }

@@ -10,7 +10,19 @@ return {
   {
     'sindrets/diffview.nvim',
 
-    opts = {},
+    opts = {
+      keymaps = {
+        file_history_panel = {
+          ['q'] = '<cmd>DiffviewClose<cr>',
+        },
+        file_panel = {
+          ['q'] = '<cmd>DiffviewClose<cr>',
+        },
+        view = {
+          ['q'] = '<cmd>DiffviewClose<cr>',
+        },
+      },
+    },
     cmd = { 'DiffviewOpen', 'DiffviewFileHistory' },
 
     --stylua: ignore
@@ -35,7 +47,7 @@ return {
 
     --stylua: ignore
     keys = {
-      { '<leader>gs', function() require('neogit').open() end, desc = 'Neogit' },
+      { '<leader>gg', function() require('neogit').open() end, desc = 'Neogit' },
       { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit commit' },
       { '<leader>gP', function() require('neogit').open { 'push' } end, desc = 'Neogit push' },
       { '<leader>gp', function() require('neogit').open { 'pull' } end, desc = 'Neogit pull' },

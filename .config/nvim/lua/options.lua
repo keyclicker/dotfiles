@@ -84,6 +84,9 @@ vim.opt.laststatus = 3
 -- Line break
 vim.opt.linebreak = true
 
+-- Enable auto indent
+vim.opt.tabstop = 4
+
 -----------------------------------------------------------
 --          Diagnostics and LSP style
 -----------------------------------------------------------

@@ -23,6 +23,11 @@ return {
     view_options = {
       show_hidden = true,
       natural_order = true,
+      case_insensitive = false,
+      sort = {
+        { 'type', 'asc' },
+        { 'name', 'asc' },
+      },
       is_always_hidden = function(name, _)
         return name == '.DS_Store'
       end,
