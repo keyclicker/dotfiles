@@ -7,10 +7,6 @@ vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to window below' })
 vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to window above' })
 vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to window right' })
 
--- Next and previous buffer
-vim.keymap.set('n', '<C-M-n>', '<cmd>bn<CR>', { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-M-p>', '<cmd>bp<CR>', { desc = 'Previous buffer' })
-
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -55,6 +51,7 @@ vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Move to previous search result and k
 
 --Paste fix
 vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without yanking' })
+
 -- Split windows
 vim.keymap.set('n', '|', '<cmd>split<CR>', { desc = 'Split window horizontally' })
 vim.keymap.set('n', '\\', '<cmd>vsplit<CR>', { desc = 'Split window vertically' })

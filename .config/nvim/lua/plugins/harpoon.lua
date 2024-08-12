@@ -24,20 +24,6 @@ return {
         end,
         desc = 'Harpoon Quick Menu',
       },
-      {
-        '<C-P>',
-        function()
-          require('harpoon'):list():prev()
-        end,
-        desc = 'which_key_ignore',
-      },
-      {
-        '<C-N>',
-        function()
-          require('harpoon'):list():next()
-        end,
-        desc = 'which_key_ignore',
-      },
     }
 
     for i = 1, 6 do

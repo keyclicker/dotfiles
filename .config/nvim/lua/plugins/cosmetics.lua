@@ -1,9 +1,5 @@
 return {
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  {
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
@@ -11,13 +7,10 @@ return {
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-moon'
-
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-  { 'rebelot/kanagawa.nvim', priority = 1000 },
-  { 'morhetz/gruvbox', priority = 1000},
 
   -- Highlight todo, notes, etc in comments
   {
@@ -27,7 +20,6 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false },
   },
-
   -- Lua
   {
     'folke/zen-mode.nvim',
@@ -36,7 +28,7 @@ return {
       width = 140, -- width of the Zen window
     },
     keys = {
-      { '<leader>tz', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
+      { '<leader>z', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
     },
   },
 }
