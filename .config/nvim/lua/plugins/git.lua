@@ -1,30 +1,18 @@
 return {
-  -- {
-  --   'tpope/vim-fugitive',
-  --   cmd = { 'G', 'Git' },
-  --
-  --   init = function()
-  --     vim.keymap.set('n', '<leader>gs', '<cmd>Git<CR>', { desc = 'Git status' })
-  --   end,
-  -- },
+  {
+    'tpope/vim-fugitive',
+    cmd = { 'G', 'Git' },
+  },
   {
     'sindrets/diffview.nvim',
-
     opts = {
       keymaps = {
-        file_history_panel = {
-          ['q'] = '<cmd>DiffviewClose<cr>',
-        },
-        file_panel = {
-          ['q'] = '<cmd>DiffviewClose<cr>',
-        },
-        view = {
-          ['q'] = '<cmd>DiffviewClose<cr>',
-        },
+        file_history_panel = { ['q'] = '<cmd>DiffviewClose<cr>' },
+        file_panel = { ['q'] = '<cmd>DiffviewClose<cr>' },
+        view = { ['q'] = '<cmd>DiffviewClose<cr>' },
       },
     },
     cmd = { 'DiffviewOpen', 'DiffviewFileHistory' },
-
     --stylua: ignore
     keys = {
       {'<leader>gd', "<cmd>DiffviewOpen<cr>", desc = 'Diffview open' },
@@ -37,7 +25,6 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim', -- required
       'sindrets/diffview.nvim', -- optional - Diff integration
-
       -- Only one of these is needed, not both.
       'nvim-telescope/telescope.nvim', -- optional
       'ibhagwan/fzf-lua', -- optional
@@ -48,36 +35,26 @@ return {
     --stylua: ignore
     keys = {
       { '<leader>gg', function() require('neogit').open() end, desc = 'Neogit' },
-      { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit commit' },
-      { '<leader>gP', function() require('neogit').open { 'push' } end, desc = 'Neogit push' },
-      { '<leader>gp', function() require('neogit').open { 'pull' } end, desc = 'Neogit pull' },
-      { '<leader>gl', function() require('neogit').open { 'log' } end, desc = 'Neogit log' },
-      { '<leader>gD', function() require('neogit').open { 'diff' } end, desc = 'Neogit diff' },
-      { '<leader>gb', function() require('neogit').open { 'branch' } end, desc = 'Neogit branch' },
-      { '<leader>gz', function() require('neogit').open { 'stash' } end, desc = 'Neogit stash' },
+      { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit Commit' },
+      { '<leader>gP', function() require('neogit').open { 'push' } end, desc = 'Neogit Push' },
+      { '<leader>gp', function() require('neogit').open { 'pull' } end, desc = 'Neogit Pull' },
+      { '<leader>gl', function() require('neogit').open { 'log' } end, desc = 'Neogit Log' },
+      { '<leader>gD', function() require('neogit').open { 'diff' } end, desc = 'Neogit Diff' },
+      { '<leader>gb', function() require('neogit').open { 'branch' } end, desc = 'Neogit Branch' },
+      { '<leader>gz', function() require('neogit').open { 'stash' } end, desc = 'Neogit Stash' },
     },
   },
-
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
-  --    require('gitsigns').setup({ ... })
-  --
-  -- See `:help gitsigns` to understand what the configuration keys do
-
-  -- Adds git related signs to the gutter, as well as utilities for managing changes
-  -- NOTE: gitsigns is already included in init.lua but contains only the base
-  -- config. This will add also the recommended keymaps.
   {
     'lewis6991/gitsigns.nvim',
-    -- event = 'LazyFile',
+    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
     opts = {
       signs = {
-        add = { text = '┃' },
-        change = { text = '┃' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-        untracked = { text = '┆' },
+        add = { text = '┃', priority = 20 },
+        change = { text = '┃', priority = 20 },
+        delete = { text = '_', priority = 20 },
+        topdelete = { text = '‾', priority = 20 },
+        changedelete = { text = '~', priority = 20 },
+        untracked = { text = '┆', priority = 20 },
       },
 
       on_attach = function(bufnr)
@@ -96,7 +73,7 @@ return {
           else
             gitsigns.nav_hunk 'next'
           end
-        end, { desc = 'Jump to next git [c]hange' })
+        end, { desc = 'Jump to Next Git Change' })
 
         map('n', '[c', function()
           if vim.wo.diff then
@@ -104,32 +81,32 @@ return {
           else
             gitsigns.nav_hunk 'prev'
           end
-        end, { desc = 'Jump to previous git [c]hange' })
+        end, { desc = 'Jump to Previous Git Change' })
 
         -- Actions
         -- visual mode
         map('v', '<leader>hs', function()
           gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'stage git hunk' })
+        end, { desc = 'Stage Git Hunk' })
         map('v', '<leader>hr', function()
           gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'reset git hunk' })
+        end, { desc = 'Reset Git Hunk' })
 
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Stage hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Reset hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Stage buffer' })
-        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'Undo stage hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Reset buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Preview hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Blame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Diff against index' })
+        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Stage Hunk' })
+        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Reset Hunk' })
+        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Stage Buffer' })
+        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'Undo Stage Hunk' })
+        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Reset Buffer' })
+        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Preview Hunk' })
+        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Blame Line' })
+        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Diff Against Index' })
         map('n', '<leader>hD', function()
           gitsigns.diffthis '@'
-        end, { desc = 'Diff against last commit' })
+        end, { desc = 'Diff Against Last Commit' })
         -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle git show blame line' })
-        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = 'Toggle git show Deleted' })
+        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = 'Toggle Git Show Blame Line' })
+        map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = 'Toggle Git Show Deleted' })
       end,
     },
   },

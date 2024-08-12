@@ -1,4 +1,3 @@
--- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
@@ -84,8 +83,13 @@ vim.opt.laststatus = 3
 -- Line break
 vim.opt.linebreak = true
 
--- Enable auto indent
+-- Default indentation settings
 vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+
+-- Set signcolumn and numberwidth
+vim.opt.signcolumn = 'yes:2'
+vim.opt.numberwidth = 3
 
 -----------------------------------------------------------
 --          Diagnostics and LSP style
