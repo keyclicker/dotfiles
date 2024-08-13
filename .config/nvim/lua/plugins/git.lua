@@ -19,7 +19,6 @@ return {
       {'<leader>gf', "<cmd>DiffviewFileHistory %<cr>", desc = 'Diffview file history' },
     },
   },
-
   {
     'NeogitOrg/neogit',
     dependencies = {
@@ -55,6 +54,14 @@ return {
         topdelete = { text = '‾', priority = 20 },
         changedelete = { text = '~', priority = 20 },
         untracked = { text = '┆', priority = 20 },
+      },
+      signs_staged = {
+        add = { text = '┃', priority = 30 },
+        change = { text = '┃', priority = 30 },
+        delete = { text = '_', priority = 30 },
+        topdelete = { text = '‾', priority = 30 },
+        changedelete = { text = '~', priority = 30 },
+        untracked = { text = '┆', priority = 30 },
       },
 
       on_attach = function(bufnr)

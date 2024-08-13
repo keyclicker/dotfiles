@@ -11,12 +11,25 @@ return {
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-
+  -- Highlight colors in code
+  {
+    'NvChad/nvim-colorizer.lua',
+    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+    opts = {
+      user_default_options = {
+        mode = 'virtualtext',
+        virtualtext = '██',
+        irtualtext = '██',
+        css = true,
+        sass = { enable = true, parsers = { 'css' } },
+      },
+    },
+  },
   -- Highlight todo, notes, etc in comments
   {
     'folke/todo-comments.nvim',
     cmd = { 'TodoTrouble', 'TodoTelescope' },
-    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' }, -- WARNING:
+    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false },
   },

@@ -30,9 +30,9 @@ return {
     },
     -- stylua: ignore
     keys = {
-      { '<leader>uc', function () require('nvim-coverage').load({place=true})end , desc = 'Load Coverage' },
+      { '<leader>uc', function() require('nvim-coverage').load({place=true})end , desc = 'Load Coverage' },
       { '<leader>ut', function() require('nvim-coverage').toggle() end, desc = 'Toggle Coverage Signs' },
-      { '<leader>uC', function () require('nvim-coverage').summary() end, desc = 'Display Coverrage Summary' },
+      { '<leader>uC', function() require('nvim-coverage').summary() end, desc = 'Display Coverrage Summary' },
     },
   },
   {
@@ -52,7 +52,7 @@ return {
         adapters = {
           require 'neotest-go',
           require 'neotest-jest' {
-            jestCommand = 'npm run test',
+            jestCommand = 'npx jest --coverage',
             jestConfigFile = 'jest.config.ts',
             env = { CI = true },
             cwd = function(path)
