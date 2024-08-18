@@ -85,7 +85,9 @@ vim.opt.linebreak = true
 
 -- Default indentation settings
 vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
 
 -- Set signcolumn and numberwidth
 vim.opt.signcolumn = 'yes:2'
@@ -125,6 +127,6 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
 -----------------------------------------------------------
 --                     Spelling
 -----------------------------------------------------------
--- vim.opt.spelllang = 'en_us'
--- vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
-vim.opt.spell = false
+vim.opt.spelllang = 'en_us'
+vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
+vim.opt.spell = true

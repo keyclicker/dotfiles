@@ -11,6 +11,7 @@ return {
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
     'mfussenegger/nvim-dap-python',
+    'mxsdev/nvim-dap-vscode-js',
   },
   config = function()
     local dap = require 'dap'
@@ -20,6 +21,9 @@ return {
     dapui.setup()
     require('dap-go').setup()
     require('dap-python').setup()
+    require('dap-vscode-js').setup {
+      adapters = { 'pwa-node' },
+    }
 
     mason_dap.setup {
       -- You'll need to check that you have the required things installed
@@ -29,6 +33,9 @@ return {
         'delve',
         'cppdbg',
         'python',
+        'firefox',
+        'js',
+        'node2',
       },
       -- Makes a best effort to setup the various debuggers with
       -- reasonable debug configurations
@@ -59,6 +66,17 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    -- Signs
+    vim.api.nvim_set_hl(0, 'DapBreakpoint', { ctermbg = 0, fg = '#993939' })
+    vim.api.nvim_set_hl(0, 'DapLogPoint', { ctermbg = 0, fg = '#61afef' })
+    vim.api.nvim_set_hl(0, 'DapStopped', { ctermbg = 0, fg = '#98c379' })
+
+    vim.fn.sign_define('DapBreakpoint', { text = '', texthl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapBreakpointCondition', { text = '', texthl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapBreakpointRejected', { text = '', texthl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapLogPoint', { text = '', texthl = 'DapLogPoint' })
+    vim.fn.sign_define('DapStopped', { text = '', texthl = 'DapStopped' })
   end,
 
   -- stylua: ignore

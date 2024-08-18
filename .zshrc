@@ -115,6 +115,10 @@ alias ffp="ffprobe -hide_banner"
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
 alias v="nvim ."
+# previous nvim session
+alias vp="nvim -c \"lua require('persistence').load()\""
+# neogit
+alias ng="nvim -c \"Neogit\""
 
 # nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"
@@ -136,16 +140,51 @@ export PATH="/Library/PostgreSQL/16/bin:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 # export PATH="$HOME/Library/Python/3./bin:$PATH"
-export NVM_DIR="$HOME/.nvm"
-	[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-	[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 # Locale
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Created by `pipx` on 2024-04-30 11:04:43
-export PATH="$PATH:/Users/keyclicker/.local/bin"
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+# export PATH="$PATH:/Users/keyclicker/.local/bin"
+# export PYENV_ROOT="$HOME/.pyenv"
+# [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+# eval "$(pyenv init -)"
+
+# Lazy load pipx
+lazy_load_pipx() {
+	unset -f pipx
+	export PATH="$PATH:$HOME/.local/bin"
+	export PYENV_ROOT="$HOME/.pyenv"
+	[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+	eval "$(pyenv init -)"
+}
+
+pipx() {
+	lazy_load_pipx
+	pipx "$@"
+}
+
+# Lazy nvm
+lazy_load_nvm() {
+	unset -f nvm node npm npx
+	export NVM_DIR="$HOME/.nvm"
+		[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+		[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+}
+nvm() {
+	lazy_load_nvm
+	nvm "$@"
+}
+node() {
+	lazy_load_nvm
+	node "$@"
+}
+npm() {
+	lazy_load_nvm
+	npm "$@"
+}
+npx() {
+	lazy_load_nvm
+	npx "$@"
+}

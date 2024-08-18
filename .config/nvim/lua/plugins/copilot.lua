@@ -11,7 +11,7 @@ return {
         jump_next = ']]',
         accept = '<CR>',
         refresh = 'gr', -- NOTE: conflict
-        open = '<M-CR>',
+        open = '<C-CR>',
       },
       layout = {
         position = 'right', -- | top | left | right

@@ -49,8 +49,9 @@ vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Move up half page and keep cur
 vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Move to next search result and keep cursor in the center' })
 vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Move to previous search result and keep cursor in the center' })
 
---Paste fix
-vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without yanking' })
+-- Paste fix
+-- NOTE: Breaks pasting from other registers
+-- vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without yanking' })
 
 -- Split windows
 vim.keymap.set('n', '|', '<cmd>split<CR>', { desc = 'Split window horizontally' })
@@ -75,6 +76,16 @@ vim.keymap.set('n', 'Q', '<nop>', { desc = 'Disable Ex mode' })
 -- Stay in indent mode
 vim.keymap.set('v', '<S-Tab>', '<gv', { desc = 'Unindent line' })
 vim.keymap.set('v', '<Tab>', '>gv', { desc = 'Indent line' })
+
+-- Toggle virtual editing
+vim.opt.virtualedit = 'block'
+vim.keymap.set('n', '<leader>tv', function()
+  if vim.o.virtualedit == 'block' then
+    vim.opt.virtualedit = 'all'
+  else
+    vim.opt.virtualedit = 'block'
+  end
+end, { desc = 'Toggle Virtual Edit' })
 
 -----------------------------------------------------------
 ---                  Keyboard Layouts
