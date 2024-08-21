@@ -41,7 +41,7 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep 2 signcolumns on by default
+-- Keep signcolumns on by default
 vim.opt.signcolumn = 'yes:2'
 vim.opt.numberwidth = 3
 
@@ -133,8 +133,9 @@ vim.opt.spell = true
 ---                     Folding
 -----------------------------------------------------------
 vim.opt.foldmethod = 'expr'
-vim.opt.foldlevel = 99
-vim.opt.foldlevelstart = 99
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.opt.foldtext = ''
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
 -- vim.opt.fillchars = 'fold: '
+

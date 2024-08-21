@@ -51,7 +51,7 @@ return {
       width = 140, -- width of the Zen window
     },
     keys = {
-      { '<leader>z', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
+      { '<leader>zz', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
     },
   },
 }

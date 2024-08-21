@@ -18,7 +18,7 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Show diagnostic Error messages' })
 
 -- Toggle diagnostics virtual text
-vim.keymap.set('n', '<leader>td', function()
+vim.keymap.set('n', '<leader>zd', function()
   local prev = vim.diagnostic.config().virtual_text
   local next = not prev
   vim.diagnostic.config { virtual_text = next }
@@ -51,14 +51,6 @@ vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Move up half page and keep cur
 vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Move to next search result and keep cursor in the center' })
 vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Move to previous search result and keep cursor in the center' })
 
--- Paste fix
--- NOTE: Breaks pasting from other registers
--- vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without yanking' })
-
--- Split windows
-vim.keymap.set('n', '|', '<cmd>split<CR>', { desc = 'Split window horizontally' })
-vim.keymap.set('n', '\\', '<cmd>vsplit<CR>', { desc = 'Split window vertically' })
-
 -- Quickfix list
 vim.keymap.set('n', '[q', '<cmd>cprev<CR>', { desc = 'Go to previous Quickfix item' })
 vim.keymap.set('n', ']q', '<cmd>cnext<CR>', { desc = 'Go to next Quickfix item' })
@@ -79,7 +71,7 @@ vim.keymap.set('n', 'Q', '<nop>', { desc = 'Disable Ex mode' })
 
 -- Toggle virtual editing
 vim.opt.virtualedit = 'block'
-vim.keymap.set('n', '<leader>tv', function()
+vim.keymap.set('n', '<leader>zv', function()
   if vim.o.virtualedit == 'block' then
     vim.opt.virtualedit = 'all'
   else
@@ -97,3 +89,60 @@ vim.keymap.set('n', '<leader>le', '<cmd>set keymap=<CR>', { desc = 'Set English 
 
 -- vim.opt.iminsert = 0
 -- vim.opt.imsearch = 0
+
+-----------------------------------------------------------
+---                 Training keymaps
+-----------------------------------------------------------
+
+local key_history = {}
+
+local count = 5
+local timeout = 1e9 
+
+local function throttle_key(key)
+  -- if this is a counted command then don't throttle
+  if vim.v.count > 1 then
+    vim.cmd('normal! ' .. vim.v.count .. key)
+    return
+  end
+
+  -- clear all entries that are older than 1 second
+  local now = vim.loop.hrtime()
+  for i = #key_history, 1, -1 do
+    if now - key_history[i][2] > timeout then
+      table.remove(key_history, i)
+    end
+  end
+
+  -- check if the last `count` keys are the same
+  if #key_history >= count then
+    for i = 1, count do
+      if key_history[#key_history - i + 1][1] ~= key then
+        vim.cmd('normal! ' .. key)
+        break
+      end
+    end
+  -- if <`count` then there is fidgeting, so just do the key
+  else
+    vim.cmd('normal! ' .. key)
+  end
+
+  -- memorize the key
+  table.insert(key_history, { key, vim.loop.hrtime() })
+end
+
+-- stylua: ignore
+if true then
+  vim.keymap.set('n', 'j', function() throttle_key 'j' end)
+  vim.keymap.set('n', 'k', function() throttle_key 'k' end)
+  vim.keymap.set('n', 'h', function() throttle_key 'h' end)
+  vim.keymap.set('n', 'l', function() throttle_key 'l' end)
+  vim.keymap.set('n', 'w', function() throttle_key 'w' end)
+  vim.keymap.set('n', 'b', function() throttle_key 'b' end)
+  vim.keymap.set('n', 'e', function() throttle_key 'e' end)
+  vim.keymap.set('n', 'W', function() throttle_key 'W' end)
+  vim.keymap.set('n', 'B', function() throttle_key 'B' end)
+  vim.keymap.set('n', 'E', function() throttle_key 'E' end)
+  vim.keymap.set('n', '{', function() throttle_key '{' end)
+  vim.keymap.set('n', '}', function() throttle_key '}' end)
+end

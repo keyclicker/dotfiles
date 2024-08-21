@@ -30,9 +30,9 @@ return {
     },
     -- stylua: ignore
     keys = {
-      { '<leader>uc', function() require('nvim-coverage').load({place=true})end , desc = 'Load Coverage' },
-      { '<leader>ut', function() require('nvim-coverage').toggle() end, desc = 'Toggle Coverage Signs' },
-      { '<leader>uC', function() require('nvim-coverage').summary() end, desc = 'Display Coverrage Summary' },
+      { '<leader>tc', function() require('nvim-coverage').load({place=true})end , desc = 'Load Coverage' },
+      { '<leader>tt', function() require('nvim-coverage').toggle() end, desc = 'Toggle Coverage Signs' },
+      { '<leader>tC', function() require('nvim-coverage').summary() end, desc = 'Display Coverrage Summary' },
     },
   },
   {
@@ -94,17 +94,17 @@ return {
 
     -- stylua: ignore
     keys = {
-      { "<leader>uf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Run File" },
-      { "<leader>uF", function() require("neotest").run.run(vim.uv.cwd()) end, desc = "Run All Test Files" },
-      { "<leader>un", function() require("neotest").run.run() end, desc = "Run Nearest" },
-      { "<leader>ur", function() require("neotest").run.run_last() end, desc = "Run Resent" },
-      { "<leader>us", function() require("neotest").summary.toggle() end, desc = "Toggle Summary" },
-      { "<leader>uo", function() require("neotest").output.open({ enter = true, auto_close = true }) end, desc = "Show Output" },
-      { "<leader>uO", function() require("neotest").output_panel.toggle() end, desc = "Toggle Output Panel" },
-      { "<leader>uS", function() require("neotest").run.stop() end, desc = "Stop" },
-      { "<leader>uw", function() require("neotest").watch.toggle(vim.fn.expand("%")) end, desc = "Toggle Watch" },
-      { '<leader>ud', function() require("neotest").run.run({strategy = "dap"}) end, desc = 'Debug Nearest'},
-      { '<leader>ua', function() require("neotest").run.attach() end, desc = 'Attach Nearest'},
+      { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Run File" },
+      { "<leader>tF", function() require("neotest").run.run(vim.uv.cwd()) end, desc = "Run All Test Files" },
+      { "<leader>tn", function() require("neotest").run.run() end, desc = "Run Nearest" },
+      { "<leader>tr", function() require("neotest").run.run_last() end, desc = "Run Resent" },
+      { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Toggle Summary" },
+      { "<leader>to", function() require("neotest").output.open({ enter = true, auto_close = true }) end, desc = "Show Output" },
+      { "<leader>tO", function() require("neotest").output_panel.toggle() end, desc = "Toggle Output Panel" },
+      { "<leader>tS", function() require("neotest").run.stop() end, desc = "Stop" },
+      { "<leader>tw", function() require("neotest").watch.toggle(vim.fn.expand("%")) end, desc = "Toggle Watch" },
+      { '<leader>td', function() require("neotest").run.run({strategy = "dap"}) end, desc = 'Debug Nearest'},
+      { '<leader>ta', function() require("neotest").run.attach() end, desc = 'Attach Nearest'},
     },
   },
 }

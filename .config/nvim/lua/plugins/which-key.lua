@@ -36,8 +36,8 @@ return { -- Useful plugin to show you pending keybinds.
       { '<leader>h', group = 'Git [H]unk', mode = 'v' },
       { '<leader>l', group = '[L]ayout' },
       { '<leader>s', group = '[S]earch' },
-      { '<leader>t', group = '[T]oggle' },
-      { '<leader>u', group = 'Testing' },
+      { '<leader>z', group = 'Toggle' },
+      { '<leader>t', group = '[T]esting' },
       { '<leader>m', group = 'Session [M]anagement' },
     }
   end,
