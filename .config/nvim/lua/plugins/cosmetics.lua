@@ -2,6 +2,16 @@ return {
   {
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
+
+    opts = {
+      on_highlights = function(highlights, colors)
+        highlights.LineNr = { fg = '#555F8C' }
+        highlights.LineNrAbove = { fg = '#555F8C' }
+        highlights.LineNrBelow = { fg = '#555F8C' }
+        highlights.CursorLineNr = { bold = true, fg = '#ff966c' }
+      end,
+    },
+
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load

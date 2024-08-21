@@ -41,6 +41,8 @@ vim.keymap.set('n', '<C-Right>', '<cmd>vertical resize +4<CR>', { desc = 'Increa
 -- Move in visual mode
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selected lines down' })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selected lines up' })
+vim.keymap.set('v', 'H', '<gv', { desc = 'Unindent line' })
+vim.keymap.set('v', 'L', '>gv', { desc = 'Indent line' })
 
 -- Cursor position fixes
 vim.keymap.set('n', 'J', 'mzJ`z', { desc = 'Join lines and keep cursor position' })
@@ -74,8 +76,6 @@ vim.keymap.set(
 vim.keymap.set('n', 'Q', '<nop>', { desc = 'Disable Ex mode' })
 
 -- Stay in indent mode
-vim.keymap.set('v', '<S-Tab>', '<gv', { desc = 'Unindent line' })
-vim.keymap.set('v', '<Tab>', '>gv', { desc = 'Indent line' })
 
 -- Toggle virtual editing
 vim.opt.virtualedit = 'block'

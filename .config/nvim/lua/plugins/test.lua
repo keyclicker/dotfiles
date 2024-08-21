@@ -55,7 +55,7 @@ return {
         adapters = {
           require 'neotest-go',
           require 'neotest-jest' {
-            jestCommand = 'npx jest --coverage --',
+            jestCommand = 'npx jest --coverage',
             jestConfigFile = 'jest.config.ts',
             jest_test_discovery = true,
             env = { CI = true },

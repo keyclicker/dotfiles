@@ -41,8 +41,9 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
+-- Keep 2 signcolumns on by default
+vim.opt.signcolumn = 'yes:2'
+vim.opt.numberwidth = 3
 
 -- Decrease update time
 vim.opt.updatetime = 250
@@ -72,7 +73,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 5
 
 -- Hide cmdline when it's not in use
 vim.opt.cmdheight = 0
@@ -89,9 +90,6 @@ vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 
--- Set signcolumn and numberwidth
-vim.opt.signcolumn = 'yes:2'
-vim.opt.numberwidth = 3
 
 -----------------------------------------------------------
 --          Diagnostics and LSP style
@@ -130,3 +128,13 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
 vim.opt.spelllang = 'en_us'
 vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
 vim.opt.spell = true
+
+-----------------------------------------------------------
+---                     Folding
+-----------------------------------------------------------
+vim.opt.foldmethod = 'expr'
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.opt.foldtext = ''
+-- vim.opt.fillchars = 'fold: '

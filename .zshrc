@@ -188,3 +188,8 @@ npx() {
 	lazy_load_nvm
 	npx "$@"
 }
+
+load() {
+	lazy_load_nvm
+	lazy_load_pipx
+}
