@@ -146,19 +146,10 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Created by `pipx` on 2024-04-30 11:04:43
-# export PATH="$PATH:/Users/keyclicker/.local/bin"
-# export PYENV_ROOT="$HOME/.pyenv"
-# [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-# eval "$(pyenv init -)"
-
-# Lazy load pipx
-lazy_load_pipx() {
-	unset -f pipx
-	export PATH="$PATH:$HOME/.local/bin"
-	export PYENV_ROOT="$HOME/.pyenv"
-	[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-	eval "$(pyenv init -)"
-}
+export PATH="$PATH:/Users/keyclicker/.local/bin"
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
 
 pipx() {
 	lazy_load_pipx
@@ -189,7 +180,3 @@ npx() {
 	npx "$@"
 }
 
-load() {
-	lazy_load_nvm
-	lazy_load_pipx
-}

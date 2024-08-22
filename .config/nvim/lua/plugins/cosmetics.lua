@@ -1,26 +1,4 @@
 return {
-  {
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-
-    opts = {
-      on_highlights = function(highlights, colors)
-        highlights.LineNr = { fg = '#555F8C' }
-        highlights.LineNrAbove = { fg = '#555F8C' }
-        highlights.LineNrBelow = { fg = '#555F8C' }
-        highlights.CursorLineNr = { bold = true, fg = '#ff966c' }
-      end,
-    },
-
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-moon'
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
-    end,
-  },
   -- Highlight colors in code
   {
     'NvChad/nvim-colorizer.lua',
@@ -53,5 +31,26 @@ return {
     keys = {
       { '<leader>zz', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
     },
+  },
+
+  ---------------------------------------------------------
+  ---                   Colorschemes
+  ---------------------------------------------------------
+  {
+    'folke/tokyonight.nvim',
+    priority = 1000, -- Make sure to load this before all the other start plugins.
+
+    opts = {
+      on_highlights = function(highlights, colors)
+        highlights.LineNr = { fg = '#555F8C' }
+        highlights.LineNrAbove = { fg = '#555F8C' }
+        highlights.LineNrBelow = { fg = '#555F8C' }
+        highlights.CursorLineNr = { bold = true, fg = '#ff966c' }
+      end,
+    },
+
+    init = function()
+      vim.cmd.colorscheme 'tokyonight-moon'
+    end,
   },
 }

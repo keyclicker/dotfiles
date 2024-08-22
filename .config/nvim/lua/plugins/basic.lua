@@ -1,9 +1,10 @@
 return {
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-
-  -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', event = 'BufReadPre', opts = {}, keys = { { 'gc' } } },
-
+  {
+    'folke/ts-comments.nvim',
+    event = 'VeryLazy',
+    opts = {},
+  },
   {
     'kylechui/nvim-surround',
     version = '*', -- Use for stability; omit to use `main` branch for the latest features

@@ -12,8 +12,6 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous Diagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next Diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.setloclist, { desc = 'Open diagnostic Quickfix list' })
 vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Show diagnostic Error messages' })
 
@@ -97,9 +95,9 @@ vim.keymap.set('n', '<leader>le', '<cmd>set keymap=<CR>', { desc = 'Set English 
 local key_history = {}
 
 local count = 5
-local timeout = 1e9 
+local timeout = 2e9
 
-local function throttle_key(key)
+local function throttle_key(key, rev)
   -- if this is a counted command then don't throttle
   if vim.v.count > 1 then
     vim.cmd('normal! ' .. vim.v.count .. key)
@@ -116,11 +114,18 @@ local function throttle_key(key)
 
   -- check if the last `count` keys are the same
   if #key_history >= count then
+    local diff = false
     for i = 1, count do
       if key_history[#key_history - i + 1][1] ~= key then
         vim.cmd('normal! ' .. key)
+        diff = true
         break
       end
+    end
+    if rev and not diff then
+      vim.cmd('normal! ' .. count .. rev)
+      key_history = {}
+      return
     end
   -- if <`count` then there is fidgeting, so just do the key
   else
@@ -133,16 +138,16 @@ end
 
 -- stylua: ignore
 if true then
-  vim.keymap.set('n', 'j', function() throttle_key 'j' end)
-  vim.keymap.set('n', 'k', function() throttle_key 'k' end)
-  vim.keymap.set('n', 'h', function() throttle_key 'h' end)
-  vim.keymap.set('n', 'l', function() throttle_key 'l' end)
-  vim.keymap.set('n', 'w', function() throttle_key 'w' end)
-  vim.keymap.set('n', 'b', function() throttle_key 'b' end)
-  vim.keymap.set('n', 'e', function() throttle_key 'e' end)
-  vim.keymap.set('n', 'W', function() throttle_key 'W' end)
-  vim.keymap.set('n', 'B', function() throttle_key 'B' end)
-  vim.keymap.set('n', 'E', function() throttle_key 'E' end)
-  vim.keymap.set('n', '{', function() throttle_key '{' end)
-  vim.keymap.set('n', '}', function() throttle_key '}' end)
+  vim.keymap.set('n', 'j', function() throttle_key( 'j', 'k') end)
+  vim.keymap.set('n', 'k', function() throttle_key( 'k', 'j') end)
+  vim.keymap.set('n', 'h', function() throttle_key( 'h', 'l') end)
+  vim.keymap.set('n', 'l', function() throttle_key( 'l', 'h') end)
+  vim.keymap.set('n', 'w', function() throttle_key( 'w', 'b') end)
+  vim.keymap.set('n', 'b', function() throttle_key( 'b', 'w') end)
+  vim.keymap.set('n', 'e', function() throttle_key( 'e', 'ge') end)
+  vim.keymap.set('n', 'W', function() throttle_key( 'W', 'B') end)
+  vim.keymap.set('n', 'B', function() throttle_key( 'B', 'W') end)
+  vim.keymap.set('n', 'E', function() throttle_key( 'E', 'W') end)
+  vim.keymap.set('n', '{', function() throttle_key( '{', '}') end)
+  vim.keymap.set('n', '}', function() throttle_key( '}', '{') end)
 end
