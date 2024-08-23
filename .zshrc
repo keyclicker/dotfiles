@@ -108,6 +108,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# =========================================================
+#						Aliases
+# =========================================================
+
 alias ql="qlmanage -p"
 alias yt="yt-dlp"
 alias ff="ffmpeg -hide_banner -i"
@@ -123,38 +127,42 @@ alias ng="nvim -c \"Neogit\""
 # nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"
 
-# alias udex="cd ~/Root/Programming/Udex/udex/front/; nvim"
-# alias dot="cd ~/.dotfiles; nvim"
-# alias nvc="cd ~/.dotfiles/.config/nvim/lua/user/; nvim"
-# alias zsrc='source ~/.dotfiles/.zshrc'
-# alias zrc="nvim ~/.dotfiles/.zshrc; source ~/.dotfiles/.zshrc"
+alias dot="cd ~/.dotfiles; nvim ./"
+alias ncfg="cd ~/.dotfiles/.config/nvim; nvim ./"
+alias zsrc='source ~/.dotfiles/.zshrc'
+
+# =========================================================
+#				 Environment Variables
+# =========================================================
 
 export PATH="$HOME/.scripts:$PATH"
 
 export EDITOR="nvim"
 export GPG_TTY=$(tty)
-# export DYLD_LIBRARY_PATH="/usr/local/mysql/lib:$PATH"
 export PATH="/Library/PostgreSQL/16/bin:$PATH"
-# export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
+# export PATH="$HOME/Library/Python/3./bin:$PATH"
 
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-# export PATH="$HOME/Library/Python/3./bin:$PATH"
 
 # Locale
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+
+export HISTORY_IGNORE="(ls|ll|la|l|pwd|cd|fg|jobs|history|exit|clear|vp|v|vi|vim|nvim|fzf)"
+
+# =========================================================
+# 					 Init utilities
+# =========================================================
+
+# Fzf
+source <(fzf --zsh)
 
 # Created by `pipx` on 2024-04-30 11:04:43
 export PATH="$PATH:/Users/keyclicker/.local/bin"
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
-
-pipx() {
-	lazy_load_pipx
-	pipx "$@"
-}
 
 # Lazy nvm
 lazy_load_nvm() {

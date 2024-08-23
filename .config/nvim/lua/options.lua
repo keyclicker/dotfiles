@@ -128,6 +128,7 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
 vim.opt.spelllang = 'en_us'
 vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
 vim.opt.spell = true
+vim.opt.spelloptions = 'camel'
 
 -----------------------------------------------------------
 ---                     Folding

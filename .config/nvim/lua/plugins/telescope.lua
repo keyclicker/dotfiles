@@ -92,7 +92,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
               ['<c-d>'] = 'delete_buffer',
             },
             n = {
-              ['c'] = 'delete_buffer',
+              ['dd'] = 'delete_buffer',
             },
           },
         },

@@ -5,6 +5,7 @@ return {
   opts = {
     modes = {
       char = {
+        enabled = false, -- enable after removing smartcase
         multi_line = false,
         char_actions = function()
           return {

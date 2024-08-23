@@ -1,6 +1,6 @@
-snippet sfcom "Auto File Component - ": 
+snippet ssfcom "Auto File Component - ": 
         export interface ${TM_FILENAME_BASE}Props {
-        }
+       
         
         /**
         * $1
@@ -16,7 +16,7 @@ snippet sfcom "Auto File Component - ":
         export default ${TM_FILENAME_BASE}
 
 
-snippet scom "Auto Component - ": 
+snippet sscom "Auto Component - ": 
         interface $1Props {
         }
         
@@ -33,16 +33,16 @@ snippet scom "Auto Component - ":
         
 
 
-snippet sdesc "Describe Component - ": 
+snippet ssdesc "Describe Component - ": 
         describe('<$1>', () => {
         })
 
-snippet sit "It component - ": 
+snippet ssit "It component - ": 
         it('$1', () => {
           render(<$2/>)
         })
 
-snippet smats "It matches shallow - ": 
+snippet ssmats "It matches shallow - ": 
         it('matches shallow snapshot', () => {
           const renderer = ShallowRenderer.createRenderer()
           const view = renderer.render(
@@ -51,7 +51,7 @@ snippet smats "It matches shallow - ":
           expect(view).toMatchSnapshot()
         })
 
-snippet smat "It matches snapshot - ": 
+snippet ssmat "It matches snapshot - ": 
         it('matches snapshot', () => {
           const { asFragment } = render(
             <$1/>
@@ -59,7 +59,7 @@ snippet smat "It matches snapshot - ":
           expect(asFragment()).toMatchSnapshot()
         })
 
-snippet stim "Test Imports - ": 
+snippet sstim "Test Imports - ": 
         import '@testing-library/jest-dom'
         import { render, screen } from '@testing-library/react'
         import ShallowRenderer from 'react-test-renderer/shallow'
