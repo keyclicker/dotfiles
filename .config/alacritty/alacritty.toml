@@ -12,6 +12,8 @@ size = 14
 [window]
 # option_as_alt = 'OnlyLeft'
 option_as_alt = 'Both'
+decorations = 'None'
+opacity = 1.0
 
 [cursor]
 style = 'Beam'

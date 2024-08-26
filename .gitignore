@@ -2,3 +2,4 @@
 nvim.*/
 !nvim.kick/
 !nvim.astro/
+.config/karabinder/automatic_backups/

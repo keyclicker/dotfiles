@@ -46,6 +46,7 @@ return {
         highlights.LineNrAbove = { fg = '#555F8C' }
         highlights.LineNrBelow = { fg = '#555F8C' }
         highlights.CursorLineNr = { bold = true, fg = '#ff966c' }
+        highlights.EndOfBuffer = { fg = "#555F8C" }
       end,
     },
 
