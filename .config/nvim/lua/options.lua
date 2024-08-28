@@ -41,10 +41,6 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
--- Keep signcolumns on by default
-vim.opt.signcolumn = 'yes:2'
-vim.opt.numberwidth = 3
-
 -- Decrease update time
 vim.opt.updatetime = 250
 
@@ -89,7 +85,6 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
-
 
 -----------------------------------------------------------
 --          Diagnostics and LSP style
@@ -140,3 +135,12 @@ vim.opt.foldlevel = 99
 vim.opt.foldlevelstart = 99
 -- vim.opt.fillchars = 'fold: '
 
+-----------------------------------------------------------
+---                Status Column
+-----------------------------------------------------------
+
+-- Keep signcolumns on by default
+vim.opt.signcolumn = 'yes:2'
+vim.opt.numberwidth = 3
+
+-- vim.o.statuscolumn = "%!v:lua.require('status').statuscolumn()";

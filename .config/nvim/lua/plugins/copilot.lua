@@ -11,7 +11,7 @@ return {
         jump_next = ']]',
         accept = '<CR>',
         refresh = 'gr', -- NOTE: conflict
-        open = '<C-CR>',
+        open = '<M-CR>',
       },
       layout = {
         position = 'right', -- | top | left | right
@@ -23,7 +23,7 @@ return {
       auto_trigger = true,
       debounce = 75,
       keymap = {
-        accept = '<C-y>',
+        accept = '<C-J>',
         accept_word = false,
         accept_line = false,
         next = '<M-]>',
@@ -32,14 +32,7 @@ return {
       },
     },
     filetypes = {
-      -- yaml = false,
       markdown = true,
-      -- help = false,
-      -- gitcommit = false,
-      -- gitrebase = false,
-      -- hgcommit = false,
-      -- svn = false,
-      -- cvs = false,
       ['.'] = true,
     },
     copilot_node_command = 'node', -- Node.js version must be > 18.x

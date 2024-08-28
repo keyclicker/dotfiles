@@ -30,7 +30,6 @@ vim.keymap.set('n', '<leader>zd', function()
   vim.diagnostic.config { virtual_text = next }
 end, { desc = 'Toggle Diagnostics Virtual Text' })
 
-
 -- Resize windows
 vim.keymap.set('n', '<C-Down>', '<cmd>resize -4<CR>', { desc = 'Decrease window height' })
 vim.keymap.set('n', '<C-Up>', '<cmd>resize +4<CR>', { desc = 'Increase window height' })
@@ -79,6 +78,15 @@ vim.keymap.set('n', '<leader>zv', function()
     vim.opt.virtualedit = 'block'
   end
 end, { desc = 'Toggle Virtual Edit' })
+
+-- tshell style keymaps
+vim.keymap.set({ 'c', 'i' }, '<C-F>', '<Right>', { noremap = true, desc = 'Go to right' })
+vim.keymap.set({ 'c', 'i' }, '<C-B>', '<Left>', { noremap = true, desc = 'Go to left' })
+
+vim.keymap.set('i', '<C-A>', '<C-O>^', { noremap = true, desc = 'Go to beginning of line' })
+vim.keymap.set('i', '<C-E>', '<End>', { noremap = true, desc = 'Go to end of line' })
+
+vim.keymap.set('c', '<C-A>', '<Home>', { noremap = true, desc = 'Go to beginning of line' })
 
 -----------------------------------------------------------
 ---                 Training keymaps

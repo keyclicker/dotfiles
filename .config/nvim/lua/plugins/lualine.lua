@@ -7,6 +7,9 @@ local function show_macro_recording()
   end
 end
 
+vim.opt.showcmd = true
+vim.opt.showcmdloc = 'statusline'
+
 return {
   'nvim-lualine/lualine.nvim',
   event = 'VeryLazy',
@@ -20,13 +23,13 @@ return {
       section_separators = { left = '', right = '' },
       disabled_filetypes = {
         statusline = {},
-        winbar = {},
+        winbar = { 'NeogitStatus', 'DiffviewFiles', 'DiffviewFileHistory', 'oil' },
       },
       ignore_focus = {},
       always_divide_middle = true,
       -- globalstatus = true,
       refresh = {
-        statusline = 500,
+        statusline = 250,
         tabline = 1000,
         winbar = 1000,
       },
@@ -35,21 +38,17 @@ return {
       lualine_a = { 'mode' },
       lualine_b = { 'branch', 'diff' },
       lualine_c = { 'diagnostics' },
-      lualine_x = { 'searchcount', { 'macro-recording', fmt = show_macro_recording } },
+      lualine_x = { 'searchcount', { 'macro-recording', fmt = show_macro_recording }, '%S' },
       lualine_y = { { 'filename', path = 1 }, 'filetype' },
       lualine_z = { 'location', 'progress' },
     },
-    -- inactive_sections = {
-    --   lualine_a = {},
-    --   lualine_b = {},
-    --   lualine_c = { 'filename' },
-    --   lualine_x = { 'location' },
-    --   lualine_y = {},
-    --   lualine_z = {},
-    -- },
-    tabline = {},
-    winbar = {},
-    inactive_winbar = {},
+    -- inactive_sections = {},
+    winbar = {
+      lualine_c = { 'filename' },
+    },
+    inactive_winbar = {
+      lualine_c = { 'filename' },
+    },
     extensions = {},
   },
 }

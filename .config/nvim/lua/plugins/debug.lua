@@ -86,9 +86,9 @@ return {
     { '<F3>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
     { '<F4>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
     { '<F5>', function() require('dap').step_back() end, desc = 'Debug: Step Back' },
+    { '<F10>', function() require('dap').run_to_cursor() end, desc = 'Debug: Run to the Cursor' },
     { '<F11>', function() require('dap').restart() end, desc = 'Debug: Restart' },
     { '<F12>', function() require('dap').stop() end, desc = 'Debug: Stop' },
-    { '<leader>x', function() require('dap').run_to_cursor() end, desc = 'Debug: Run to the Cursor' },
     { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
     {
       '<leader>B',

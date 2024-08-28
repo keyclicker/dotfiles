@@ -84,15 +84,19 @@ cmd + ctrl + alt - l : yabai -m window --focus east
 
 # swap managed window
 # shift + alt - h : yabai -m window --swap north
+shift + cmd + ctrl + alt - h : yabai -m window --swap west
+shift + cmd + ctrl + alt - j : yabai -m window --swap south
+shift + cmd + ctrl + alt - k : yabai -m window --swap north
+shift + cmd + ctrl + alt - l : yabai -m window --swap east
 
 # move managed window
-shift + cmd + ctrl + alt - h : yabai -m window --warp west
-shift + cmd + ctrl + alt - j : yabai -m window --warp south
-shift + cmd + ctrl + alt - k : yabai -m window --warp north
-shift + cmd + ctrl + alt - l : yabai -m window --warp east
+# shift + cmd + ctrl + alt - h : yabai -m window --warp west
+# shift + cmd + ctrl + alt - j : yabai -m window --warp south
+# shift + cmd + ctrl + alt - k : yabai -m window --warp north
+# shift + cmd + ctrl + alt - l : yabai -m window --warp east
 
 # balance size of windows
-# shift + alt - 0 : yabai -m space --balance
+cmd + ctrl + alt - b : yabai -m space --balance
 
 # make floating window fill screen
 # shift + alt - up     : yabai -m window --grid 1:1:0:0:1:1
@@ -112,7 +116,17 @@ shift + cmd + ctrl + alt - l : yabai -m window --warp east
 
 # send window to desktop and follow focus
 # shift + cmd - z : yabai -m window --space next; yabai -m space --focus next
-# shift + cmd - 2 : yabai -m window --space  2; yabai -m space --focus 2
+# shift + cmd - 2 : yabai -m window --space 2; yabai -m space --focus 2
+ shift + ctrl - 1 : yabai -m window --space 1
+ shift + ctrl - 2 : yabai -m window --space 2
+ shift + ctrl - 3 : yabai -m window --space 3
+ shift + ctrl - 4 : yabai -m window --space 4
+ shift + ctrl - 5 : yabai -m window --space 5
+ shift + ctrl - 6 : yabai -m window --space 6
+ shift + ctrl - 7 : yabai -m window --space 7
+ shift + ctrl - 8 : yabai -m window --space 8
+ shift + ctrl - 9 : yabai -m window --space 9
+ shift + ctrl - 0 : yabai -m window --space 10
 
 # focus monitor
 # ctrl + alt - z  : yabai -m display --focus prev
@@ -139,14 +153,18 @@ shift + cmd + ctrl + alt - l : yabai -m window --warp east
 
 # toggle window zoom
 # cmd + ctrl + alt - f : yabai -m window --toggle zoom-parent
-cmd + ctrl + alt - f : yabai -m window --toggle zoom-fullscreen
+cmd + ctrl + alt - space : yabai -m window --toggle zoom-fullscreen
 
 # toggle window split type
 # alt - e : yabai -m window --toggle split
 
 # float / unfloat window and center on screen
-# alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
+shift + cmd + ctrl + alt - space : yabai -m window --toggle float --grid 4:4:1:1:2:2
 
 # toggle sticky(+float), picture-in-picture
 # alt - p : yabai -m window --toggle sticky --toggle pip
 
+# layout change
+cmd + ctrl + alt - u : input select com.apple.keylayout.ABC
+cmd + ctrl + alt - i : input select com.apple.keylayout.Ukrainian-PC
+cmd + ctrl + alt - o : input select com.apple.keylayout.RussianWin
