@@ -12,6 +12,12 @@ return {
     'leoluz/nvim-dap-go',
     'mfussenegger/nvim-dap-python',
     'mxsdev/nvim-dap-vscode-js',
+    { -- fix style
+      "microsoft/vscode-js-debug",
+      opt = true,
+      run = "npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out",
+    }
+
   },
   config = function()
     local dap = require 'dap'

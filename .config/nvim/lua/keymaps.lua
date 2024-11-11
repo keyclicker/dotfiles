@@ -10,10 +10,10 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 vim.keymap.set('n', 'Q', '<nop>', { desc = 'Disable Ex mode' })
 
 -- Window navigation
-vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to window left' })
-vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to window below' })
-vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to window above' })
-vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to window right' })
+-- vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to window left' })
+-- vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to window below' })
+-- vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to window above' })
+-- vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to window right' })
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true

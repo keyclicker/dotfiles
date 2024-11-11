@@ -14,9 +14,15 @@ brew "fzf"
 brew "ripgrep"
 brew "tldr"
 brew "stow"
+brew "sevenzip"
 
 brew "yazi"
 brew "vifm"
+
+# Yazi deps
+brew "imagemagick"
+brew "ghostscript" 
+brew "ffmpegthumbnailer"
 
 # Lang tools
 brew "node"

@@ -162,7 +162,7 @@ return { -- LSP Configuration & Plugins
       clangd = {},
 
       pyright = {},
-      tsserver = {},
+      ts_ls = {},
       eslint = {},
       cssls = {},
       html = {},

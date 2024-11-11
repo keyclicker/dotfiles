@@ -1,16 +1,25 @@
 font_size 14.0
 
-font_family                      family="JetBrains Mono"
-bold_font                        auto
-italic_font                      auto
-bold_italic_font                 auto
-
 macos_option_as_alt              yes
 macos_colorspace                 srgb
 enable_audio_bell                no
 hide_window_decorations          yes
 tab_bar_edge                     top
+placement_strategy               top
 
-# text_composition_strategy legacy
+# text_composition_strategy 2.7 0
+text_composition_strategy   legacy
+cursor_blink_interval       0
 
 include current-theme.conf
+
+# BEGIN_KITTY_FONTS
+font_family                 family='JetBrains Mono' postscript_name=JetBrainsMono-Regular
+bold_font                   auto
+italic_font                 auto
+bold_italic_font            auto
+modify_font cell_width      95%
+# END_KITTY_FONTS
+
+map cmd+equal change_font_size all +0.5 
+map cmd+minus change_font_size all -0.5

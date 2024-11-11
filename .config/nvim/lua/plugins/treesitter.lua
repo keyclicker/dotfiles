@@ -4,12 +4,15 @@ return { -- Highlight, edit, and navigate code
   build = ':TSUpdate',
   opts = {
     ensure_installed = {
+      'markdown',
+      'markdown_inline',
+      'latex',
+      'bibtex',
+
       'bash',
       'diff',
       'lua',
       'luadoc',
-      'markdown',
-      'markdown_inline',
       'vim',
       'vimdoc',
 

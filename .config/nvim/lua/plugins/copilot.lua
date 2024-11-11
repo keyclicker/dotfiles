@@ -40,7 +40,7 @@ return {
   },
   keys = {
     {
-      '<leader>tc',
+      '<leader>zc',
       function()
         require('copilot.suggestion').toggle_auto_trigger()
       end,
