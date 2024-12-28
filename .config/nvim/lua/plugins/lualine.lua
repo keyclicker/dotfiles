@@ -23,7 +23,7 @@ return {
       section_separators = { left = '', right = '' },
       disabled_filetypes = {
         statusline = {},
-        winbar = { 'NeogitStatus', 'DiffviewFiles', 'DiffviewFileHistory', 'oil' },
+        winbar = { 'NeogitStatus', 'DiffviewFiles', 'DiffviewFileHistory' },
       },
       ignore_focus = {},
       always_divide_middle = true,

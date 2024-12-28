@@ -44,6 +44,10 @@ vim.keymap.set('v', 'L', '>gv', { desc = 'Indent line' })
 
 -- Cursor position fixes
 vim.keymap.set('n', 'J', 'mzJ`z', { desc = 'Join lines and keep cursor position' })
+vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Move down half page and keep cursor in the center' })
+vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Move up half page and keep cursor in the center' })
+vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Move to next search result and keep cursor in the center' })
+vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Move to previous search result and keep cursor in the center' })
 
 -- Quickfix list
 vim.keymap.set('n', '[q', '<cmd>cprev<CR>', { desc = 'Go to previous Quickfix item' })
