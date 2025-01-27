@@ -3,7 +3,7 @@ return { -- LSP Configuration & Plugins
   event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
-    { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+    { 'williamboman/mason.nvim', opts = { PATH = 'append' } }, -- NOTE: Must be loaded before dependants
     'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
 
@@ -136,6 +136,39 @@ return { -- LSP Configuration & Plugins
           map('<leader>zh', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
           end, 'Toggle Inlay Hints')
+        end
+
+        -- Fix pyright `is not accessed` warning
+        if client and client.name == 'pyright' then
+          local function filter(arr, func)
+            -- Filter in place
+            -- https://stackoverflow.com/questions/49709998/how-to-filter-a-lua-array-inplace
+            local new_index = 1
+            local size_orig = #arr
+            for old_index, v in ipairs(arr) do
+              if func(v, old_index) then
+                arr[new_index] = v
+                new_index = new_index + 1
+              end
+            end
+            for i = new_index, size_orig do
+              arr[i] = nil
+            end
+          end
+
+          local function pyright_accessed_filter(diagnostic)
+            if string.match(diagnostic.message, '"_.+" is not accessed') then
+              return false
+            end
+            return true
+          end
+
+          local function custom_on_publish_diagnostics(a, params, client_id, c, config)
+            filter(params.diagnostics, pyright_accessed_filter)
+            vim.lsp.diagnostic.on_publish_diagnostics(a, params, client_id, c, config)
+          end
+
+          vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(custom_on_publish_diagnostics, {})
         end
       end,
     })

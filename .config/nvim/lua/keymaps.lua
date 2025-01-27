@@ -83,6 +83,9 @@ vim.keymap.set('n', '<leader>zv', function()
   end
 end, { desc = 'Toggle Virtual Edit' })
 
+-- Pasting fix
+vim.keymap.set('i', '<C-r>', '<C-r><C-p>', { noremap = true })
+
 -- tshell style keymaps
 vim.keymap.set({ 'c', 'i' }, '<C-F>', '<Right>', { noremap = true, desc = 'Go to right' })
 vim.keymap.set({ 'c', 'i' }, '<C-B>', '<Left>', { noremap = true, desc = 'Go to left' })

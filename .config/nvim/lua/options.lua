@@ -6,8 +6,9 @@ vim.g.maplocalleader = '\\'
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
--- Set the python3 host program path
+-- -- Set the python3 host program path
 vim.g.python3_host_prog = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3'
+-- vim.g.python3_host_prog = 'python3'
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -124,6 +125,19 @@ vim.opt.spelllang = 'en_us'
 vim.opt.spellfile = vim.fn.stdpath 'config' .. '/spell/utf-8.add'
 vim.opt.spell = true
 vim.opt.spelloptions = 'camel'
+
+local nospell = function()
+  vim.opt_local.spell = false
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'checkhealth' },
+  callback = nospell,
+})
+vim.api.nvim_create_autocmd('TermOpen', {
+  pattern = '*',
+  callback = nospell,
+})
 
 -----------------------------------------------------------
 ---                     Folding
