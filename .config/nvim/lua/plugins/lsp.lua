@@ -1,3 +1,4 @@
+local helpers = require 'utils.helpers'
 return { -- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
   event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
@@ -140,22 +141,6 @@ return { -- LSP Configuration & Plugins
 
         -- Fix pyright `is not accessed` warning
         if client and client.name == 'pyright' then
-          local function filter(arr, func)
-            -- Filter in place
-            -- https://stackoverflow.com/questions/49709998/how-to-filter-a-lua-array-inplace
-            local new_index = 1
-            local size_orig = #arr
-            for old_index, v in ipairs(arr) do
-              if func(v, old_index) then
-                arr[new_index] = v
-                new_index = new_index + 1
-              end
-            end
-            for i = new_index, size_orig do
-              arr[i] = nil
-            end
-          end
-
           local function pyright_accessed_filter(diagnostic)
             if string.match(diagnostic.message, '"_.+" is not accessed') then
               return false
@@ -163,9 +148,9 @@ return { -- LSP Configuration & Plugins
             return true
           end
 
-          local function custom_on_publish_diagnostics(a, params, client_id, c, config)
-            filter(params.diagnostics, pyright_accessed_filter)
-            vim.lsp.diagnostic.on_publish_diagnostics(a, params, client_id, c, config)
+          local function custom_on_publish_diagnostics(_, result, ctx, config)
+            helpers.filter_inplace(result.diagnostics, pyright_accessed_filter)
+            vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
           end
 
           vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(custom_on_publish_diagnostics, {})

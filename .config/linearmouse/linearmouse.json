@@ -3,10 +3,44 @@
     {
       "if" : {
         "device" : {
-          "productID" : "0x1832",
-          "productName" : "SteelSeries Sensei Ten",
           "vendorID" : "0x1038",
-          "category" : "mouse"
+          "productName" : "SteelSeries Sensei Ten",
+          "category" : "mouse",
+          "productID" : "0x1832"
+        }
+      },
+      "scrolling" : {
+        "distance" : {
+          "vertical" : 6
+        },
+        "acceleration" : {
+          "vertical" : 1
+        },
+        "reverse" : {
+          "vertical" : true
+        },
+        "speed" : {
+          "vertical" : 0
+        }
+      },
+      "pointer" : {
+        "speed" : 0.0689655172413792768,
+        "acceleration" : 0.6875,
+        "disableAcceleration" : false
+      }
+    },
+    {
+      "pointer" : {
+        "speed" : 0.0689655172413792768,
+        "disableAcceleration" : false,
+        "acceleration" : 0.6875
+      },
+      "if" : {
+        "device" : {
+          "productID" : "0x343",
+          "category" : "trackpad",
+          "vendorID" : "0x5ac",
+          "productName" : "Apple Internal Keyboard \/ Trackpad"
         }
       },
       "scrolling" : {
@@ -14,20 +48,61 @@
           "vertical" : 0
         },
         "reverse" : {
-          "vertical" : true
-        },
-        "distance" : {
-          "vertical" : 6
+          "vertical" : false
         },
         "acceleration" : {
           "vertical" : 1
+        },
+        "distance" : {
+          "vertical" : "auto"
+        }
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "productName" : "Nick’s Magic Mouse",
+          "serialNumber" : "D0:C0:50:BA:8C:3C",
+          "productID" : "0x323",
+          "category" : "trackpad",
+          "vendorID" : "0x4c"
         }
       },
+      "scrolling" : {
+        "speed" : 0,
+        "distance" : "auto",
+        "acceleration" : 1
+      },
       "pointer" : {
-        "disableAcceleration" : true,
-        "acceleration" : 0.45
+        "acceleration" : 0.6875,
+        "speed" : 0,
+        "disableAcceleration" : false
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "mouse",
+          "vendorID" : "0x46d",
+          "productID" : "0xb034",
+          "serialNumber" : "41DEBBD3",
+          "productName" : "MX Master 3S"
+        }
+      },
+      "scrolling" : {
+        "reverse" : {
+          "vertical" : false
+        },
+        "distance" : "auto",
+        "acceleration" : 1,
+        "speed" : 0
+      },
+      "pointer" : {
+        "disableAcceleration" : false,
+        "acceleration" : 0.6875,
+        "speed" : 0
       }
     }
   ],
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.9.5"
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0"
 }

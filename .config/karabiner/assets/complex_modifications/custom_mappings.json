@@ -3,9 +3,16 @@
   "rules": [
     {
       "description": "My very own custom mappings.",
+
       "manipulators": [
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "caps_lock",
             "modifiers": { "optional": ["any"] }
@@ -14,6 +21,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "left_control",
             "modifiers": { "optional": ["any"] }
@@ -22,6 +35,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "left_option",
             "modifiers": { "optional": ["any"] }
@@ -30,6 +49,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "right_command",
             "modifiers": { "optional": ["any"] }
@@ -38,6 +63,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "right_option",
             "modifiers": { "optional": ["any"] }
@@ -46,6 +77,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "tab",
             "modifiers": { "optional": ["any"] }
@@ -54,6 +91,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "escape",
             "modifiers": { "optional": ["any"] }
@@ -62,6 +105,12 @@
         },
         {
           "type": "basic",
+          "conditions": [
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }]
+            }
+          ],
           "from": {
             "key_code": "fn",
             "modifiers": { "optional": ["any"] }

@@ -131,7 +131,7 @@ local nospell = function()
 end
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'checkhealth' },
+  pattern = { 'checkhealth', 'man' },
   callback = nospell,
 })
 vim.api.nvim_create_autocmd('TermOpen', {

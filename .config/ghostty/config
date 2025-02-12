@@ -1,0 +1,25 @@
+font-family = JetBrainsMono
+font-size = 14
+font-feature = -calt
+
+theme = light:tokyonight-day,dark:tokyonight_moon
+
+window-decoration = none
+window-colorspace = srgb
+macos-window-shadow = false
+macos-option-as-alt = true
+
+background-opacity = 0.75
+background-blur = 20
+
+window-padding-balance = true
+window-padding-x = 4
+window-padding-y = 0
+
+cursor-style = bar
+cursor-style-blink = false
+shell-integration-features = no-cursor
+adjust-cursor-thickness = 2
+cursor-invert-fg-bg = false
+cursor-text = #0b0d0b
+

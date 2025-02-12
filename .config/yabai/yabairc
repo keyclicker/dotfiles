@@ -14,7 +14,7 @@
 # global settings
 yabai -m config                                 \
     external_bar                 off:40:0       \
-    menubar_opacity              0.6            \
+    menubar_opacity              0.4            \
     mouse_follows_focus          on            \
     focus_follows_mouse          off            \
     display_arrangement_order    default        \
