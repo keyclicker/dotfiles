@@ -9,7 +9,7 @@ window-colorspace = srgb
 macos-window-shadow = false
 macos-option-as-alt = true
 
-background-opacity = 0.75
+background-opacity = 0.9
 background-blur = 20
 
 window-padding-balance = true

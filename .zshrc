@@ -145,11 +145,15 @@ export PATH="/Library/PostgreSQL/16/bin:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
+export PATH="$HOME/.usr/bin:$PATH"
+
 # Locale
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 export HISTORY_IGNORE="(ls|ll|la|l|pwd|cd|fg|jobs|history|exit|clear|vp|v|vi|vim|nvim|fzf)"
+
+export XDG_DATA_DIRS="/opt/homebrew/share"
 
 # =========================================================
 # 					 Init utilities

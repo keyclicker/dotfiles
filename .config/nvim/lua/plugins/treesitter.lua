@@ -18,6 +18,7 @@ return { -- Highlight, edit, and navigate code
 
       'query',
       'python',
+      'sql',
 
       'c',
       'cpp',
@@ -49,6 +50,11 @@ return { -- Highlight, edit, and navigate code
     indent = { enable = true, disable = { 'ruby' } },
   },
   config = function(_, opts)
+    -- highlight sql
+    -- vim.api.nvim_set_hl(0, "@error", { bg = "#330000", italic = true })
+
+
+-- Add more SQL capture groups as needed
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
     -- Prefer git instead of curl in order to improve connectivity in some environments

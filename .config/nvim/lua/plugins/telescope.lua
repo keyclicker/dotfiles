@@ -134,6 +134,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     vim.keymap.set('n', '<leader>P', function()
       builtin.find_files {
         hidden = true,
+        no_ignore = true,
         prompt_title = 'Search All Files',
       }
     end, { desc = 'Search All Files' })
@@ -141,7 +142,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     vim.keymap.set('n', '<leader>f', builtin.live_grep, { desc = 'Live grep' })
     vim.keymap.set('n', '<leader>F', function()
       builtin.live_grep {
-        hidden = true,
+        additional_args = { '--hidden', '--no-ignore' },
         prompt_title = 'Live Grep (All Files)',
       }
     end, { desc = 'Live grep (all files)' })

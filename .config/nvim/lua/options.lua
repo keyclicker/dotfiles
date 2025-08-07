@@ -17,6 +17,7 @@ vim.g.python3_host_prog = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3
 
 -- Make line numbers default
 vim.opt.number = true
+
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true

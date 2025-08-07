@@ -1,0 +1,6 @@
+# ignore everything except mpv.conf and input.conf
+
+*
+!/mpv.conf
+!/input.conf
+!/script-opts/*

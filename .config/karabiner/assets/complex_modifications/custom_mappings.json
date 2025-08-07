@@ -10,7 +10,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -24,7 +24,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -38,7 +38,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -52,7 +52,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -66,7 +66,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -80,7 +80,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -94,7 +94,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
@@ -108,7 +108,7 @@
           "conditions": [
             {
               "type": "device_unless",
-              "identifiers": [{ "vendor_id": 10730 }]
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
           ],
           "from": {
