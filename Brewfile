@@ -1,6 +1,3 @@
-tap "homebrew/bundle"
-tap "koekeishiya/formulae"
-
 # Basics
 brew "coreutils"
 brew "cmake"
@@ -15,14 +12,6 @@ brew "ripgrep"
 brew "tldr"
 brew "stow"
 brew "sevenzip"
-
-brew "yazi"
-brew "vifm"
-
-# Yazi deps
-brew "imagemagick"
-brew "ghostscript" 
-brew "ffmpegthumbnailer"
 
 # Lang tools
 brew "node"
@@ -41,11 +30,6 @@ brew "neovim"
 # User tools
 brew "neofetch"
 brew "ffmpeg"
-brew "gnu-typist"
-brew "qalculate-qt"
-
-brew "gdu"
-brew "pinentry"
 brew "htop"
 brew "tokei"
 
@@ -53,15 +37,5 @@ brew "tokei"
 brew "gnupg"
 brew "pinentry-mac"
 
-# Libs
-brew "sfml"
-
-# To Delete
-# tap "railwaycat/emacsmacport"
-# tap "d12frosted/emacs-plus"
-# tap "jesseduffield/lazygit"
-# brew "midnight-commander"
-# brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp"]
-# brew "jesseduffield/lazygit/lazygit"
-# brew "nnn"
-# brew "lf"
+# Dependencies
+brew "tree-sitter-cli"
