@@ -1,5 +1,5 @@
 {
-  "title": "My very own custom mappings.",
+  "title": "My very own custom mappings with conditions.",
   "rules": [
     {
       "description": "My very own custom mappings.",
@@ -110,6 +110,15 @@
           "type": "basic",
           "conditions": [
             {
+              "bundle_identifiers": [
+                "^com\\.todesktop\\.230313mzl4w4u92$",
+                "^com\\.microsoft\\.VSCode$",
+                "^org\\.gnu\\.Emacs$",
+                "^com\\.mitchellh\\.ghostty$"
+              ],
+              "type": "frontmost_application_unless"
+            },
+            {
               "type": "device_unless",
               "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
             }
@@ -119,12 +128,21 @@
             "modifiers": { "optional": ["any"] }
           },
           "to": {
-            "key_code": "left_control"
+            "key_code": "left_command"
           }
         },
         {
           "type": "basic",
           "conditions": [
+            {
+              "bundle_identifiers": [
+                "^com\\.todesktop\\.230313mzl4w4u92$",
+                "^com\\.microsoft\\.VSCode$",
+                "^org\\.gnu\\.Emacs$",
+                "^com\\.mitchellh\\.ghostty$"
+              ],
+              "type": "frontmost_application_unless"
+            },
             {
               "type": "device_unless",
               "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
@@ -135,8 +153,62 @@
             "modifiers": { "optional": ["any"] }
           },
           "to": {
-            "key_code": "left_command"
+            "key_code": "left_control"
           }
+        },
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "bundle_identifiers": [
+                "^com\\.todesktop\\.230313mzl4w4u92$",
+                "^com\\.microsoft\\.VSCode$",
+                "^org\\.gnu\\.Emacs$",
+                "^com\\.mitchellh\\.ghostty$"
+              ],
+              "type": "frontmost_application_if"
+            },
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
+            }
+          ],
+          "from": {
+            "key_code": "caps_lock",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [
+            {
+              "key_code": "left_control"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "bundle_identifiers": [
+                "^com\\.todesktop\\.230313mzl4w4u92$",
+                "^com\\.microsoft\\.VSCode$",
+                "^org\\.gnu\\.Emacs$",
+                "^com\\.mitchellh\\.ghostty$"
+              ],
+              "type": "frontmost_application_if"
+            },
+            {
+              "type": "device_unless",
+              "identifiers": [{ "vendor_id": 10730 }, { "vendor_id": 5824 }]
+            }
+          ],
+          "from": {
+            "key_code": "fn",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [
+            {
+              "apple_vendor_top_case_key_code": "left_command"
+            }
+          ]
         }
       ]
     }
