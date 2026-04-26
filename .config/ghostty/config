@@ -2,10 +2,11 @@ font-family = JetBrainsMono
 font-size = 14
 font-feature = -calt
 
-theme = light:tokyonight-day,dark:tokyonight_moon
+theme = light:TokyoNight Day,dark:TokyoNight Moon
 
-window-decoration = none
 window-colorspace = srgb
+window-decoration = auto
+macos-titlebar-style = tabs
 macos-window-shadow = false
 macos-option-as-alt = true
 
@@ -23,3 +24,4 @@ adjust-cursor-thickness = 2
 cursor-invert-fg-bg = false
 cursor-text = #0b0d0b
 
+# keybind = super+e=toggle_window_decorations
