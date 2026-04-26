@@ -60,4 +60,20 @@ return {
       vim.cmd.colorscheme 'tokyonight-moon'
     end,
   },
+
+  {
+    'f-person/auto-dark-mode.nvim',
+    opts = {
+      update_interval = 1000,
+      fallback = 'dark',
+      set_dark_mode = function()
+        vim.o.background = 'dark'
+        vim.cmd.colorscheme 'tokyonight-moon'
+      end,
+      set_light_mode = function()
+        vim.o.background = 'light'
+        vim.cmd.colorscheme 'tokyonight-day'
+      end,
+    },
+  },
 }

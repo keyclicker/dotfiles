@@ -116,8 +116,8 @@ local lspfloat = {
   max_height = 20,
 }
 
-vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, lspfloat)
-vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, lspfloat)
+vim.lsp.handlers['textDocument/hover'] = vim.lsp.buf.hover(lspfloat)
+vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.buf.signature_help(lspfloat)
 
 -----------------------------------------------------------
 --                     Spelling
