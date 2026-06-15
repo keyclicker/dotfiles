@@ -72,6 +72,8 @@ ZSH_THEME="robbyrussell"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	git
+	docker
+	docker-compose
 	zsh-autosuggestions
 	zsh-history-substring-search
 	zsh-syntax-highlighting
@@ -139,7 +141,8 @@ export PATH="$HOME/.scripts:$PATH"
 
 export EDITOR="nvim"
 export GPG_TTY=$(tty)
-export PATH="/Library/PostgreSQL/16/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
+# export PATH="/Library/PostgreSQL/18/bin:$PATH"
 # export PATH="$HOME/Library/Python/3./bin:$PATH"
 
 export PATH="$HOME/.emacs.d/bin:$PATH"
