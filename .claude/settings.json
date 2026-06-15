@@ -1,0 +1,63 @@
+{
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"/Users/keyclicker/.dotfiles/.claude/statusline.sh\""
+  },
+  "enabledPlugins": {
+    "caveman@caveman": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "playwright@claude-plugins-official": false,
+    "github@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
+  },
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "github.com",
+        "api.github.com",
+        "objects.githubusercontent.com",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "code.claude.com",
+        "docs.claude.com"
+      ]
+    },
+    "filesystem": {
+      "denyRead": [
+        "~/.aws",
+        "~/.ssh",
+        "~/.gnupg",
+        "~/.config/gcloud",
+        "~/Downloads",
+        "~/Documents",
+        "~/Desktop",
+        "~/Applications",
+        "~/Movies",
+        "~/Music",
+        "~/Pictures",
+        "~/.Trash",
+        "~/Root"
+      ],
+      "allowRead": [
+        "~/.dotfiles",
+        "~/Root/Programming/"
+      ]
+    }
+  },
+  "effortLevel": "high",
+  "theme": "auto",
+  "editorMode": "vim"
+}
