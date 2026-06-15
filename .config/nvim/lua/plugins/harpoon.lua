@@ -5,6 +5,9 @@ return {
   opts = {
     settings = {
       save_on_toggle = true,
+      key = function()
+        return vim.loop.cwd() .. '::tab=' .. vim.api.nvim_get_current_tabpage()
+      end,
     },
   },
   keys = function()
