@@ -8,3 +8,5 @@
 	program = /opt/homebrew/bin/gpg
 [core]
 	editor = nvim
+[worktree]
+	useRelativePaths = true

@@ -7,6 +7,8 @@
 #   pwd/.claude/transcripts  -> ~/.claude/projects/-work             (session .jsonl)
 #   pwd/.claude/memory       -> ~/.claude/projects/-work/memory      (overlays the above)
 #   private state dir        -> /home/node/.claude                   (login + config)
+#   cache/npm                -> /home/node/.npm                      (npm download cache)
+#   cache/pip                -> /home/node/.cache/pip                (pip download cache)
 # cwd=/work, which Claude encodes as project "-work". The memory mount nests inside
 # the transcripts mount, so transcripts hold sessions and memory gets its own dir.
 #
@@ -25,13 +27,15 @@ HOST_CONFIG="$HOME/.claude"               # source of curated config (copied in)
 HOST_MEMORY="$HOST_PROJECT/.claude/memory"
 HOST_TRANSCRIPTS="$HOST_PROJECT/.claude/transcripts"
 HOST_STATE="$HOME/.claude-jail/state"     # jail's own ~/.claude; persists login
+HOST_CACHE="$HOME/.claude-jail/cache"     # npm + pip download caches; persist across runs
 
 # Container paths (inside the jail).
 CONTAINER_WORK="/work"
 CONTAINER_CONFIG="/home/node/.claude"                 # the jailed Claude's ~/.claude
 CONTAINER_PROJECT="$CONTAINER_CONFIG/projects/-work"  # cwd=/work -> "-work"
 
-mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS"
+mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" \
+         "$HOST_CACHE/npm" "$HOST_CACHE/pip"
 
 # Launcher flags (must lead; everything after is passed through to claude):
 #   --rebuild  rebuild the image (e.g. to pull a newer base image)
@@ -83,6 +87,8 @@ mounts=(
     -v "$HOST_STATE:$CONTAINER_CONFIG"            # writable base (login + config)
     -v "$HOST_TRANSCRIPTS:$CONTAINER_PROJECT"     # session .jsonl
     -v "$HOST_MEMORY:$CONTAINER_PROJECT/memory"   # nested: carves memory out
+    -v "$HOST_CACHE/npm:/home/node/.npm"          # npm download cache (faster re-installs)
+    -v "$HOST_CACHE/pip:/home/node/.cache/pip"    # pip download cache
 )
 
 # Claude args, built as a --settings override (JSON assembled by string concat, no
@@ -100,6 +106,15 @@ perms=""
 
 claude_args=(--settings "{\"hooks\":{}${sl}${perms}}")
 [ "$YOLO" = 1 ] && claude_args+=(--dangerously-skip-permissions)
+
+# Tell the jailed Claude it's sandboxed and how — session-only (not written to any file,
+# so the host ~/.claude/CLAUDE.md and this host session are untouched).
+JAIL_NOTE="You are running inside claude-jail: an isolated Docker container (non-root user, \
+cap-drop ALL, no-new-privileges). Only the current project is mounted, at /work (your cwd) — \
+the host home directory, ~/.ssh, ~/.claude.json and the macOS keychain are NOT accessible. \
+Network egress is open. Git has no host identity or SSH keys here, so commits/push may need \
+configuring first. Login and Claude config persist in a separate jail state dir, not the host ~/.claude."
+claude_args+=(--append-system-prompt "$JAIL_NOTE")
 
 # Run. Default: edits prompted (--yolo bypasses). Full network egress.
 # Non-root, dropped caps, no privilege escalation, no host access beyond mounts.
