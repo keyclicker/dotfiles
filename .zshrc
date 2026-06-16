@@ -133,6 +133,23 @@ alias dot="cd ~/.dotfiles; nvim ./"
 alias ncfg="cd ~/.dotfiles/.config/nvim; nvim ./"
 alias zsrc='source ~/.dotfiles/.zshrc'
 
+alias gw="git worktree"
+
+git-pwd() {
+    local common_dir
+    if common_dir=$(git rev-parse --git-common-dir 2>/dev/null); then
+        dirname "$(cd "$common_dir" && pwd)"
+    else
+        pwd
+    fi
+}
+
+cll() {
+  local root
+  root=$(git-pwd)
+  claude --settings "{\"autoMemoryDirectory\":\"$root/.claude/memory\"}" "$@"
+}
+
 # =========================================================
 #				 Environment Variables
 # =========================================================
