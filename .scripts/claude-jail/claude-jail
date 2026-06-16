@@ -3,9 +3,11 @@
 # claude-jail — run Claude Code inside an isolated Docker container.
 #
 # Host bind mounts (nothing else on the host is visible):
-#   pwd                      -> /work                                (rw, the project)
-#   pwd/.claude/transcripts  -> ~/.claude/projects/-work             (session .jsonl)
-#   pwd/.claude/memory       -> ~/.claude/projects/-work/memory      (overlays the above)
+#   pwd                       -> /work                               (rw, the project)
+#   <root>/.claude/transcripts -> ~/.claude/projects/-work           (session .jsonl)
+#   <root>/.claude/memory     -> ~/.claude/projects/-work/memory     (overlays the above)
+# <root> = repo root (parent of the git common dir), so all worktrees/subdirs of one
+# project share memory + transcripts; falls back to pwd outside a git repo.
 #   private state dir        -> /home/node/.claude                   (login + config)
 #   cache/npm                -> /home/node/.npm                      (npm download cache)
 #   cache/pip                -> /home/node/.cache/pip                (pip download cache)
@@ -21,11 +23,23 @@ set -euo pipefail
 IMAGE="claude-jail"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Resolve the repo root: parent of the git common dir, so all worktrees/subdirs of
+# one project share it. Falls back to the launch dir when not inside a git repo.
+git_root() {
+    local common_dir
+    if common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"; then
+        dirname "$(cd "$common_dir" && pwd -P)"
+    else
+        pwd -P
+    fi
+}
+
 # Host paths (real, on your machine).
 HOST_PROJECT="$(pwd -P)"                  # launch dir; becomes /work
+HOST_ROOT="$(git_root)"                   # repo root; anchors shared memory/transcripts
 HOST_CONFIG="$HOME/.claude"               # source of curated config (copied in)
-HOST_MEMORY="$HOST_PROJECT/.claude/memory"
-HOST_TRANSCRIPTS="$HOST_PROJECT/.claude/transcripts"
+HOST_MEMORY="$HOST_ROOT/.claude/memory"
+HOST_TRANSCRIPTS="$HOST_ROOT/.claude/transcripts"
 HOST_STATE="$HOME/.claude-jail/state"     # jail's own ~/.claude; persists login
 HOST_CACHE="$HOME/.claude-jail/cache"     # npm + pip download caches; persist across runs
 
@@ -126,6 +140,8 @@ exec docker run -it --rm \
     --pids-limit 512 \
     -w "$CONTAINER_WORK" \
     -e "CLAUDE_CONFIG_DIR=$CONTAINER_CONFIG" \
+    -e "TERM=${TERM:-xterm-256color}" \
+    -e "COLORTERM=${COLORTERM:-truecolor}" \
     "${mounts[@]}" \
     "$IMAGE" \
     claude "${claude_args[@]}" "$@"

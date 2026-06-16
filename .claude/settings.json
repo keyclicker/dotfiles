@@ -2,7 +2,7 @@
   "model": "opus",
   "statusLine": {
     "type": "command",
-    "command": "bash \"/Users/keyclicker/.dotfiles/.claude/statusline.sh\""
+    "command": "bash \"$HOME/.dotfiles/.claude/statusline.sh\""
   },
   "enabledPlugins": {
     "caveman@caveman": true,
@@ -10,7 +10,7 @@
     "typescript-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": false,
+    "playwright@claude-plugins-official": true,
     "github@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
