@@ -13,6 +13,7 @@ brew "tldr"
 brew "stow"
 brew "sevenzip"
 brew "watch"
+brew "tree"
 
 # User tools
 brew "neofetch"
@@ -54,4 +55,3 @@ brew "tree-sitter-cli"
 brew "stockfish"
 brew "gnu-chess"
 brew "lc0"
-
