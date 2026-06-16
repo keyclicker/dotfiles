@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+#
+# claude-jail — run Claude Code inside an isolated Docker container.
+#
+# Host bind mounts (nothing else on the host is visible):
+#   pwd                      -> /work                                (rw, the project)
+#   pwd/.claude/transcripts  -> ~/.claude/projects/-work             (session .jsonl)
+#   pwd/.claude/memory       -> ~/.claude/projects/-work/memory      (overlays the above)
+#   private state dir        -> /home/node/.claude                   (login + config)
+# cwd=/work, which Claude encodes as project "-work". The memory mount nests inside
+# the transcripts mount, so transcripts hold sessions and memory gets its own dir.
+#
+# Curated config (settings.json, agents, skills, CLAUDE.md, statusline.sh) is COPIED
+# into the state dir, not mounted — so the host ~/.claude is never written.
+# Your ~/.claude.json and macOS Keychain are never mounted. See README.md.
+#
+set -euo pipefail
+
+IMAGE="claude-jail"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Host paths (real, on your machine).
+HOST_PROJECT="$(pwd -P)"                  # launch dir; becomes /work
+HOST_CONFIG="$HOME/.claude"               # source of curated config (copied in)
+HOST_MEMORY="$HOST_PROJECT/.claude/memory"
+HOST_TRANSCRIPTS="$HOST_PROJECT/.claude/transcripts"
+HOST_STATE="$HOME/.claude-jail/state"     # jail's own ~/.claude; persists login
+
+# Container paths (inside the jail).
+CONTAINER_WORK="/work"
+CONTAINER_CONFIG="/home/node/.claude"                 # the jailed Claude's ~/.claude
+CONTAINER_PROJECT="$CONTAINER_CONFIG/projects/-work"  # cwd=/work -> "-work"
+
+mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS"
+
+# Launcher flags (must lead; everything after is passed through to claude):
+#   --rebuild  rebuild the image (e.g. to pull a newer base image)
+#   --auto     auto-run commands but still PROMPT before edits (allow Bash + ask on
+#              Edit/Write). `ask` beats `allow`, so edit prompts hold even if the host
+#              config allows those tools. Middle ground between default and --yolo.
+#   --yolo     skip ALL in-app prompts (edits included). Safe-ish here: the CONTAINER
+#              is the sandbox (non-root, cap-drop, mounts only). Bypass refuses to run
+#              as root, but we run as node, so it works. Caveat: /work is rw and maps
+#              to your real project — YOLO can modify it unprompted; egress is open.
+FORCE_REBUILD=0
+YOLO=0
+AUTO=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --rebuild) FORCE_REBUILD=1; shift ;;
+        --auto)    AUTO=1; shift ;;
+        --yolo)    YOLO=1; shift ;;
+        --)        shift; break ;;
+        *)         break ;;
+    esac
+done
+
+# Build on first use, or when the Dockerfile / caller UID:GID changed. The build
+# signature is stored as an image label and re-checked each launch, so editing the
+# Dockerfile auto-triggers a rebuild — no manual `docker image rm` needed.
+BUILD_SIG="$(shasum -a 256 "$SCRIPT_DIR/Dockerfile" | awk '{print $1}')-$(id -u):$(id -g)"
+CURRENT_SIG="$(docker image inspect -f '{{ index .Config.Labels "jail.sig" }}' "$IMAGE" 2>/dev/null || true)"
+if [ "$FORCE_REBUILD" = 1 ] || [ "$CURRENT_SIG" != "$BUILD_SIG" ]; then
+    echo "claude-jail: building image '$IMAGE'..." >&2
+    docker build \
+        --build-arg "UID=$(id -u)" --build-arg "GID=$(id -g)" \
+        --label "jail.sig=$BUILD_SIG" \
+        -t "$IMAGE" "$SCRIPT_DIR"
+fi
+
+# Copy curated config into the writable base (never write the host config).
+# cp -RL dereferences symlinks (e.g. -> ~/.dotfiles). Login/.credentials.json untouched.
+for item in settings.json CLAUDE.md statusline.sh agents skills; do
+    [ -e "$HOST_CONFIG/$item" ] || continue
+    rm -rf "${HOST_STATE:?}/$item"
+    # || true: a nested broken symlink in dotfiles shouldn't abort the launch.
+    cp -RL "$HOST_CONFIG/$item" "$HOST_STATE/$item" 2>/dev/null \
+        || echo "claude-jail: warning, skipped config '$item' (copy failed)" >&2
+done
+
+mounts=(
+    -v "$HOST_PROJECT:$CONTAINER_WORK"
+    -v "$HOST_STATE:$CONTAINER_CONFIG"            # writable base (login + config)
+    -v "$HOST_TRANSCRIPTS:$CONTAINER_PROJECT"     # session .jsonl
+    -v "$HOST_MEMORY:$CONTAINER_PROJECT/memory"   # nested: carves memory out
+)
+
+# Claude args, built as a --settings override (JSON assembled by string concat, no
+# jq needed). --settings REPLACES top-level keys, so host-absolute paths broken in
+# the jail get fixed: clear host `hooks`, repoint `statusLine` at the copied script.
+# --auto adds permission rules (allow Bash, ask on edits). NOTE: permission arrays
+# union across sources, so this can ADD rules but can't STRIP host grants; --yolo
+# bypasses gating entirely (and makes any rules here moot).
+sl=""
+[ -e "$HOST_STATE/statusline.sh" ] \
+    && sl=',"statusLine":{"type":"command","command":"bash /home/node/.claude/statusline.sh"}'
+perms=""
+[ "$AUTO" = 1 ] && [ "$YOLO" != 1 ] \
+    && perms=',"permissions":{"allow":["Bash"],"ask":["Edit","Write","MultiEdit","NotebookEdit"]}'
+
+claude_args=(--settings "{\"hooks\":{}${sl}${perms}}")
+[ "$YOLO" = 1 ] && claude_args+=(--dangerously-skip-permissions)
+
+# Run. Default: edits prompted (--yolo bypasses). Full network egress.
+# Non-root, dropped caps, no privilege escalation, no host access beyond mounts.
+# CLAUDE_CONFIG_DIR pins .claude.json INSIDE the mounted state dir; without it the
+# config defaults to $HOME/.claude.json (outside any mount) and is lost every --rm run.
+exec docker run -it --rm \
+    --cap-drop ALL \
+    --security-opt no-new-privileges \
+    --pids-limit 512 \
+    -w "$CONTAINER_WORK" \
+    -e "CLAUDE_CONFIG_DIR=$CONTAINER_CONFIG" \
+    "${mounts[@]}" \
+    "$IMAGE" \
+    claude "${claude_args[@]}" "$@"

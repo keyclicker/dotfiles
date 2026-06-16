@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# clj — launch claude-jail from any cwd (cwd stays your project = /work mount).
+set -euo pipefail
+exec "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/claude-jail/claude-jail" "$@"
