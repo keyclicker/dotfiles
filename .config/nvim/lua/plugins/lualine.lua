@@ -7,12 +7,13 @@ local function show_macro_recording()
   end
 end
 
-vim.opt.showcmd = true
-vim.opt.showcmdloc = 'statusline'
-
 return {
   'nvim-lualine/lualine.nvim',
   event = 'VeryLazy',
+  init = function()
+    vim.opt.showcmd = true
+    vim.opt.showcmdloc = 'statusline'
+  end,
   dependencies = { 'nvim-tree/nvim-web-devicons' },
 
   opts = {

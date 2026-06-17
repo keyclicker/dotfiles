@@ -4,17 +4,19 @@ return { -- LSP Configuration & Plugins
   event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
-    { 'williamboman/mason.nvim', cmd = "Mason", opts = { PATH = 'append' } }, -- NOTE: Must be loaded before dependants
-    'williamboman/mason-lspconfig.nvim',
+    -- NOTE: mason/mason-lspconfig repos moved to the `mason-org` org.
+    { 'mason-org/mason.nvim', cmd = 'Mason', opts = { PATH = 'append' } }, -- NOTE: Must be loaded before dependants
+    'mason-org/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
 
     -- Useful status updates for LSP.
     -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
     { 'j-hui/fidget.nvim', opts = {} },
 
-    -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
-    { 'folke/neodev.nvim', opts = {} },
+    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
+    -- used for completion, annotations and signatures of Neovim apis.
+    -- (replaces the now-archived `folke/neodev.nvim`)
+    { 'folke/lazydev.nvim', ft = 'lua', opts = {} },
   },
   config = function()
     -- Brief aside: **What is LSP?**
@@ -93,8 +95,9 @@ return { -- LSP Configuration & Plugins
 
         -- Opens a popup that displays documentation about the word under your cursor
         --  See `:help K` for why this keymap.
-        map('K', vim.lsp.buf.hover, 'Hover Documentation')
-        map('<leader>D', vim.lsp.buf.signature_help, 'Signature Help')
+        local float = { border = 'rounded', max_width = 80, max_height = 20 }
+        map('K', function() vim.lsp.buf.hover(float) end, 'Hover Documentation')
+        map('<leader>D', function() vim.lsp.buf.signature_help(float) end, 'Signature Help')
 
         -- WARN: This is not Goto Definition, this is Goto Declaration.
         --  For example, in C this would take you to the header.
@@ -139,31 +142,39 @@ return { -- LSP Configuration & Plugins
           end, 'Toggle Inlay Hints')
         end
 
-        -- Fix pyright `is not accessed` warning
-        if client and client.name == 'pyright' then
-          local function pyright_accessed_filter(diagnostic)
-            if string.match(diagnostic.message, '"_.+" is not accessed') then
-              return false
-            end
-            return true
-          end
-
-          local function custom_on_publish_diagnostics(_, result, ctx, config)
-            helpers.filter_inplace(result.diagnostics, pyright_accessed_filter)
-            vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
-          end
-
-          vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(custom_on_publish_diagnostics, {})
-        end
       end,
     })
 
-    -- LSP servers and clients are able to communicate to each other what features they support.
-    --  By default, Neovim doesn't support everything that is in the LSP specification.
-    --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
-    --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+    -- Fix pyright `"_x" is not accessed` noise.
+    -- NOTE: `vim.lsp.diagnostic.on_publish_diagnostics` was removed in nvim 0.11,
+    -- and re-assigning the handler inside LspAttach wrapped it on every attach.
+    -- Wrap the default `publishDiagnostics` handler once, here in the config body.
+    do
+      local function pyright_accessed_filter(diagnostic)
+        return not string.match(diagnostic.message, '"_.+" is not accessed')
+      end
+      local default_handler = vim.lsp.handlers['textDocument/publishDiagnostics']
+      vim.lsp.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+        local client = vim.lsp.get_client_by_id(ctx.client_id)
+        if client and client.name == 'pyright' and result and result.diagnostics then
+          helpers.filter_inplace(result.diagnostics, pyright_accessed_filter)
+        end
+        return default_handler(err, result, ctx, config)
+      end
+    end
+
+    -- Native completion uses Neovim's default capabilities (which already
+    -- advertise snippetSupport). Only add resolveSupport so servers send
+    -- auto-import edits / docs on resolve. Small delta keeps checkhealth lean.
+    local capabilities = {
+      textDocument = {
+        completion = {
+          completionItem = {
+            resolveSupport = { properties = { 'documentation', 'detail', 'additionalTextEdits' } },
+          },
+        },
+      },
+    }
 
     -- Enable the following language servers
     --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -219,7 +230,9 @@ return { -- LSP Configuration & Plugins
 
     -- You can add other tools here that you want Mason to install
     -- for you, so that they are available from within Neovim.
-    local ensure_installed = vim.tbl_keys(servers or {})
+    -- NOTE: servers are installed via mason-lspconfig below (LazyVim style);
+    -- tool-installer handles only the non-LSP tools (formatters/linters).
+    local ensure_installed = {}
     vim.list_extend(ensure_installed, {
       'cspell',
       'markdownlint',
@@ -244,17 +257,42 @@ return { -- LSP Configuration & Plugins
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+    -- Mirror LazyVim's `config` body: register every server with the native
+    -- `vim.lsp.config` API, let mason-lspconfig install + auto-enable the
+    -- mason-provided servers, and `vim.lsp.enable` any server mason doesn't ship.
+
+    -- The wildcard `*` config carries capabilities for every server: native
+    -- completion + LazyVim's file-rename workspace ops.
+    servers['*'] = {
+      capabilities = vim.tbl_deep_extend('force', capabilities, {
+        workspace = { fileOperations = { didRename = true, willRename = true } },
+      }),
+    }
+    vim.lsp.config('*', servers['*'])
+
+    -- Servers mason-lspconfig knows how to install (lspconfig name -> package).
+    local mason_all = vim.tbl_keys(require('mason-lspconfig.mappings').get_mason_map().lspconfig_to_package)
+    local mason_exclude = {} ---@type string[]
+
+    ---@return boolean? use_mason  -- true => mason-lspconfig installs & auto-enables it
+    local function configure(server)
+      if server == '*' then
+        return false
+      end
+      local sopts = servers[server]
+      local use_mason = sopts.mason ~= false and vim.tbl_contains(mason_all, server)
+      vim.lsp.config(server, sopts)
+      -- mason-lspconfig auto-enables mason servers; enable the rest ourselves.
+      if not use_mason then
+        vim.lsp.enable(server)
+      end
+      return use_mason
+    end
+
+    local install = vim.tbl_filter(configure, vim.tbl_keys(servers))
     require('mason-lspconfig').setup {
-      handlers = {
-        function(server_name)
-          local server = servers[server_name] or {}
-          -- This handles overriding only values explicitly passed
-          -- by the server configuration above. Useful when disabling
-          -- certain features of an LSP (for example, turning off formatting for tsserver)
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-          require('lspconfig')[server_name].setup(server)
-        end,
-      },
+      ensure_installed = install,
+      automatic_enable = { exclude = mason_exclude },
     }
   end,
 }

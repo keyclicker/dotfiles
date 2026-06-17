@@ -6,7 +6,7 @@ return {
     settings = {
       save_on_toggle = true,
       key = function()
-        return vim.loop.cwd() .. '::tab=' .. vim.api.nvim_get_current_tabpage()
+        return vim.uv.cwd() .. '::tab=' .. vim.api.nvim_get_current_tabpage()
       end,
     },
   },

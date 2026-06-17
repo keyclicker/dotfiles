@@ -7,8 +7,10 @@ vim.g.maplocalleader = '\\'
 vim.g.have_nerd_font = true
 
 -- -- Set the python3 host program path
-vim.g.python3_host_prog = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3'
--- vim.g.python3_host_prog = 'python3'
+local py3 = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3'
+if vim.fn.executable(py3) == 1 then
+  vim.g.python3_host_prog = py3
+end
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -108,16 +110,8 @@ vim.diagnostic.config {
   },
 }
 
-local lspfloat = {
-  source = true,
-  header = '',
-  border = border,
-  max_width = 80,
-  max_height = 20,
-}
-
-vim.lsp.handlers['textDocument/hover'] = vim.lsp.buf.hover(lspfloat)
-vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.buf.signature_help(lspfloat)
+-- Border/size for hover + signature floats is set per-call in the LSP keymaps
+-- (lsp.lua). Not done globally via `winborder`, which would also border cmp.
 
 -----------------------------------------------------------
 --                     Spelling
@@ -159,3 +153,30 @@ vim.opt.signcolumn = 'yes:2'
 vim.opt.numberwidth = 3
 
 -- vim.o.statuscolumn = "%!v:lua.require('status').statuscolumn()";
+
+-----------------------------------------------------------
+---                  Completion
+-----------------------------------------------------------
+
+vim.opt.completeopt = { 'menu', 'menuone', 'noinsert', 'popup' }
+
+-- Enable LSP completion per client, autotriggered as you type (like cmp).
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('native-completion', { clear = true }),
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client:supports_method 'textDocument/completion' then
+      vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+    end
+  end,
+})
+
+-- Manual trigger (cmp had this on <C-c>).
+vim.keymap.set('i', '<C-c>', function()
+  vim.lsp.completion.get()
+end, { desc = 'Trigger LSP completion' })
+
+-- The rest of cmp's keys are already native ins-completion behavior:
+--   <C-n>/<C-p> -> next/prev item in the popup menu
+--   <C-y>       -> accept the selected item
+--   <C-e>       -> dismiss the popup

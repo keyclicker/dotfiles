@@ -7,7 +7,6 @@ return {
       user_default_options = {
         mode = 'virtualtext',
         virtualtext = '██',
-        irtualtext = '██',
         css = true,
         sass = { enable = true, parsers = { 'css' } },
       },
@@ -47,6 +46,10 @@ return {
         highlights.LineNrBelow = { fg = '#555F8C' }
         highlights.CursorLineNr = { bold = true, fg = '#ff966c' }
         highlights.EndOfBuffer = { fg = '#555F8C' }
+
+        -- Make intra-line diff (DiffText) visible under the transparent theme
+        highlights.DiffChange = { bg = '#2a3760' }
+        highlights.DiffText = { bg = '#3c5aa4', bold = true }
       end,
       light_style = "day",
       transparent = true,

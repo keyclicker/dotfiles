@@ -100,10 +100,9 @@ return {
         end, { desc = 'Reset Git Hunk' })
 
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Stage Hunk' })
+        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Toggle Stage Hunk' })
         map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Reset Hunk' })
         map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Stage Buffer' })
-        map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'Undo Stage Hunk' })
         map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Reset Buffer' })
         map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Preview Hunk' })
         map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Blame Line' })
@@ -113,7 +112,7 @@ return {
         end, { desc = 'Diff Against Last Commit' })
         -- Toggles
         map('n', '<leader>hl', gitsigns.toggle_current_line_blame, { desc = 'Toggle Git Show Blame Line' })
-        map('n', '<leader>hx', gitsigns.toggle_deleted, { desc = 'Toggle Git Show Deleted' })
+        map('n', '<leader>hx', gitsigns.preview_hunk_inline, { desc = 'Preview Hunk Inline' })
       end,
     },
   },
