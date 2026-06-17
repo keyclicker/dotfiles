@@ -142,6 +142,8 @@ exec docker run -it --rm \
     -e "CLAUDE_CONFIG_DIR=$CONTAINER_CONFIG" \
     -e "TERM=${TERM:-xterm-256color}" \
     -e "COLORTERM=${COLORTERM:-truecolor}" \
+    -e "CLAUDE_CODE_NO_FLICKER=1" \
+    -e "EDITOR=nvim" \
     "${mounts[@]}" \
     "$IMAGE" \
     claude "${claude_args[@]}" "$@"

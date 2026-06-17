@@ -158,6 +158,7 @@ export PATH="$HOME/.scripts:$PATH"
 
 export EDITOR="nvim"
 export GPG_TTY=$(tty)
+export CLAUDE_CODE_NO_FLICKER=1
 export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 # export PATH="/Library/PostgreSQL/18/bin:$PATH"
 # export PATH="$HOME/Library/Python/3./bin:$PATH"

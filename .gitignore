@@ -3,3 +3,5 @@ nvim.*/
 !nvim.kick/
 !nvim.astro/
 .config/karabiner/automatic_backups/
+.claude/transcripts/
+.claude/memory/
