@@ -53,6 +53,9 @@ mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" \
 
 # Launcher flags (must lead; everything after is passed through to claude):
 #   --rebuild  rebuild the image (e.g. to pull a newer base image)
+#   --udex     use the udex backend image (Dockerfile.udex, FROM the base) instead of
+#              the general base: adds Python 3.12, libjxl/libheif, the pg/locale bits and
+#              rustfs that udex's backend test suite needs. Base is built first either way.
 #   --auto     auto-run commands but still PROMPT before edits (allow Bash + ask on
 #              Edit/Write). `ask` beats `allow`, so edit prompts hold even if the host
 #              config allows those tools. Middle ground between default and --yolo.
@@ -63,9 +66,11 @@ mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" \
 FORCE_REBUILD=0
 YOLO=0
 AUTO=0
+UDEX=0
 while [ $# -gt 0 ]; do
     case "$1" in
         --rebuild) FORCE_REBUILD=1; shift ;;
+        --udex)    UDEX=1; shift ;;
         --auto)    AUTO=1; shift ;;
         --yolo)    YOLO=1; shift ;;
         --)        shift; break ;;
@@ -73,17 +78,32 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Build on first use, or when the Dockerfile / caller UID:GID changed. The build
-# signature is stored as an image label and re-checked each launch, so editing the
+# Build on first use, or when a Dockerfile / caller UID:GID changed. The build
+# signature is stored as an image label and re-checked each launch, so editing a
 # Dockerfile auto-triggers a rebuild — no manual `docker image rm` needed.
-BUILD_SIG="$(shasum -a 256 "$SCRIPT_DIR/Dockerfile" | awk '{print $1}')-$(id -u):$(id -g)"
-CURRENT_SIG="$(docker image inspect -f '{{ index .Config.Labels "jail.sig" }}' "$IMAGE" 2>/dev/null || true)"
-if [ "$FORCE_REBUILD" = 1 ] || [ "$CURRENT_SIG" != "$BUILD_SIG" ]; then
-    echo "claude-jail: building image '$IMAGE'..." >&2
-    docker build \
-        --build-arg "UID=$(id -u)" --build-arg "GID=$(id -g)" \
-        --label "jail.sig=$BUILD_SIG" \
-        -t "$IMAGE" "$SCRIPT_DIR"
+#   build_image <tag> <dockerfile> <sig>
+build_image() {
+    local tag="$1" dockerfile="$2" sig="$3" current
+    current="$(docker image inspect -f '{{ index .Config.Labels "jail.sig" }}' "$tag" 2>/dev/null || true)"
+    if [ "$FORCE_REBUILD" = 1 ] || [ "$current" != "$sig" ]; then
+        echo "claude-jail: building image '$tag'..." >&2
+        docker build \
+            --build-arg "UID=$(id -u)" --build-arg "GID=$(id -g)" \
+            --label "jail.sig=$sig" \
+            -f "$dockerfile" -t "$tag" "$SCRIPT_DIR"
+    fi
+}
+
+# Always (re)build the base — the udex image is FROM it, so it must exist and be current.
+BASE_SIG="$(shasum -a 256 "$SCRIPT_DIR/Dockerfile" | awk '{print $1}')-$(id -u):$(id -g)"
+build_image "$IMAGE" "$SCRIPT_DIR/Dockerfile" "$BASE_SIG"
+
+# --udex: layer the udex backend toolchain on top, run that image instead. Its sig folds
+# in BOTH Dockerfiles, so a base edit rebuilds the udex image too (FROM picks the new base).
+if [ "$UDEX" = 1 ]; then
+    IMAGE="claude-jail-udex"
+    UDEX_SIG="$(cat "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/Dockerfile.udex" | shasum -a 256 | awk '{print $1}')-$(id -u):$(id -g)"
+    build_image "$IMAGE" "$SCRIPT_DIR/Dockerfile.udex" "$UDEX_SIG"
 fi
 
 # Copy curated config into the writable base (never write the host config).

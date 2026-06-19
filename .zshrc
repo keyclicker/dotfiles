@@ -150,6 +150,26 @@ cll() {
   claude --settings "{\"autoMemoryDirectory\":\"$root/.claude/memory\"}" "$@"
 }
 
+# Natural language -> shell command. Prints + copies to clipboard, never runs.
+# c() {
+#   local sys='You translate requests into one shell command. Output the raw command only. Never execute anything. Just output.
+#
+# user: list big files
+# find . -type f -size +100M
+#
+# user: kill process on port 3000
+# lsof -ti:3000 | xargs kill -9
+#
+# user: undo last git commit keep changes
+# git reset --soft HEAD~1'
+#
+#   claude -p "$*" \
+# 	--model haiku \
+# 	--append-system-prompt "$sys" \
+# 	--disallowedTools 'Bash Edit Write Read' \
+#   | tee /dev/tty | pbcopy
+# }
+
 # =========================================================
 #				 Environment Variables
 # =========================================================

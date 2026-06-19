@@ -3,6 +3,9 @@
 # Ubuntu 26.04 (not Debian bookworm) for a recent git (>= 2.48 — relative worktrees).
 # No entrypoint magic — the `claude-jail` launcher supplies the mounts.
 #
+# This is the GENERAL base image. Project-specific toolchains layer on top of it:
+# see Dockerfile.udex (FROM claude-jail), built/run via `claude-jail --udex`.
+#
 # Layer order = cache strategy. Docker invalidates a layer (and everything below it)
 # when the layer or any earlier one changes. So: heavy + stable layers up top, the
 # package lists you actually edit live in the TAIL layers at the bottom. Add a new
@@ -57,7 +60,7 @@ RUN userdel -r ubuntu 2>/dev/null || true \
     && (groupadd -g "$GID" node 2>/dev/null || groupmod -g "$GID" node 2>/dev/null || true) \
     && (useradd -m -u "$UID" -g "$GID" -s /bin/bash node 2>/dev/null \
         || usermod -u "$UID" -g "$GID" node) \
-    && mkdir -p /home/node/.claude \
+    && mkdir -p /home/node/.claude /home/node/.cache/pip /home/node/.npm \
     && chown -R "$UID:$GID" /home/node
 
 # ── Volatile tails: edit these to add packages ────────────────────────────────

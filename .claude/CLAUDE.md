@@ -9,13 +9,6 @@ Prefer specialized tools over bash when they do the job better:
 
 When working with an unfamiliar library or API, consider fetching up-to-date docs rather than relying on memory.
 
-## Subagents
-
-Reach for subagents when they help — no need to force it:
-- Parallel, independent tasks
-- Subtasks that don't need this chat's history (keeps context lean)
-- Simple, well-scoped work that a cheaper model (Sonnet, Haiku) can handle
-
 ## Commits & comments
 
 Do not add Claude/Anthropic trademarks (e.g. "Co-Authored-By: Claude", "Generated with Claude Code") to commit messages, PR descriptions, or code comments unless the user explicitly asks for it.
