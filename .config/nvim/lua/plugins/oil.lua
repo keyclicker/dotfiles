@@ -16,6 +16,20 @@ return {
       -- ['<C->'] = { 'actions.select', opts = { horizontal = true }, desc = 'Open the entry in a horizontal split' },
       ['<C-s>'] = { 'actions.select', opts = { vertical = true }, desc = 'Open the entry in a vertical split' },
       ['<C-c>'] = 'actions.refresh',
+
+      -- TELESCOPE ------
+      ['gp'] = {
+        desc = 'Find files in oil dir',
+        callback = function()
+          require('telescope.builtin').find_files { cwd = require('oil').get_current_dir() }
+        end,
+      },
+      ['gf'] = {
+        desc = 'Live grep in oil dir',
+        callback = function()
+          require('telescope.builtin').live_grep { cwd = require('oil').get_current_dir() }
+        end,
+      },
     },
     win_options = {
       winbar = "%{v:lua.require('oil').get_current_dir()}",

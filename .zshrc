@@ -129,11 +129,14 @@ alias ng="nvim -c \"Neogit\""
 # nvim config aliases
 alias astro="NVIM_APPNAME=nvim-astro nvim"
 
-alias dot="cd ~/.dotfiles; nvim ./"
-alias ncfg="cd ~/.dotfiles/.config/nvim; nvim ./"
+alias udex="cd ~/Root/Programming/udex; pwd"
+alias vdot="nvim ~/.dotfiles"
+alias vcfg="nvim ~/.dotfiles/.config/nvim"
+alias vzsh='nvim ~/.dotfiles/.zshrc'
 alias zsrc='source ~/.dotfiles/.zshrc'
 
 alias gw="git worktree"
+alias gs="git status"
 
 git-pwd() {
     local common_dir

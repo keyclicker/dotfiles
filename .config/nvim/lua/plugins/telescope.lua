@@ -162,13 +162,14 @@ return { -- Fuzzy Finder (files, lsp, etc)
       },
     }
     -- Slightly advanced example of overriding default behavior and theme
+    -- deepcopy per call: pickers mutate opts (e.g. write opts.bufnr), so a shared
+    -- table leaks a stale/dead buffer id into the next picker -> "Invalid buffer id".
     vim.keymap.set('n', '<leader>/', function()
-      -- You can pass additional configuration to Telescope to change the theme, layout, etc.
-      builtin.current_buffer_fuzzy_find(dropdown_theme)
+      builtin.current_buffer_fuzzy_find(vim.deepcopy(dropdown_theme))
     end, { desc = 'Fuzzily search in current buffer' })
 
     vim.keymap.set('n', '<leader><leader>', function()
-      builtin.buffers(dropdown_theme)
+      builtin.buffers(vim.deepcopy(dropdown_theme))
     end, { desc = 'Find existing buffers' })
 
     -------------------------------------------------------
@@ -185,6 +186,17 @@ return { -- Fuzzy Finder (files, lsp, etc)
         end,
       }
     end, { desc = 'Opened Files' })
+
+    -------------------------------------------------------
+    --              Search dirs -> open in Oil
+    -------------------------------------------------------
+    -- Oil is the default file explorer, so selecting a dir (:edit <path>) opens it.
+    vim.keymap.set('n', '<leader>o', function()
+      builtin.find_files {
+        prompt_title = 'Open Dir in Oil',
+        find_command = { 'fd', '--type', 'd', '--hidden', '--exclude', '.git' },
+      }
+    end, { desc = 'Open dir in Oil' })
 
     -------------------------------------------------------
     --                 Other
