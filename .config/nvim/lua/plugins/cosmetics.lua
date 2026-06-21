@@ -55,8 +55,7 @@ return {
       transparent = true,
       styles = {
         sidebars = 'transparent',
-        -- Keep floats opaque (themed bg) so telescope's winblend has a surface to blend
-        floats = 'normal',
+        floats = 'transparent',
       },
     },
 

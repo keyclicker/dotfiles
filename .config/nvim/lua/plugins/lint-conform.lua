@@ -50,6 +50,10 @@ return {
         c = { 'clang-format' },
 
         go = { 'gofmt', 'gofumpt' },
+
+        sh = { 'shfmt' },
+        bash = { 'shfmt' },
+        zsh = { 'shfmt' },
       },
     },
   },
@@ -57,7 +61,7 @@ return {
     'mfussenegger/nvim-lint',
     event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
     opts = {
-      events = { 'BufReadPost', 'BufWritePost', },--'InsertLeave' },
+      events = { 'BufReadPost', 'BufWritePost' }, --'InsertLeave' },
 
       linters_by_ft = {
         markdown = { 'markdownlint' },
@@ -80,10 +84,9 @@ return {
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
       vim.api.nvim_create_autocmd(opts.events, {
         group = lint_augroup,
-        callback = require('utils.helpers').debounce(100, function ()
+        callback = require('utils.helpers').debounce(100, function()
           lint.try_lint()
-        end
-        ),
+        end),
       })
     end,
   },

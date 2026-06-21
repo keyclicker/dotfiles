@@ -194,7 +194,9 @@ return { -- LSP Configuration & Plugins
       ts_ls = {},
       eslint = {},
       cssls = {},
-      html = {},
+      html = {}, -- ??
+
+      bashls = {},
 
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
@@ -254,6 +256,8 @@ return { -- LSP Configuration & Plugins
 
       'goimports',
       'gofumpt',
+
+      'shfmt'
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

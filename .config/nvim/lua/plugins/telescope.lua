@@ -151,7 +151,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     --                           Dropdowns
     ---------------------------------------------------------------------------
     local dropdown_theme = {
-      winblend = 10,
+      -- winblend = 10,
       sorting_strategy = 'ascending',
       layout_strategy = 'vertical',
       previewer = false,
