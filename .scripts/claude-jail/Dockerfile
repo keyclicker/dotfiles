@@ -105,7 +105,7 @@ RUN case "$(dpkg --print-architecture)" in \
 #   git-delta : nicer git diff viewer (delta)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        wget jq fd-find git-delta \
+        wget jq fd-find git-delta zsh \
     && ln -s "$(command -v fdfind)" /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
 
