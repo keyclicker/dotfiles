@@ -14,6 +14,7 @@ brew "stow"
 brew "sevenzip"
 brew "watch"
 brew "tree"
+brew "carapace"
 
 # User tools
 brew "neofetch"
@@ -24,7 +25,7 @@ brew "mc"
 
 # Dev tools
 brew "node"
-brew "nvm"
+brew "pnpm"
 brew "pipx"
 brew "pyenv"
 brew "pyenv-virtualenv"

@@ -1,150 +1,96 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+clear
 
-# Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
+# =========================================================
+#               Environment Variables
+# =========================================================
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='mvim'
+fi
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+export PATH="$HOME/.scripts:$PATH"
+export PATH="$HOME/.emacs.d/bin:$PATH"
+export PATH="$HOME/.config/emacs/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+export GPG_TTY=$(tty)
+export CLAUDE_CODE_NO_FLICKER=1
+export HISTORY_IGNORE="(ls|ll|la|l|pwd|cd|fg|jobs|history|exit|clear|vp|v|vi|vim|nvim|fzf)"
+export XDG_DATA_DIRS="/opt/homebrew/share"
 
-# Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+export LESS='-R'
 
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
+# ls coloring: LSCOLORS for BSD `ls -G`, LS_COLORS for GNU + completion menu
+export LSCOLORS="Gxfxcxdxbxegedabagacad"
+export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
 
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(
-	git
-	docker
-	docker-compose
-	zsh-autosuggestions
-	zsh-history-substring-search
-	zsh-syntax-highlighting
-	# zsh-vi-mode
-	fancy-ctrl-z
-	poetry
-)
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
+# =========================================================
+#                     History
+# =========================================================
 #
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+## History file configuration
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=10000
+
+## History command configuration
+setopt extended_history       # record timestamp of command in HISTFILE
+setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups       # ignore duplicated commands history list
+setopt hist_ignore_space      # ignore commands that start with space
+setopt hist_verify            # show command with history expansion to user before running it
+setopt share_history          # share command history data
 
 # =========================================================
-#						Aliases
+#                        Aliases
 # =========================================================
+
+alias ..='cd ..'
+
+alias ls="ls -G"
+alias la="ls -lAh"
+alias grep="grep --color"
+alias rm="rm -i"
+alias cl="clear; clear"
+
+alias python="python3"
+alias pip="pip3"
 
 alias ql="qlmanage -p"
 alias yt="yt-dlp"
+
 alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
+
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
 alias v="nvim ."
-# previous nvim session
+
 alias vp="nvim -c \"lua require('persistence').load()\""
-# neogit
-alias ng="nvim -c \"Neogit\""
+alias vg="nvim -c \"Neogit\""
 
-# nvim config aliases
-alias astro="NVIM_APPNAME=nvim-astro nvim"
-
-alias udex="cd ~/Root/Programming/udex; pwd"
 alias vdot="nvim ~/.dotfiles"
 alias vcfg="nvim ~/.dotfiles/.config/nvim"
 alias vzsh='nvim ~/.dotfiles/.zshrc'
+
+alias udex="cd ~/Root/Programming/udex; pwd"
 alias zsrc='source ~/.dotfiles/.zshrc'
 
 alias gw="git worktree"
 alias gs="git status"
 
 git-pwd() {
-    local common_dir
-    if common_dir=$(git rev-parse --git-common-dir 2>/dev/null); then
-        dirname "$(cd "$common_dir" && pwd)"
-    else
-        pwd
-    fi
+  local common_dir
+  if common_dir=$(git rev-parse --git-common-dir 2>/dev/null); then
+    dirname "$(cd "$common_dir" && pwd)"
+  else
+    pwd
+  fi
 }
 
 cll() {
@@ -153,91 +99,113 @@ cll() {
   claude --settings "{\"autoMemoryDirectory\":\"$root/.claude/memory\"}" "$@"
 }
 
-# Natural language -> shell command. Prints + copies to clipboard, never runs.
-# c() {
-#   local sys='You translate requests into one shell command. Output the raw command only. Never execute anything. Just output.
-#
-# user: list big files
-# find . -type f -size +100M
-#
-# user: kill process on port 3000
-# lsof -ti:3000 | xargs kill -9
-#
-# user: undo last git commit keep changes
-# git reset --soft HEAD~1'
-#
-#   claude -p "$*" \
-# 	--model haiku \
-# 	--append-system-prompt "$sys" \
-# 	--disallowedTools 'Bash Edit Write Read' \
-#   | tee /dev/tty | pbcopy
-# }
-
 # =========================================================
-#				 Environment Variables
+#                 Init utilities
 # =========================================================
 
-export PATH="$HOME/.scripts:$PATH"
-
-export EDITOR="nvim"
-export GPG_TTY=$(tty)
-export CLAUDE_CODE_NO_FLICKER=1
-export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
-# export PATH="/Library/PostgreSQL/18/bin:$PATH"
-# export PATH="$HOME/Library/Python/3./bin:$PATH"
-
-export PATH="$HOME/.emacs.d/bin:$PATH"
-export PATH="$HOME/.config/emacs/bin:$PATH"
-
-export PATH="$HOME/.usr/bin:$PATH"
-
-# Locale
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
-export HISTORY_IGNORE="(ls|ll|la|l|pwd|cd|fg|jobs|history|exit|clear|vp|v|vi|vim|nvim|fzf)"
-
-export XDG_DATA_DIRS="/opt/homebrew/share"
-
-# =========================================================
-# 					 Init utilities
-# =========================================================
-
-# Fzf
 source <(fzf --zsh)
 
 # Created by `pipx` on 2024-04-30 11:04:43
 export PATH="$PATH:/Users/keyclicker/.local/bin"
+
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
 
-# Lazy nvm
-lazy_load_nvm() {
-	unset -f nvm node npm npx
-	export NVM_DIR="$HOME/.nvm"
-		[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-		[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
-}
-nvm() {
-	lazy_load_nvm
-	nvm "$@"
-}
-node() {
-	lazy_load_nvm
-	node "$@"
-}
-npm() {
-	lazy_load_nvm
-	npm "$@"
-}
-npx() {
-	lazy_load_nvm
-	npx "$@"
+ll_pyenv() {
+  unset -f python3 pip3 pyenv
+  eval "$(pyenv init -)"
 }
 
+pyenv() {
+  ll_pyenv
+  pyenv "$@"
+}
+python3() {
+  ll_pyenv
+  python3 "$@"
+}
+pip3() {
+  ll_pyenv
+  pip3 "$@"
+}
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/keyclicker/.lmstudio/bin"
-# End of LM Studio CLI section
+# =========================================================
+#                       Completion
+# =========================================================
 
+autoload -Uz compinit && compinit
+
+setopt complete_in_word always_to_end
+# case-insensitive (lower matches upper), then partial-word/substring fallback
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'r:|=*' 'l:|=* r:|=*'
+
+export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense'
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
+
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+
+source <(carapace _carapace)
+
+# =========================================================
+#                    Robby Russell theme
+# =========================================================
+
+autoload -U colors && colors # $fg / $fg_bold / $reset_color
+setopt PROMPT_SUBST          # re-eval $(...) every prompt
+
+git_prompt_info() {
+  local ref
+  ref=$(GIT_OPTIONAL_LOCKS=0 git symbolic-ref --short HEAD 2>/dev/null) ||
+    ref=$(GIT_OPTIONAL_LOCKS=0 git rev-parse --short HEAD 2>/dev/null) ||
+    return 0
+  local dirty=$ZSH_THEME_GIT_PROMPT_CLEAN
+  [[ -n $(GIT_OPTIONAL_LOCKS=0 git status --porcelain --ignore-submodules=dirty 2>/dev/null) ]] &&
+    dirty=$ZSH_THEME_GIT_PROMPT_DIRTY
+  echo "${ZSH_THEME_GIT_PROMPT_PREFIX}${ref}${dirty}${ZSH_THEME_GIT_PROMPT_SUFFIX}"
+}
+
+PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%}"
+PROMPT+=' $(git_prompt_info)'
+
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[blue]%}git:(%{$fg[red]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%}) %{$fg[yellow]%}%1{✗%}"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
+
+# =========================================================
+#                        Other
+# =========================================================
+
+fancy-ctrl-z() {
+  if [[ $#BUFFER -eq 0 ]]; then
+    BUFFER="fg"
+    zle accept-line -w
+  else
+    zle push-input -w
+    zle clear-screen -w
+  fi
+}
+zle -N fancy-ctrl-z
+bindkey '^Z' fancy-ctrl-z
+
+# =========================================================
+#                  Plugins (submodules)
+# =========================================================
+
+ZSH_PLUGIN_DIR=~/.dotfiles/submodules
+
+source $ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh
+source $ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $ZSH_PLUGIN_DIR/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+bindkey '^[[A' history-substring-search-up   # or '\eOA'
+bindkey '^[[B' history-substring-search-down # or '\eOB'
+HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='standout'
+HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25

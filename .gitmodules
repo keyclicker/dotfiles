@@ -1,6 +1,3 @@
-[submodule "submodules/zsh-completions"]
-	path = submodules/zsh-completions
-	url = https://github.com/zsh-users/zsh-completions.git
 [submodule "submodules/zsh-history-substring-search"]
 	path = submodules/zsh-history-substring-search
 	url = https://github.com/zsh-users/zsh-history-substring-search.git
@@ -10,3 +7,6 @@
 [submodule "submodules/zsh-syntax-highlighting"]
 	path = submodules/zsh-syntax-highlighting
 	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "submodules/fzf-tab"]
+	path = submodules/fzf-tab
+	url = https://github.com/Aloxaf/fzf-tab
