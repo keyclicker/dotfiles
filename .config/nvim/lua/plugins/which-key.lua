@@ -19,7 +19,7 @@ return { -- Useful plugin to show you pending keybinds.
     'nvim-tree/nvim-web-devicons',
     'echasnovski/mini.icons',
   },
-  event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+  event = 'VeryLazy',
   config = function() -- This is the function that runs, AFTER loading
     local wk = require 'which-key'
 
@@ -31,7 +31,6 @@ return { -- Useful plugin to show you pending keybinds.
 
     -- Document existing key chains
     wk.add {
-      { '<leader>g', group = '[G]it' },
       { '<leader>h', group = 'Git [H]unk' },
       { '<leader>h', group = 'Git [H]unk', mode = 'v' },
       { '<leader>l', group = '[L]ayout' },

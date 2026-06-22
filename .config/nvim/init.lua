@@ -35,6 +35,14 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
+-- Define the `LazyFile` event: a shared alias for the buffer "file" events, so
+-- file-plugins batch-load under one trigger (one re-emit). Must run before setup.
+do
+  local Event = require 'lazy.core.handler.event'
+  Event.mappings.LazyFile = { id = 'LazyFile', event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' } }
+  Event.mappings['User LazyFile'] = Event.mappings.LazyFile
+end
+
 -- [[ Configure and install plugins ]]
 --
 --  To check the current status of your plugins, run

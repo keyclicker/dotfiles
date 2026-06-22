@@ -2,7 +2,7 @@ return {
   -- Highlight colors in code
   {
     'NvChad/nvim-colorizer.lua',
-    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+    event = 'LazyFile',
     opts = {
       user_default_options = {
         mode = 'virtualtext',
@@ -16,7 +16,7 @@ return {
   {
     'folke/todo-comments.nvim',
     cmd = { 'TodoTrouble', 'TodoTelescope' },
-    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+    event = 'LazyFile',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false },
   },
@@ -51,7 +51,7 @@ return {
         highlights.DiffChange = { bg = '#2a3760' }
         highlights.DiffText = { bg = '#3c5aa4', bold = true }
       end,
-      light_style = "day",
+      light_style = 'day',
       transparent = true,
       styles = {
         sidebars = 'transparent',

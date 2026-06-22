@@ -1,7 +1,7 @@
 return { -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
   branch = 'main',
-  event = { 'BufReadPost', 'BufWritePost', 'BufNewFile', 'VeryLazy' },
+  event = { 'LazyFile', 'VeryLazy' },
   build = ':TSUpdate',
   -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
   config = function()

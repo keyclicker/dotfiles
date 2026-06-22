@@ -57,6 +57,7 @@ alias la="ls -lAh"
 alias grep="grep --color"
 alias rm="rm -i"
 alias cl="clear; clear"
+alias md="mkdir -p"
 
 alias python="python3"
 alias pip="pip3"
@@ -75,14 +76,26 @@ alias vp="nvim -c \"lua require('persistence').load()\""
 alias vg="nvim -c \"Neogit\""
 
 alias vdot="nvim ~/.dotfiles"
-alias vcfg="nvim ~/.dotfiles/.config/nvim"
+alias vvim="nvim ~/.dotfiles/.config/nvim"
 alias vzsh='nvim ~/.dotfiles/.zshrc'
+
+alias cddot="cd ~/.dotfiles"
+alias cdvim="cd ~/.dotfiles/.config/nvim"
 
 alias udex="cd ~/Root/Programming/udex; pwd"
 alias zsrc='source ~/.dotfiles/.zshrc'
 
 alias gw="git worktree"
 alias gs="git status"
+
+# dr - drill: mkdir -p then cd into it
+dr() {
+  [[ -n "$1" ]] || {
+    print -u2 "dr: need a path"
+    return 1
+  }
+  mkdir -p -- "$1" && cd -- "$1"
+}
 
 git-pwd() {
   local common_dir

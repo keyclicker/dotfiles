@@ -1,7 +1,7 @@
 return {
   'stevearc/oil.nvim',
-  cmd = { 'Oil' },
-  event = 'VeryLazy',
+  -- cmd = { 'Oil' },
+  -- event = 'VeryLazy',
   lazy = false,
   -- dependencies = { 'echasnovski/mini.icons' },
   dependencies = { 'nvim-tree/nvim-web-devicons' },

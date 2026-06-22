@@ -1,7 +1,10 @@
 local helpers = require 'utils.helpers'
 return { -- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
-  event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+  -- BufReadPre (not BufReadPost): loading lspconfig during the first file's
+  -- BufReadPost makes Neovim skip native filetype detection (nested-autocmd
+  -- quirk, lazy #25526) -> ft='' -> no LSP and no treesitter on the first file.
+  event = { 'BufReadPre', 'BufNewFile' },
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
     -- NOTE: mason/mason-lspconfig repos moved to the `mason-org` org.
@@ -66,7 +69,7 @@ return { -- LSP Configuration & Plugins
         map('gd', require('telescope.builtin').lsp_definitions, 'Goto Definition')
 
         -- Find references for the word under your cursor.
-        map('gr', require('telescope.builtin').lsp_references, 'Goto References')
+        map('gR', require('telescope.builtin').lsp_references, 'Goto References')
 
         -- Jump to the implementation of the word under your cursor.
         --  Useful when your language has ways of declaring types without an actual implementation.
@@ -96,8 +99,12 @@ return { -- LSP Configuration & Plugins
         -- Opens a popup that displays documentation about the word under your cursor
         --  See `:help K` for why this keymap.
         local float = { border = 'rounded', max_width = 80, max_height = 20 }
-        map('K', function() vim.lsp.buf.hover(float) end, 'Hover Documentation')
-        map('<leader>D', function() vim.lsp.buf.signature_help(float) end, 'Signature Help')
+        map('K', function()
+          vim.lsp.buf.hover(float)
+        end, 'Hover Documentation')
+        map('<leader>D', function()
+          vim.lsp.buf.signature_help(float)
+        end, 'Signature Help')
 
         -- WARN: This is not Goto Definition, this is Goto Declaration.
         --  For example, in C this would take you to the header.
@@ -141,7 +148,6 @@ return { -- LSP Configuration & Plugins
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
           end, 'Toggle Inlay Hints')
         end
-
       end,
     })
 
@@ -257,7 +263,7 @@ return { -- LSP Configuration & Plugins
       'goimports',
       'gofumpt',
 
-      'shfmt'
+      'shfmt',
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

@@ -57,7 +57,9 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 -- Make diff split vertical by default
-vim.opt.diffopt = "vertical,internal,filler,closeoff,indent-heuristic,inline:char,linematch:60"
+vim.opt.diffopt:append 'vertical'
+vim.opt.diffopt:append 'algorithm:histogram'
+vim.opt.diffopt:append 'linematch:60'
 
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
@@ -151,14 +153,14 @@ end
 vim.opt.foldtext = 'v:lua.fold_text()'
 vim.opt.foldlevel = 99
 vim.opt.foldlevelstart = 99
--- diff: blank out the '----' filler on deleted/added lines
-vim.opt.fillchars:append('diff: ')
+-- diff: faint dots for filler on deleted/added lines
+vim.opt.fillchars:append 'diff:·'
 
 -----------------------------------------------------------
 ---                     Sessions
 -----------------------------------------------------------
 -- localoptions: restore window-local opts (diff/diffthis) across sessions
-vim.opt.sessionoptions:append('localoptions')
+vim.opt.sessionoptions:append 'localoptions'
 
 -----------------------------------------------------------
 ---                Status Column

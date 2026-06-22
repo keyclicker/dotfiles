@@ -6,17 +6,23 @@ return {
   {
     'sindrets/diffview.nvim',
     opts = {
+      enhanced_diff_hl = true,
       keymaps = {
         file_history_panel = { ['q'] = '<cmd>DiffviewClose<cr>' },
         file_panel = { ['q'] = '<cmd>DiffviewClose<cr>' },
         view = { ['q'] = '<cmd>DiffviewClose<cr>' },
       },
+      hooks = {
+        diff_buf_read = function()
+          vim.opt_local.wrap = false
+        end,
+      },
     },
     cmd = { 'DiffviewOpen', 'DiffviewFileHistory' },
     --stylua: ignore
     keys = {
-      {'<leader>gd', "<cmd>DiffviewOpen<cr>", desc = 'Diffview open' },
-      {'<leader>gf', "<cmd>DiffviewFileHistory %<cr>", desc = 'Diffview file history' },
+      {'<leader>v', "<cmd>DiffviewOpen<cr>", desc = 'Diffview open' },
+      {'<leader>V', "<cmd>DiffviewFileHistory %<cr>", desc = 'Diffview file history' },
     },
   },
   {
@@ -28,24 +34,17 @@ return {
       'nvim-telescope/telescope.nvim', -- optional
       'ibhagwan/fzf-lua', -- optional
     },
-    opts = {},
+    opts = { integrations = { diffview = true } },
     cmd = { 'Neogit' },
 
     --stylua: ignore
     keys = {
-      { '<leader>gg', function() require('neogit').open() end, desc = 'Neogit' },
-      { '<leader>gc', function() require('neogit').open { 'commit' } end, desc = 'Neogit Commit' },
-      { '<leader>gP', function() require('neogit').open { 'push' } end, desc = 'Neogit Push' },
-      { '<leader>gp', function() require('neogit').open { 'pull' } end, desc = 'Neogit Pull' },
-      { '<leader>gl', function() require('neogit').open { 'log' } end, desc = 'Neogit Log' },
-      { '<leader>gD', function() require('neogit').open { 'diff' } end, desc = 'Neogit Diff' },
-      { '<leader>gb', function() require('neogit').open { 'branch' } end, desc = 'Neogit Branch' },
-      { '<leader>gz', function() require('neogit').open { 'stash' } end, desc = 'Neogit Stash' },
+      { '<leader>g', function() require('neogit').open() end, desc = 'Neogit' },
     },
   },
   {
     'lewis6991/gitsigns.nvim',
-    event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+    event = 'LazyFile',
     opts = {
       signs = {
         add = { text = '┃', priority = 20 },

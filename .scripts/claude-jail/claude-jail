@@ -164,6 +164,7 @@ exec docker run -it --rm \
     -e "COLORTERM=${COLORTERM:-truecolor}" \
     -e "CLAUDE_CODE_NO_FLICKER=1" \
     -e "EDITOR=nvim" \
+    -e "CAVEMAN_DEFAULT_MODE=ultra" \
     "${mounts[@]}" \
     "$IMAGE" \
     claude "${claude_args[@]}" "$@"
