@@ -50,6 +50,8 @@ return {
         -- Make intra-line diff (DiffText) visible under the transparent theme
         highlights.DiffChange = { bg = '#2a3760' }
         highlights.DiffText = { bg = '#3c5aa4', bold = true }
+        -- Dim codediff's ╱ filler further (default #444444)
+        highlights.CodeDiffFiller = { fg = '#333333' }
       end,
       light_style = 'day',
       transparent = true,
