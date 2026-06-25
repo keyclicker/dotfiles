@@ -40,13 +40,17 @@ version control.
   bundled file disables the in-Claude sandbox (the container already is one), wires
   the in-container `statusLine` + `SessionStart` hook, and declares the **plugins**
   to enable (see below).
-- **Plugins** mirror the host set — `context7`, `playwright`, `github`,
+- **Plugins** mirror the host set — `context7`, `playwright`,
   `clangd-lsp` / `typescript-lsp` / `pyright-lsp`, `caveman`. They're *enabled* via
   the bundled `settings.json` and *installed* by `requirements.sh` into the mounted
   state dir (`~/.claude/plugins`), so they persist across `--rm`. The LSP plugins'
-  servers (`clangd`, `typescript-language-server`, `pyright`) are installed by the
-  same `requirements.sh`. (The Google Drive connector is skipped — interactive OAuth,
-  no good headless.) `--dangerously-skip-permissions` auto-approves their tools.
+  servers are installed alongside: `clangd` + `pyright` via `requirements.sh`,
+  and `typescript-language-server` + `typescript` baked via `npm -g` in the
+  Dockerfile (flat layout — the server can't resolve a pnpm-isolated typescript).
+  **playwright** is pinned to the bundled Chromium (`--browser chromium`; Google
+  Chrome has no arm64 Linux build).
+  (The Google Drive connector is skipped — interactive OAuth, no good headless.)
+  `--dangerously-skip-permissions` auto-approves their tools.
 - **Copies** a minimal set of host *content* into the container's state dir:
   `CLAUDE.md`, `statusline.sh`, `agents/`, `skills/` (`~/.dotfiles` symlinks
   dereferenced). Nothing else, no credentials. The host `~/.claude` is never written.
@@ -116,7 +120,8 @@ The container gets exactly these from the host (see `claude-jail`):
 -v "$STATE:/home/agent/.claude"                               # login + copied config
 -v "$PROJECT/.claude/transcripts:~/.claude/projects/-work"    # session .jsonl
 -v "$PROJECT/.claude/memory:~/.claude/projects/-work/memory"  # project memory
--v "$PACK/nix:/nix"                                           # persistent nix store
+-v claude-jail-nix:/nix                                       # nix store (named volume)
+-v claude-jail-nix-state:~/.local/state/nix                   # nix profile (named volume)
 -v "$PACK/npm:/home/agent/.npm"                              # npm cache
 -v "$PACK/pnpm:/home/agent/.local/share/pnpm"                 # pnpm store + bins
 -v "$PACK/pip:/home/agent/.cache/pip"                         # pip cache
@@ -125,9 +130,13 @@ The container gets exactly these from the host (see `claude-jail`):
 --cap-drop ALL  --security-opt no-new-privileges  --pids-limit 512
 ```
 
-`$PACK` = `~/.claude-jail/pack`. The `pack/nix` store is **seeded** from the image
-on first run (the bind mount would otherwise hide the baked install); after a
-Dockerfile nix change, `rm -rf ~/.claude-jail/pack/nix` to force a reseed.
+`$PACK` = `~/.claude-jail/pack`. The nix store **and profile** are Docker **named
+volumes** (`claude-jail-nix`, `claude-jail-nix-state`), not binds: the macOS host
+FS is case-insensitive and the nix store is not (ncurses terminfo et al. collide),
+and an empty bind would shadow the image's baked store/profile instead of seeding
+from it. The volumes live on Docker's case-sensitive Linux VM and **auto-seed**
+from the image on first mount. The profile references store paths, so the launcher
+keeps the two in lockstep — `docker volume rm claude-jail-nix` reseeds both.
 
 No Docker socket, no host home, no `~/.ssh`, no credentials mount.
 
@@ -135,5 +144,6 @@ No Docker socket, no host home, no `~/.ssh`, no credentials mount.
 
 ```
 rm -rf ~/.claude-jail            # forget login, copied config, package stores
+docker volume rm claude-jail-nix # drop the nix store
 docker image rm claude-jail      # drop the image
 ```

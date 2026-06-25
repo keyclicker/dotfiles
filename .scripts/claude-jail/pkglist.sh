@@ -33,7 +33,8 @@ fi
 
 if command -v pnpm >/dev/null 2>&1; then
     echo "## pnpm -g:"
-    pnpm ls -g --depth=0 2>/dev/null | awk '/^[a-z@][^ ]* /{print $1}' | paste -sd' ' -
+    pnpm ls -g --depth=0 --json 2>/dev/null \
+        | jq -r '.[0].dependencies // {} | keys[]' 2>/dev/null | paste -sd' ' -
 fi
 
 if command -v uv >/dev/null 2>&1; then

@@ -17,6 +17,8 @@
 set -euo pipefail
 
 IMAGE="claude-jail"
+NIX_VOLUME="claude-jail-nix"             # store; named vol, see seed block
+NIX_STATE_VOLUME="claude-jail-nix-state" # profile; paired with the store
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # --rebuild forces an image rebuild; must lead. Everything else is
@@ -63,10 +65,11 @@ CONTAINER_PNPM="/home/agent/.local/share/pnpm"
 CONTAINER_PIP="/home/agent/.cache/pip"
 CONTAINER_UV="/home/agent/.cache/uv"
 CONTAINER_UV_DATA="/home/agent/.local/share/uv"
+CONTAINER_NIX_STATE="/home/agent/.local/state/nix" # nix profile (not in /nix)
 CONTAINER_TMP="/home/agent/tmp"
 
 mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" "$HOST_TMP" \
-    "$HOST_PACK/nix" "$HOST_PACK/npm" "$HOST_PACK/pnpm" \
+    "$HOST_PACK/npm" "$HOST_PACK/pnpm" \
     "$HOST_PACK/pip" "$HOST_PACK/uv-cache" "$HOST_PACK/uv-data"
 
 # ============================================================
@@ -86,12 +89,14 @@ if [ "$FORCE_REBUILD" = 1 ] || [ "$current" != "$SIG" ]; then
         -f "$SCRIPT_DIR/Dockerfile" -t "$IMAGE" "$SCRIPT_DIR"
 fi
 
-# The /nix bind mount overlays the image's baked store with the (empty)
-# host dir, hiding it — so seed pack/nix from the image when empty.
-# After a Dockerfile nix bump, rm -rf ~/.claude-jail/pack/nix to reseed.
-if [ -z "$(ls -A "$HOST_PACK/nix" 2>/dev/null)" ]; then
-    echo "claude-jail: seeding nix store from image..." >&2
-    docker run --rm -v "$HOST_PACK/nix:/seed" "$IMAGE" sh -c 'cp -a /nix/. /seed/'
+# Nix store + profile on named volumes (case-sensitive VM FS; a bind also
+# shadows the baked content). Paired: recreate both if either is missing.
+# Reseed after a Dockerfile nix bump: docker volume rm claude-jail-nix.
+if ! docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1 ||
+    ! docker volume inspect "$NIX_STATE_VOLUME" >/dev/null 2>&1; then
+    docker volume rm "$NIX_VOLUME" "$NIX_STATE_VOLUME" >/dev/null 2>&1 || true
+    docker volume create "$NIX_VOLUME" >/dev/null
+    docker volume create "$NIX_STATE_VOLUME" >/dev/null
     rm -f "$HOST_REQ_MARKER" # fresh store -> re-run requirements
 fi
 
@@ -120,7 +125,8 @@ mounts=(
     -v "$HOST_TRANSCRIPTS:$CONTAINER_PROJECT"   # session .jsonl
     -v "$HOST_MEMORY:$CONTAINER_PROJECT/memory" # carved-out memory
     -v "$HOST_PACK/npm:$CONTAINER_NPM"          # npm cache
-    -v "$HOST_PACK/nix:$CONTAINER_NIX"          # nix store
+    -v "$NIX_VOLUME:$CONTAINER_NIX"             # nix store (named vol, case-sensitive)
+    -v "$NIX_STATE_VOLUME:$CONTAINER_NIX_STATE" # nix profile (named vol, seeds from image)
     -v "$HOST_PACK/pnpm:$CONTAINER_PNPM"        # pnpm store + bins
     -v "$HOST_PACK/pip:$CONTAINER_PIP"          # pip cache
     -v "$HOST_PACK/uv-cache:$CONTAINER_UV"      # uv cache
@@ -191,15 +197,22 @@ git commit -F - <<'EOF'
 EOF
 
 Keep /work clean (it's the user's live tree — they edit and may commit it):
-- Throwaway work (clones, builds, scratch) goes in ~/tmp, not /work. Don't copy
-  /work into ~/tmp — it drifts from the user's live edits.
+- NEVER write scratch/test/throwaway files anywhere under /work — not even a
+  one-off, not a dotfile, not a "temp" dir. ALL such files go in ~/tmp. This is
+  a hard rule: if a file is not a deliberate edit to the user's project, it does
+  not belong in /work. Need a sample file for a tool (LSP, linter)? Put it in ~/tmp.
+- Clones, builds, caches → ~/tmp. Don't copy /work into ~/tmp (it drifts).
 - node_modules / .venv / build in /work are the HOST's (macOS-native); building
   over them from this Linux jail corrupts them. Don't clobber host artifacts.
-- Need in-tree deps? Isolate in a gitignored jail path (e.g. pnpm --modules-dir)
-  and leave it — don't delete it or the user's artifacts.
-Soft rule — use judgement.
+- Need in-tree deps? If possible, isolate in a gitignored jail path 
+    (e.g. pnpm --modules-dir) and leave it — don't delete it or the user's artifacts.
 JAIL_NOTE_EOF
 )"
+# /work maps to a different path on the host; tell the agent the real one.
+JAIL_NOTE+="
+
+/work is the host directory: $HOST_PROJECT — use this path when reporting
+to the user or writing commands the user runs on the host."
 
 claude_args=(
     --dangerously-skip-permissions

@@ -21,11 +21,12 @@ nix_pkgs=(
 pnpm_pkgs=(
     eslint
     prettier
-    typescript
     tsx
-    typescript-language-server # server for the typescript-lsp plugin
-    pyright                    # pyright-langserver — server for the pyright-lsp plugin
+    pyright # pyright-langserver — server for the pyright-lsp plugin
 )
+# Note: typescript + typescript-language-server are baked via npm -g in the
+# Dockerfile (flat layout), not here — pnpm's isolation hides typescript from
+# the server.
 
 # Python CLIs as isolated `uv tool install` apps (flake8 handled below so
 # its plugin shares the tool env). Anything else: the agent runs uv freely.
@@ -39,15 +40,14 @@ uv_tools=(
     httpie
 )
 
-# Claude Code plugins, mirroring the host: MCP servers (context7/playwright/
-# github) + LSP integrations (the *-lsp plugins drive the servers installed
-# above). Installed with `-s user` into the mounted state dir (~/.claude/
+# Claude Code plugins, mirroring the host: MCP servers (context7/playwright)
+# + LSP integrations (the *-lsp plugins drive the servers installed above).
+# Installed with `-s user` into the mounted state dir (~/.claude/
 # plugins), so they persist across --rm. `enabledPlugins` in settings.json
 # enables them each launch (it survives the launcher's per-launch copy).
 claude_plugins=(
     context7@claude-plugins-official
     playwright@claude-plugins-official
-    github@claude-plugins-official
     clangd-lsp@claude-plugins-official
     typescript-lsp@claude-plugins-official
     pyright-lsp@claude-plugins-official
@@ -66,7 +66,10 @@ fi
 
 if [ ${#pnpm_pkgs[@]} -gt 0 ] && command -v pnpm >/dev/null 2>&1; then
     echo "==> pnpm -g"
-    pnpm add -g "${pnpm_pkgs[@]}"
+    # Guard so a pnpm failure can't trip set -e and skip the uv + plugin
+    # sections below (every other installer here is guarded the same way).
+    pnpm add -g "${pnpm_pkgs[@]}" ||
+        echo "    pnpm add -g failed" >&2
 fi
 
 if [ ${#uv_tools[@]} -gt 0 ] && command -v uv >/dev/null 2>&1; then
@@ -90,4 +93,16 @@ if [ ${#claude_plugins[@]} -gt 0 ] && command -v claude >/dev/null 2>&1; then
         claude plugin install "$p" -s user 2>/dev/null ||
             echo "    $p: install failed" >&2
     done
+    # @playwright/mcp defaults to Google Chrome (no arm64 Linux build); pin chromium
+    # in every copy of the plugin's .mcp.json — the live one is the cache copy, not
+    # the marketplace source.
+    if command -v jq >/dev/null 2>&1; then
+        find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins" \
+            -path '*playwright*' -name '.mcp.json' 2>/dev/null | while read -r f; do
+            patched="$(jq '.playwright.args=["@playwright/mcp@latest","--browser","chromium","--output-dir","/home/agent/tmp/playwright-mcp"]' "$f")" &&
+                printf '%s\n' "$patched" >"$f"
+        done
+    fi
 fi
+
+# Seed: 1

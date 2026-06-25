@@ -50,14 +50,25 @@ RUN apt-get update \
 # Playwright + Chromium (browser e2e / debugging). Slowest layer, so
 # it sits high and stays cached. World-readable so non-root finds it.
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+# Also bake the browser @playwright/mcp wants: it pins a different playwright
+# revision than the global CLI, so its --browser chromium needs its own build
+# (agent can't install at runtime — /ms-playwright is root-owned).
 RUN npm install -g playwright \
  && npx playwright install --with-deps chromium \
+ && npx --yes @playwright/mcp@latest install-browser chrome-for-testing \
  && chmod -R a+rX /ms-playwright
 
 # Global tooling: Claude Code, corepack (pnpm/yarn), Python managers.
 # Linters/formatters are project-pinned — add them via requirements.sh.
+# TS language server + typescript baked together via npm (flat node_modules)
+# so the server resolves typescript; pnpm's isolated globals can't (the
+# typescript-lsp plugin expects `npm install -g typescript-language-server
+# typescript`).
 RUN npm install -g corepack@latest && corepack enable \
- && npm install -g @anthropic-ai/claude-code \
+ && npm install -g \
+      @anthropic-ai/claude-code \
+      typescript \
+      typescript-language-server \
  && pip3 install --no-cache-dir --break-system-packages \
       poetry \
       uv
@@ -89,9 +100,11 @@ RUN mkdir -m 0755 /nix && chown agent:agent /nix
 
 USER agent
 ENV HOME=/home/agent USER=agent
-# pnpm global bins on PATH so `pnpm add -g` tools resolve.
+# pnpm global bins on PATH so `pnpm add -g` tools resolve. pnpm puts
+# them in $PNPM_HOME/bin, and refuses every global op unless that exact
+# dir is on PATH — so point PATH at the /bin subdir, not PNPM_HOME.
 ENV PNPM_HOME=/home/agent/.local/share/pnpm
-ENV PATH="/home/agent/.local/share/pnpm:$PATH"
+ENV PATH="/home/agent/.local/share/pnpm/bin:$PATH"
 # uv as the agent's full Python toolkit. All state lives under the two
 # mounted dirs — cache (~/.cache/uv) and data (~/.local/share/uv: tool
 # installs, `uv python` interpreters) — so installs/venvs/pythons persist.
