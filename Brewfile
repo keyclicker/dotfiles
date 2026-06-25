@@ -56,3 +56,4 @@ brew "tree-sitter-cli"
 brew "stockfish"
 brew "gnu-chess"
 brew "lc0"
+

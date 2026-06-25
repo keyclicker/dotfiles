@@ -1,5 +1,25 @@
 {
-  "model": "opus",
+  "permissions": {
+    "allow": [
+      "mcp__plugin_context7_context7__query-docs",
+      "mcp__next-devtools__nextjs_docs",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_navigate",
+      "WebFetch(domain:api.anthropic.com)",
+      "WebFetch(domain:mcp-proxy.anthropic.com)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git clean:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git stash clear)"
+    ]
+  },
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.dotfiles/.claude/statusline.sh\""
@@ -52,10 +72,17 @@
         "~/Root"
       ],
       "allowRead": [
+        "~/.config",
+        "~/.claude",
         "~/.dotfiles",
         "~/Root/Programming/"
       ]
-    }
+    },
+    "excludedCommands": [
+      "docker logs *",
+      "docker compose logs *",
+      "docker-compose logs *"
+    ]
   },
   "effortLevel": "xhigh",
   "theme": "auto",

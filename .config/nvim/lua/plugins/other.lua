@@ -31,6 +31,10 @@ return {
   },
   {
     'christoomey/vim-tmux-navigator',
+    init = function()
+      -- Don't navigate out of a zoomed pane (keep tmux zoom on C-h/j/k/l)
+      vim.g.tmux_navigator_disable_when_zoomed = 1
+    end,
     cmd = {
       'TmuxNavigateLeft',
       'TmuxNavigateDown',

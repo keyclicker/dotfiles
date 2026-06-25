@@ -55,7 +55,6 @@ alias ..='cd ..'
 alias ls="ls -G"
 alias la="ls -lAh"
 alias grep="grep --color"
-alias rm="rm -i"
 alias cl="clear; clear"
 alias md="mkdir -p"
 
@@ -68,6 +67,9 @@ alias yt="yt-dlp"
 alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
 
+alias gw="git worktree"
+alias gs="git status"
+
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
 alias v="nvim ."
@@ -75,18 +77,15 @@ alias v="nvim ."
 alias vp="nvim -c \"lua require('persistence').load()\""
 alias vg="nvim -c \"Neogit\""
 
-alias vdot="nvim ~/.dotfiles"
-alias vvim="nvim ~/.dotfiles/.config/nvim"
-alias vzsh='nvim ~/.dotfiles/.zshrc'
-
 alias cddot="cd ~/.dotfiles"
 alias cdvim="cd ~/.dotfiles/.config/nvim"
 
 alias udex="cd ~/Root/Programming/udex; pwd"
 alias zsrc='source ~/.dotfiles/.zshrc'
 
-alias gw="git worktree"
-alias gs="git status"
+vdot() { cd ~/.dotfiles && nvim .; }
+vvim() { cd ~/.dotfiles/.config/nvim && nvim .; }
+vzsh() { cd ~/.dotfiles && nvim .zshrc; }
 
 # dr - drill: mkdir -p then cd into it
 dr() {
@@ -184,6 +183,9 @@ git_prompt_info() {
 
 PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%}"
 PROMPT+=' $(git_prompt_info)'
+
+# Background job count on the right, only when ≥1 (s pluralizes at ≥2)
+RPROMPT='%(1j.%{$fg[yellow]%}✦ %j job%(2j.s.)%{$reset_color%}.)'
 
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[blue]%}git:(%{$fg[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
