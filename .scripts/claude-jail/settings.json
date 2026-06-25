@@ -1,0 +1,49 @@
+{
+  "editorMode": "vim",
+  "effortLevel": "xhigh",
+  "model": "opus[1m]",
+  "theme": "auto",
+
+  "sandbox": { "enabled": false },
+
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/agent/.claude/statusline.sh"
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash /home/agent/.claude/pkglist.sh" }
+        ]
+      }
+    ]
+  },
+
+  "permissions": {
+    "deny": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  },
+
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": { "source": "github", "repo": "anthropics/claude-plugins-official" }
+    },
+    "caveman": {
+      "source": { "source": "github", "repo": "JuliusBrussee/caveman" }
+    }
+  },
+
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "caveman@caveman": true
+  }
+}

@@ -1,30 +1,38 @@
 #!/usr/bin/env bash
 #
-# claude-jail — run Claude Code inside an isolated Docker container.
+# claude-jail — run Claude Code in an isolated Docker container.
+# Only /work (the project) and a private state/pack dir are visible;
+# host home, ~/.ssh, ~/.claude.json and the Keychain are not. Curated
+# config is COPIED into state, never mounted, so host ~/.claude is
+# untouched. Package stores persist under ~/.claude-jail/pack.
 #
-# Host bind mounts (nothing else on the host is visible):
-#   pwd                       -> /work                               (rw, the project)
-#   <root>/.claude/transcripts -> ~/.claude/projects/-work           (session .jsonl)
-#   <root>/.claude/memory     -> ~/.claude/projects/-work/memory     (overlays the above)
-# <root> = repo root (parent of the git common dir), so all worktrees/subdirs of one
-# project share memory + transcripts; falls back to pwd outside a git repo.
-#   private state dir        -> /home/node/.claude                   (login + config)
-#   cache/npm                -> /home/node/.npm                      (npm download cache)
-#   cache/pip                -> /home/node/.cache/pip                (pip download cache)
-# cwd=/work, which Claude encodes as project "-work". The memory mount nests inside
-# the transcripts mount, so transcripts hold sessions and memory gets its own dir.
+# Always runs --dangerously-skip-permissions: the container IS the
+# sandbox, so in-container prompts are redundant. /work is read-write
+# and egress is open, so only point it at projects (ideally git-tracked)
+# you'd trust an autonomous agent with.
 #
-# Curated config (settings.json, agents, skills, CLAUDE.md, statusline.sh) is COPIED
-# into the state dir, not mounted — so the host ~/.claude is never written.
-# Your ~/.claude.json and macOS Keychain are never mounted. See README.md.
+#   claude-jail [--rebuild] [args passed to claude...]
 #
+# See README.md for the mount table and threat model.
 set -euo pipefail
 
 IMAGE="claude-jail"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Resolve the repo root: parent of the git common dir, so all worktrees/subdirs of
-# one project share it. Falls back to the launch dir when not inside a git repo.
+# --rebuild forces an image rebuild; must lead. Everything else is
+# passed through to claude.
+FORCE_REBUILD=0
+[ "${1:-}" = "--rebuild" ] && {
+    FORCE_REBUILD=1
+    shift
+}
+
+# ============================================================
+#                           Paths
+# ============================================================
+
+# Repo root = parent of the git common dir, so all worktrees/subdirs
+# share one (else just cwd).
 git_root() {
     local common_dir
     if common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"; then
@@ -34,126 +42,173 @@ git_root() {
     fi
 }
 
-# Host paths (real, on your machine).
-HOST_PROJECT="$(pwd -P)"                  # launch dir; becomes /work
-HOST_ROOT="$(git_root)"                   # repo root; anchors shared memory/transcripts
-HOST_CONFIG="$HOME/.claude"               # source of curated config (copied in)
+# Host (your machine).
+HOST_PROJECT="$(pwd -P)"    # launch dir -> /work
+HOST_ROOT="$(git_root)"     # repo root; anchors memory
+HOST_CONFIG="$HOME/.claude" # curated config source
 HOST_MEMORY="$HOST_ROOT/.claude/memory"
 HOST_TRANSCRIPTS="$HOST_ROOT/.claude/transcripts"
-HOST_STATE="$HOME/.claude-jail/state"     # jail's own ~/.claude; persists login
-HOST_CACHE="$HOME/.claude-jail/cache"     # npm + pip download caches; persist across runs
+HOST_STATE="$HOME/.claude-jail/state" # jail's ~/.claude + login
+HOST_PACK="$HOME/.claude-jail/pack"   # nix/npm/pnpm/pip/uv stores
+HOST_TMP="$HOME/.claude-jail/tmp"     # persistent scratch
+HOST_REQ_MARKER="$HOST_PACK/.requirements-sha"
 
-# Container paths (inside the jail).
+# Container (inside the jail).
 CONTAINER_WORK="/work"
-CONTAINER_CONFIG="/home/node/.claude"                 # the jailed Claude's ~/.claude
-CONTAINER_PROJECT="$CONTAINER_CONFIG/projects/-work"  # cwd=/work -> "-work"
+CONTAINER_CONFIG="/home/agent/.claude"
+CONTAINER_PROJECT="$CONTAINER_CONFIG/projects/-work"
+CONTAINER_NIX="/nix"
+CONTAINER_NPM="/home/agent/.npm"
+CONTAINER_PNPM="/home/agent/.local/share/pnpm"
+CONTAINER_PIP="/home/agent/.cache/pip"
+CONTAINER_UV="/home/agent/.cache/uv"
+CONTAINER_UV_DATA="/home/agent/.local/share/uv"
+CONTAINER_TMP="/home/agent/tmp"
 
-mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" \
-         "$HOST_CACHE/npm" "$HOST_CACHE/pip"
+mkdir -p "$HOST_STATE" "$HOST_MEMORY" "$HOST_TRANSCRIPTS" "$HOST_TMP" \
+    "$HOST_PACK/nix" "$HOST_PACK/npm" "$HOST_PACK/pnpm" \
+    "$HOST_PACK/pip" "$HOST_PACK/uv-cache" "$HOST_PACK/uv-data"
 
-# Launcher flags (must lead; everything after is passed through to claude):
-#   --rebuild  rebuild the image (e.g. to pull a newer base image)
-#   --udex     use the udex backend image (Dockerfile.udex, FROM the base) instead of
-#              the general base: adds Python 3.12, libjxl/libheif, the pg/locale bits and
-#              rustfs that udex's backend test suite needs. Base is built first either way.
-#   --auto     auto-run commands but still PROMPT before edits (allow Bash + ask on
-#              Edit/Write). `ask` beats `allow`, so edit prompts hold even if the host
-#              config allows those tools. Middle ground between default and --yolo.
-#   --yolo     skip ALL in-app prompts (edits included). Safe-ish here: the CONTAINER
-#              is the sandbox (non-root, cap-drop, mounts only). Bypass refuses to run
-#              as root, but we run as node, so it works. Caveat: /work is rw and maps
-#              to your real project — YOLO can modify it unprompted; egress is open.
-FORCE_REBUILD=0
-YOLO=0
-AUTO=0
-UDEX=0
-while [ $# -gt 0 ]; do
-    case "$1" in
-        --rebuild) FORCE_REBUILD=1; shift ;;
-        --udex)    UDEX=1; shift ;;
-        --auto)    AUTO=1; shift ;;
-        --yolo)    YOLO=1; shift ;;
-        --)        shift; break ;;
-        *)         break ;;
-    esac
-done
+# ============================================================
+#                     Build & seed image
+# ============================================================
 
-# Build on first use, or when a Dockerfile / caller UID:GID changed. The build
-# signature is stored as an image label and re-checked each launch, so editing a
-# Dockerfile auto-triggers a rebuild — no manual `docker image rm` needed.
-#   build_image <tag> <dockerfile> <sig>
-build_image() {
-    local tag="$1" dockerfile="$2" sig="$3" current
-    current="$(docker image inspect -f '{{ index .Config.Labels "jail.sig" }}' "$tag" 2>/dev/null || true)"
-    if [ "$FORCE_REBUILD" = 1 ] || [ "$current" != "$sig" ]; then
-        echo "claude-jail: building image '$tag'..." >&2
-        docker build \
-            --build-arg "UID=$(id -u)" --build-arg "GID=$(id -g)" \
-            --label "jail.sig=$sig" \
-            -f "$dockerfile" -t "$tag" "$SCRIPT_DIR"
-    fi
-}
-
-# Always (re)build the base — the udex image is FROM it, so it must exist and be current.
-BASE_SIG="$(shasum -a 256 "$SCRIPT_DIR/Dockerfile" | awk '{print $1}')-$(id -u):$(id -g)"
-build_image "$IMAGE" "$SCRIPT_DIR/Dockerfile" "$BASE_SIG"
-
-# --udex: layer the udex backend toolchain on top, run that image instead. Its sig folds
-# in BOTH Dockerfiles, so a base edit rebuilds the udex image too (FROM picks the new base).
-if [ "$UDEX" = 1 ]; then
-    IMAGE="claude-jail-udex"
-    UDEX_SIG="$(cat "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR/Dockerfile.udex" | shasum -a 256 | awk '{print $1}')-$(id -u):$(id -g)"
-    build_image "$IMAGE" "$SCRIPT_DIR/Dockerfile.udex" "$UDEX_SIG"
+# Rebuild on first use or whenever the Dockerfile / UID:GID changes.
+# The signature is stored as an image label and rechecked each launch.
+SIG="$(shasum -a 256 "$SCRIPT_DIR/Dockerfile" | awk '{print $1}')-$(id -u):$(id -g)"
+current="$(docker image inspect -f '{{ index .Config.Labels "jail.sig" }}' \
+    "$IMAGE" 2>/dev/null || true)"
+if [ "$FORCE_REBUILD" = 1 ] || [ "$current" != "$SIG" ]; then
+    echo "claude-jail: building image '$IMAGE'..." >&2
+    docker build \
+        --build-arg "UID=$(id -u)" --build-arg "GID=$(id -g)" \
+        --label "jail.sig=$SIG" \
+        -f "$SCRIPT_DIR/Dockerfile" -t "$IMAGE" "$SCRIPT_DIR"
 fi
 
-# Copy curated config into the writable base (never write the host config).
-# cp -RL dereferences symlinks (e.g. -> ~/.dotfiles). Login/.credentials.json untouched.
-for item in settings.json CLAUDE.md statusline.sh agents skills; do
+# The /nix bind mount overlays the image's baked store with the (empty)
+# host dir, hiding it — so seed pack/nix from the image when empty.
+# After a Dockerfile nix bump, rm -rf ~/.claude-jail/pack/nix to reseed.
+if [ -z "$(ls -A "$HOST_PACK/nix" 2>/dev/null)" ]; then
+    echo "claude-jail: seeding nix store from image..." >&2
+    docker run --rm -v "$HOST_PACK/nix:/seed" "$IMAGE" sh -c 'cp -a /nix/. /seed/'
+    rm -f "$HOST_REQ_MARKER" # fresh store -> re-run requirements
+fi
+
+# ============================================================
+#                      Config & mounts
+# ============================================================
+
+# Jail's own settings.json — bundled with the script, NOT the host's,
+# so no global config (sandbox/enabledPlugins/permissions) bleeds in.
+# It already carries the in-container statusLine + pkglist SessionStart
+# hook, so no --settings override is needed below.
+cp -f "$SCRIPT_DIR/settings.json" "$HOST_STATE/settings.json"
+
+# Copy curated host CONTENT (not settings) into state. cp -RL
+# dereferences dotfiles symlinks; login/.credentials.json stays put.
+for item in CLAUDE.md statusline.sh agents skills; do
     [ -e "$HOST_CONFIG/$item" ] || continue
     rm -rf "${HOST_STATE:?}/$item"
-    # || true: a nested broken symlink in dotfiles shouldn't abort the launch.
-    cp -RL "$HOST_CONFIG/$item" "$HOST_STATE/$item" 2>/dev/null \
-        || echo "claude-jail: warning, skipped config '$item' (copy failed)" >&2
+    cp -RL "$HOST_CONFIG/$item" "$HOST_STATE/$item" 2>/dev/null ||
+        echo "claude-jail: skipped '$item' (copy failed)" >&2
 done
 
 mounts=(
-    -v "$HOST_PROJECT:$CONTAINER_WORK"
-    -v "$HOST_STATE:$CONTAINER_CONFIG"            # writable base (login + config)
-    -v "$HOST_TRANSCRIPTS:$CONTAINER_PROJECT"     # session .jsonl
-    -v "$HOST_MEMORY:$CONTAINER_PROJECT/memory"   # nested: carves memory out
-    -v "$HOST_CACHE/npm:/home/node/.npm"          # npm download cache (faster re-installs)
-    -v "$HOST_CACHE/pip:/home/node/.cache/pip"    # pip download cache
+    -v "$HOST_PROJECT:$CONTAINER_WORK"          # project, rw
+    -v "$HOST_STATE:$CONTAINER_CONFIG"          # login + config
+    -v "$HOST_TRANSCRIPTS:$CONTAINER_PROJECT"   # session .jsonl
+    -v "$HOST_MEMORY:$CONTAINER_PROJECT/memory" # carved-out memory
+    -v "$HOST_PACK/npm:$CONTAINER_NPM"          # npm cache
+    -v "$HOST_PACK/nix:$CONTAINER_NIX"          # nix store
+    -v "$HOST_PACK/pnpm:$CONTAINER_PNPM"        # pnpm store + bins
+    -v "$HOST_PACK/pip:$CONTAINER_PIP"          # pip cache
+    -v "$HOST_PACK/uv-cache:$CONTAINER_UV"      # uv cache
+    -v "$HOST_PACK/uv-data:$CONTAINER_UV_DATA"  # uv tools + pythons
+    -v "$HOST_TMP:$CONTAINER_TMP"               # persistent scratch
 )
 
-# Claude args, built as a --settings override (JSON assembled by string concat, no
-# jq needed). --settings REPLACES top-level keys, so host-absolute paths broken in
-# the jail get fixed: clear host `hooks`, repoint `statusLine` at the copied script.
-# --auto adds permission rules (allow Bash, ask on edits). NOTE: permission arrays
-# union across sources, so this can ADD rules but can't STRIP host grants; --yolo
-# bypasses gating entirely (and makes any rules here moot).
-sl=""
-[ -e "$HOST_STATE/statusline.sh" ] \
-    && sl=',"statusLine":{"type":"command","command":"bash /home/node/.claude/statusline.sh"}'
-perms=""
-[ "$AUTO" = 1 ] && [ "$YOLO" != 1 ] \
-    && perms=',"permissions":{"allow":["Bash"],"ask":["Edit","Write","MultiEdit","NotebookEdit"]}'
+# ============================================================
+#                Requirements & package list
+# ============================================================
 
-claude_args=(--settings "{\"hooks\":{}${sl}${perms}}")
-[ "$YOLO" = 1 ] && claude_args+=(--dangerously-skip-permissions)
+# Copy the helper scripts into state (reachable in-jail under
+# ~/.claude). requirements.sh installs project tools into the pack/
+# stores; run it only when it changed (installs persist, so once per
+# version is enough — a nix reseed cleared the marker above to force it).
+cp -f "$SCRIPT_DIR/pkglist.sh" "$HOST_STATE/pkglist.sh"
+if [ -f "$SCRIPT_DIR/requirements.sh" ]; then
+    cp -f "$SCRIPT_DIR/requirements.sh" "$HOST_STATE/requirements.sh"
+    req_sha="$(shasum -a 256 "$SCRIPT_DIR/requirements.sh" | awk '{print $1}')"
+    if [ "$FORCE_REBUILD" = 1 ] ||
+        [ "$(cat "$HOST_REQ_MARKER" 2>/dev/null || true)" != "$req_sha" ]; then
+        echo "claude-jail: running requirements.sh..." >&2
+        if docker run --rm \
+            --cap-drop ALL --security-opt no-new-privileges \
+            -e "CLAUDE_CONFIG_DIR=$CONTAINER_CONFIG" \
+            "${mounts[@]}" "$IMAGE" \
+            bash "$CONTAINER_CONFIG/requirements.sh"; then
+            printf '%s\n' "$req_sha" >"$HOST_REQ_MARKER"
+        else
+            echo "claude-jail: requirements.sh failed; retry next launch" >&2
+        fi
+    fi
+fi
 
-# Tell the jailed Claude it's sandboxed and how — session-only (not written to any file,
-# so the host ~/.claude/CLAUDE.md and this host session are untouched).
-JAIL_NOTE="You are running inside claude-jail: an isolated Docker container (non-root user, \
-cap-drop ALL, no-new-privileges). Only the current project is mounted, at /work (your cwd) — \
-the host home directory, ~/.ssh, ~/.claude.json and the macOS keychain are NOT accessible. \
-Network egress is open. Git has no host identity or SSH keys here, so commits/push may need \
-configuring first. Login and Claude config persist in a separate jail state dir, not the host ~/.claude."
-claude_args+=(--append-system-prompt "$JAIL_NOTE")
+# ============================================================
+#                            Run
+# ============================================================
 
-# Run. Default: edits prompted (--yolo bypasses). Full network egress.
-# Non-root, dropped caps, no privilege escalation, no host access beyond mounts.
-# CLAUDE_CONFIG_DIR pins .claude.json INSIDE the mounted state dir; without it the
-# config defaults to $HOME/.claude.json (outside any mount) and is lost every --rm run.
+# Tell the jailed Claude it's sandboxed — session-only, no file.
+JAIL_NOTE="$(
+    cat <<'JAIL_NOTE_EOF'
+You are running inside claude-jail, an isolated Docker container.
+
+Sandbox:
+- Non-root, cap-drop ALL, no-new-privileges. The container IS the sandbox.
+- Only the current project is mounted, at /work (your cwd). The host home,
+  ~/.ssh, ~/.claude.json and the macOS Keychain are NOT accessible.
+- Network egress is open.
+- Git has no host identity or SSH keys here; commits/push may need setup first.
+
+Persists across restarts:
+- ~/tmp — scratch: clone, build, cache, anything reusable.
+- Login + Claude config (a separate jail state dir, not host ~/.claude).
+- Package installs (below).
+
+Installing tools — no apt (non-root), but these work and persist:
+- nix  : nix profile install nixpkgs#<pkg>  (or nix run nixpkgs#<pkg>) — anything
+- pnpm : pnpm add -g <pkg> — Node CLIs
+- uv   : full Python toolkit — uv tool install <t> (CLI on PATH), uvx <t> (ad-hoc),
+         uv venv / uv pip / uv python install <ver>
+
+Commits — NEVER run git commit yourself. There is no GPG key in the jail, so
+any commit you make would be unsigned. When the user asks you to commit, do NOT
+run it; instead OUTPUT the command(s) for the user to run on the host. Always
+use the -F heredoc form so the body copies clean (closing EOF at column 0):
+git commit -F - <<'EOF'
+<message>
+EOF
+
+Keep /work clean (it's the user's live tree — they edit and may commit it):
+- Throwaway work (clones, builds, scratch) goes in ~/tmp, not /work. Don't copy
+  /work into ~/tmp — it drifts from the user's live edits.
+- node_modules / .venv / build in /work are the HOST's (macOS-native); building
+  over them from this Linux jail corrupts them. Don't clobber host artifacts.
+- Need in-tree deps? Isolate in a gitignored jail path (e.g. pnpm --modules-dir)
+  and leave it — don't delete it or the user's artifacts.
+Soft rule — use judgement.
+JAIL_NOTE_EOF
+)"
+
+claude_args=(
+    --dangerously-skip-permissions
+    --append-system-prompt "$JAIL_NOTE"
+)
+
+# Non-root, dropped caps, no priv-escalation, no host access beyond
+# mounts; egress open. CLAUDE_CONFIG_DIR pins .claude.json inside the
+# mounted state dir, else it's lost each --rm run.
 exec docker run -it --rm \
     --cap-drop ALL \
     --security-opt no-new-privileges \

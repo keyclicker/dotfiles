@@ -9,6 +9,8 @@ Prefer specialized tools over bash when they do the job better:
 
 When working with an unfamiliar library or API, consider fetching up-to-date docs rather than relying on memory.
 
+When an install command takes multiple packages (`apt install`, `pip install`, `npm`/`pnpm add`, nix, ...), put one package per line so diffs stay clean and packages are easy to add/remove.
+
 ## Commits & comments
 
 Do not add Claude/Anthropic trademarks (e.g. "Co-Authored-By: Claude", "Generated with Claude Code") to commit messages, PR descriptions, or code comments unless the user explicitly asks for it.
