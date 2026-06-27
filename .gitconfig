@@ -1,7 +1,7 @@
 [user]
-	email = nickeyclicker@gmail.com
+	email = nick@keyclicker.dev
 	name = keyclicker
-	signingkey = 0D357FC831321F40
+	signingkey = 577CB135713C717B
 [commit]
 	gpgsign = true
 [gpg]
@@ -10,3 +10,5 @@
 	editor = nvim
 [worktree]
 	useRelativePaths = true
+[init]
+	defaultBranch = master
