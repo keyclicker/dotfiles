@@ -2,6 +2,7 @@
 brew "coreutils"
 brew "cmake"
 brew "git"
+brew "openssh"
 
 # Shell tools
 brew "fd"
@@ -27,6 +28,7 @@ brew "mc"
 brew "node"
 brew "pnpm"
 brew "pipx"
+brew "uv"
 brew "pyenv"
 brew "pyenv-virtualenv"
 brew "luarocks"
