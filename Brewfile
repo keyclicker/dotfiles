@@ -1,8 +1,9 @@
 # Basics
 brew "coreutils"
 brew "cmake"
-brew "git"
 brew "openssh"
+brew "git"
+brew "gh"
 
 # Shell tools
 brew "fd"
@@ -16,13 +17,16 @@ brew "sevenzip"
 brew "watch"
 brew "tree"
 brew "carapace"
+brew "git-delta"
 
 # User tools
 brew "neofetch"
 brew "ffmpeg"
-brew "htop"
 brew "tokei"
 brew "mc"
+brew "vifm"
+brew "htop"
+brew "btop"
 
 # Dev tools
 brew "node"
@@ -42,7 +46,8 @@ brew "colima"
 brew "lazydocker"
 
 # Workspace tools
-# brew "asmvik/formulae/skhd"
+tap "asmvik/formulae", trusted: true
+brew "asmvik/formulae/skhd"
 # brew "asmvik/formulae/yabai"
 brew "tmux"
 brew "neovim"
@@ -59,3 +64,13 @@ brew "stockfish"
 brew "gnu-chess"
 brew "lc0"
 
+# AI
+brew "ollama"
+
+# Test calc
+brew "libqalculate"
+
+# Cask
+cask "puremac"
+# Feature-rich command-line audio/video downloader
+brew "yt-dlp"
