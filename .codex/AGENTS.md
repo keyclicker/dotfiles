@@ -58,8 +58,6 @@ Response: "Pool reuse open DB connections. No per-request handshake."
 
 ### Auto-Clarity
 
-Use Conventional Commits unless project overrides this in AGENTS.md/CLAUDE.md or in other instructions.
-
 Drop lazy typing when:
 
 - Security warnings
@@ -85,9 +83,11 @@ Code/commits/PRs: write normal. "stop lazy typing" or "normal mode": revert. Mod
 
 --------------------------------------------------------------------------------
 
-## Conventional Commits
+## Git conventions
 
-### Specification
+Use Conventional Commits unless project overrides this in AGENTS.md/CLAUDE.md or in other instructions.
+
+### Conventional Commits Specification
 
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
 
@@ -108,20 +108,29 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 - The units of information that make up Conventional Commits MUST NOT be treated as case-sensitive by implementors, with the exception of BREAKING CHANGE which MUST be uppercase.
 - BREAKING-CHANGE MUST be synonymous with BREAKING CHANGE, when used as a token in a footer.
 
-Other types: build(), chore(), ci(), docs(), style(), refactor(), perf(), test()
+### Commit message requirements
 
-### Special Type mixed()
+- Descriptions MUST use imperative mood, e.g., `fix: handle expired tokens`, not
+  `fix: handled expired tokens`.
+- Every commit message line, including header, body, and footers, MUST NOT exceed
+  72 characters.
 
-If the user asks to make a big commit of different changes, you can use type mixed()
-and list concrete changes in body
+Additional allowed types: `build`, `chore`, `ci`, `docs`, `style`,
+`refactor`, `perf`, and `test`.
+
+### Special type: `mixed`
+
+Prefer separate commits for unrelated changes. When multiple inseparable change
+types must share one commit, `mixed` MAY be used. Tooling MUST be configured to
+recognize this custom type where type-based release or changelog generation is
+used.
 
 Example:
 
-```
-mixed: [general description]
+```text
+mixed: update development environment
 
-chore(...): [chore description]
-style(...): [style description]
-...
-
+- chore(shell): reorganize shell configuration
+- style(editor): update formatting defaults
+- docs: document installation changes
 ```
