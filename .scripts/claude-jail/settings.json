@@ -1,7 +1,7 @@
 {
   "editorMode": "vim",
-  "effortLevel": "xhigh",
-  "model": "opus[1m]",
+  "effortLevel": "high",
+  "model": "fable",
   "theme": "auto",
 
   "sandbox": { "enabled": false },
@@ -15,22 +15,25 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "bash /home/agent/.claude/pkglist.sh" }
+          {
+            "type": "command",
+            "command": "bash /home/agent/.claude/pkglist.sh"
+          }
         ]
       }
     ]
   },
 
   "permissions": {
-    "deny": [
-      "Bash(git commit:*)",
-      "Bash(git push:*)"
-    ]
+    "deny": ["Bash(git commit:*)", "Bash(git push:*)"]
   },
 
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
-      "source": { "source": "github", "repo": "anthropics/claude-plugins-official" }
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     },
     "caveman": {
       "source": { "source": "github", "repo": "JuliusBrussee/caveman" }

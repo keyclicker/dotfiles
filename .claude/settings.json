@@ -2,9 +2,6 @@
   "permissions": {
     "allow": [
       "mcp__plugin_context7_context7__query-docs",
-      "mcp__next-devtools__nextjs_docs",
-      "mcp__playwright__browser_resize",
-      "mcp__playwright__browser_navigate",
       "WebFetch(domain:api.anthropic.com)",
       "WebFetch(domain:mcp-proxy.anthropic.com)"
     ],
@@ -19,19 +16,14 @@
       "Bash(git stash clear)"
     ]
   },
-  "model": "opus[1m]",
+  "model": "claude-fable-5[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash \"$HOME/.dotfiles/.claude/statusline.sh\""
   },
   "enabledPlugins": {
     "caveman@caveman": true,
-    "clangd-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "context7@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
