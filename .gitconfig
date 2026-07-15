@@ -2,13 +2,30 @@
 	email = nick@keyclicker.dev
 	name = keyclicker
 	signingkey = 577CB135713C717B
+
 [commit]
 	gpgsign = true
+
 [gpg]
 	program = /opt/homebrew/bin/gpg
+
 [core]
 	editor = nvim
+    ; pager = delta
+
 [worktree]
 	useRelativePaths = true
+
 [init]
 	defaultBranch = master
+
+; [interactive]
+;     diffFilter = delta --color-only
+;
+; [delta]
+;     navigate = true  # use n and N to move between diff sections
+;     dark = true      # or light = true, or omit for auto-detection
+; 	line-numbers = true
+;
+; [merge]
+;     conflictStyle = zdiff3

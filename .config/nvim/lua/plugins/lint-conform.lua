@@ -51,9 +51,11 @@ return {
 
         go = { 'gofmt', 'gofumpt' },
 
-        sh = { 'shfmt' },
-        bash = { 'shfmt' },
-        zsh = { 'shfmt' },
+        -- sh = { 'shfmt' },
+        -- bash = { 'shfmt' },
+        -- zsh = { 'shfmt' },
+
+        -- tex = { 'tex-fmt' },
       },
     },
   },

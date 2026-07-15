@@ -10,7 +10,7 @@ macos-titlebar-style = tabs
 macos-window-shadow = false
 macos-option-as-alt = true
 
-background-opacity = 0.9
+background-opacity = 0.75
 background-blur = 20
 
 window-padding-balance = true
@@ -25,3 +25,10 @@ cursor-invert-fg-bg = false
 cursor-text = #0b0d0b
 
 # keybind = super+e=toggle_window_decorations
+
+quick-terminal-position = center
+quick-terminal-size = 600px,400px
+quick-terminal-screen = mouse
+quick-terminal-autohide = true
+quick-terminal-animation-duration = 0
+keybind = global:alt+space=toggle_quick_terminal

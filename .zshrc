@@ -1,5 +1,11 @@
 clear
 
+# Quick terminal runs qalc instead of a shell
+if [[ -n $GHOSTTY_QUICK_TERMINAL ]] && command -v qalc >/dev/null; then
+  cd
+  qalc
+fi
+
 # =========================================================
 #               Environment Variables
 # =========================================================
@@ -7,11 +13,7 @@ clear
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='mvim'
-fi
+export EDITOR='nvim'
 
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
@@ -196,6 +198,8 @@ ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 #                        Other
 # =========================================================
 
+bindkey -v
+
 fancy-ctrl-z() {
   if [[ $#BUFFER -eq 0 ]]; then
     BUFFER="fg"
@@ -224,3 +228,6 @@ bindkey '^[[B' history-substring-search-down # or '\eOB'
 HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='standout'
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
+
+# opencode
+export PATH=/Users/keyclicker/.opencode/bin:$PATH

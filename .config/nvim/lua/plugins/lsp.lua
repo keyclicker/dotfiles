@@ -264,6 +264,7 @@ return { -- LSP Configuration & Plugins
       'gofumpt',
 
       'shfmt',
+      'tex-fmt',
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
