@@ -8,6 +8,11 @@
 
 ## Asking before acting
 
+### Codex specific
+
+- `request_user_input` for Codex is configured to be available in default mode.
+- Codex should use it, when it's appropriate.
+
 ### Ask when
 
 Use the AskUserQuestion/request_user_input tools more often — not for every
@@ -29,14 +34,40 @@ task, but when it earns its cost:
 - Once the direction is settled, commit to it and run the task to completion
   without further check-ins.
 
+## Human is just a human (for Codex)
+
+- User is human and can make mistakes.
+- If request based on wrong assumptions - don't execute it, correct user.
+- Don't take request too literate, if literate reading seems wrong.
+- User can use the poor wording, that can be misinterpreted.
+- It's better to ask question, than execute poorly interpreted request.
+
 ## Commits & comments
 
-- Do not add Claude/Anthropic or Codex/OpenAI trademarks (e.g.
-  "Co-Authored-By: Codex", "Generated with Claude Code") to commit messages,
-  PR descriptions, or code comments unless the user explicitly asks for it.
+- Add this trailer to commits created with AI assistance:
+
+  ```text
+  Assisted-by: <model name>
+  ```
+
+- Use a short human-readable model family and version without the vendor name
+  or punctuation between the family and version:
+  - Claude examples: `Fable 5`, `Opus 4.8`
+  - GPT examples: `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
 
 - Git commits should be GPG-signed, by real user's key.
 - If git sign fails - don't commit, ask user what to do.
+
+### Model name (for Codex)
+
+- This section applies only to Codex.
+- Whenever you need to use your model name, read the `model` key from
+  `~/.codex/config.toml`. This includes answering which model you are and
+  writing Assisted-by trailers.
+- Re-read it every time. Do not reuse an earlier answer because model may
+  change between turns.
+- Never use generic names such as `GPT-5-based Codex` when configured model
+  name is available.
 
 ## Upkeep
 
