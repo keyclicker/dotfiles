@@ -6,12 +6,6 @@ vim.g.maplocalleader = '\\'
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
--- -- Set the python3 host program path
-local py3 = '/Users/keyclicker/.pyenv/versions/py3nvim/bin/python3'
-if vim.fn.executable(py3) == 1 then
-  vim.g.python3_host_prog = py3
-end
-
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!

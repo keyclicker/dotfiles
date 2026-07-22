@@ -60,9 +60,6 @@ alias grep="grep --color"
 alias cl="clear; clear"
 alias md="mkdir -p"
 
-alias python="python3"
-alias pip="pip3"
-
 alias ql="qlmanage -p"
 alias yt="yt-dlp"
 
@@ -119,29 +116,7 @@ cll() {
 
 source <(fzf --zsh)
 
-# Created by `pipx` on 2024-04-30 11:04:43
-export PATH="$PATH:/Users/keyclicker/.local/bin"
-
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-
-ll_pyenv() {
-  unset -f python3 pip3 pyenv
-  eval "$(pyenv init -)"
-}
-
-pyenv() {
-  ll_pyenv
-  pyenv "$@"
-}
-python3() {
-  ll_pyenv
-  python3 "$@"
-}
-pip3() {
-  ll_pyenv
-  pip3 "$@"
-}
+export PATH="$HOME/.local/bin:$PATH"
 
 # =========================================================
 #                       Completion

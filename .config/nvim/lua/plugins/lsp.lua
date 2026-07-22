@@ -1,4 +1,3 @@
-local helpers = require 'utils.helpers'
 return { -- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
   -- BufReadPre (not BufReadPost): loading lspconfig during the first file's
@@ -151,24 +150,6 @@ return { -- LSP Configuration & Plugins
       end,
     })
 
-    -- Fix pyright `"_x" is not accessed` noise.
-    -- NOTE: `vim.lsp.diagnostic.on_publish_diagnostics` was removed in nvim 0.11,
-    -- and re-assigning the handler inside LspAttach wrapped it on every attach.
-    -- Wrap the default `publishDiagnostics` handler once, here in the config body.
-    do
-      local function pyright_accessed_filter(diagnostic)
-        return not string.match(diagnostic.message, '"_.+" is not accessed')
-      end
-      local default_handler = vim.lsp.handlers['textDocument/publishDiagnostics']
-      vim.lsp.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
-        local client = vim.lsp.get_client_by_id(ctx.client_id)
-        if client and client.name == 'pyright' and result and result.diagnostics then
-          helpers.filter_inplace(result.diagnostics, pyright_accessed_filter)
-        end
-        return default_handler(err, result, ctx, config)
-      end
-    end
-
     -- Native completion uses Neovim's default capabilities (which already
     -- advertise snippetSupport). Only add resolveSupport so servers send
     -- auto-import edits / docs on resolve. Small delta keeps checkhealth lean.
@@ -196,7 +177,21 @@ return { -- LSP Configuration & Plugins
       rust_analyzer = {},
       clangd = {},
 
-      pyright = {},
+      ruff = {
+        init_options = {
+          settings = {
+            -- Prefer each project's pyproject.toml or ruff.toml.
+            configurationPreference = 'filesystemFirst',
+          },
+        },
+      },
+      ty = {
+        settings = {
+          ty = {
+            diagnosticMode = 'workspace',
+          },
+        },
+      },
       ts_ls = {},
       eslint = {},
       cssls = {},
@@ -251,12 +246,6 @@ return { -- LSP Configuration & Plugins
       'prettierd',
       'jsonlint',
 
-      'flake8',
-      'pylint',
-      'black',
-      'mypy',
-      'isort',
-
       'clang-format',
       'cpplint',
 
@@ -283,7 +272,6 @@ return { -- LSP Configuration & Plugins
 
     -- Servers mason-lspconfig knows how to install (lspconfig name -> package).
     local mason_all = vim.tbl_keys(require('mason-lspconfig.mappings').get_mason_map().lspconfig_to_package)
-    local mason_exclude = {} ---@type string[]
 
     ---@return boolean? use_mason  -- true => mason-lspconfig installs & auto-enables it
     local function configure(server)
@@ -303,7 +291,8 @@ return { -- LSP Configuration & Plugins
     local install = vim.tbl_filter(configure, vim.tbl_keys(servers))
     require('mason-lspconfig').setup {
       ensure_installed = install,
-      automatic_enable = { exclude = mason_exclude },
+      -- Do not start previously installed servers that are absent from `servers`.
+      automatic_enable = install,
     }
   end,
 }

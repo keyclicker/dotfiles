@@ -78,7 +78,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
             preview_width = 0.55,
           },
         },
-        file_ignore_patterns = { 'poetry.lock', 'package%-lock.json' },
+        file_ignore_patterns = { 'package%-lock.json' },
       },
 
       pickers = {

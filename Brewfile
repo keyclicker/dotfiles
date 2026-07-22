@@ -31,10 +31,7 @@ brew "btop"
 # Dev tools
 brew "node"
 brew "pnpm"
-brew "pipx"
 brew "uv"
-brew "pyenv"
-brew "pyenv-virtualenv"
 brew "luarocks"
 brew "postgresql"
 

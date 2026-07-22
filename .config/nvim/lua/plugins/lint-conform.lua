@@ -28,8 +28,7 @@ return {
       },
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
+        python = { 'ruff_organize_imports', 'ruff_format' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
@@ -67,8 +66,6 @@ return {
 
       linters_by_ft = {
         markdown = { 'markdownlint' },
-        python = { 'pylint', 'mypy', 'flake8' },
-
         scss = { 'stylelint' },
         css = { 'stylelint' },
         json = { 'jsonlint' },

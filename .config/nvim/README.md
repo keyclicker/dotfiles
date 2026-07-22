@@ -28,6 +28,8 @@ External Requirements:
 - A [Nerd Font](https://www.nerdfonts.com/): optional, provides various icons
   - if you have it set `vim.g.have_nerd_font` in `init.lua` to true
 - Language Setup:
+  - For Python, install `uv`, then install Neovim's Python provider with
+    `uv tool install --upgrade pynvim`. Ruff and ty are installed by Mason.
   - If want to write Typescript, you need `npm`
   - If want to write Golang, you will need `go`
   - etc.
@@ -226,4 +228,3 @@ sudo dnf install -y gcc make git ripgrep fd-find unzip neovim
 sudo pacman -S --noconfirm --needed gcc make git ripgrep fd unzip neovim
 ```
 </details>
-
