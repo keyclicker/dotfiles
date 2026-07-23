@@ -1,0 +1,98 @@
+{ pkgs, ... }:
+
+{
+  homebrew = {
+    enable = true;
+    casks = [
+      "blender"
+      "brave-browser"
+      "chatgpt"
+      "claude"
+      "discord"
+      "ghostty"
+      "imhex"
+      "karabiner-elements"
+      "obs"
+      "obsidian"
+      "postico"
+      "puremac"
+      "qbittorrent"
+      "spotify"
+      "visual-studio-code"
+      "xld"
+    ];
+  };
+
+  # Packages installed in the system profile.
+  environment.systemPackages = with pkgs; [
+    # Basics
+    coreutils
+    cmake
+    openssh
+    git
+    gh
+
+    # Shell tools
+    fd
+    wget
+    bat
+    fzf
+    ripgrep
+    tealdeer # Better-maintained replacement for tldr client
+    stow
+    p7zip
+    watch
+    tree
+    carapace
+    delta
+
+    # User tools
+    # neofetch
+    ffmpeg
+    tokei
+    mc
+    vifm
+    htop
+    btop
+
+    # Development
+    nodejs
+    pnpm
+    uv
+    luarocks
+    postgresql
+
+    # Containers
+    docker
+    docker-compose
+    docker-buildx
+    colima
+    lazydocker
+
+    # Workspace
+    skhd
+    tmux
+    neovim
+
+    # Encryption
+    gnupg
+    pinentry_mac
+
+    # Dependencies
+    tree-sitter
+
+    # Chess engines
+    stockfish
+    #gnuchess
+    #lc0
+
+    # AI
+    ollama
+
+    # Calculator
+    libqalculate
+
+    # Media downloader
+    yt-dlp
+  ];
+}

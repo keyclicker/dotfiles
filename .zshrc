@@ -27,7 +27,8 @@ export XDG_DATA_DIRS="/opt/homebrew/share"
 
 export LESS='-R'
 
-# ls coloring: LSCOLORS for BSD `ls -G`, LS_COLORS for GNU + completion menu
+# ls coloring: LSCOLORS for BSD, LS_COLORS for GNU + completion menu
+export CLICOLOR=1
 export LSCOLORS="Gxfxcxdxbxegedabagacad"
 export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
 
@@ -54,7 +55,11 @@ setopt share_history          # share command history data
 
 alias ..='cd ..'
 
-alias ls="ls -G"
+if command ls --color=auto -d . >/dev/null 2>&1; then
+  alias ls='ls --color=auto' # GNU
+else
+  alias ls='ls -G' # BSD
+fi
 alias la="ls -lAh"
 alias grep="grep --color"
 alias cl="clear; clear"
@@ -68,6 +73,9 @@ alias ffp="ffprobe -hide_banner"
 
 alias gw="git worktree"
 alias gs="git status"
+
+# nix rebuild
+alias nr="sudo darwin-rebuild switch --flake ~/nix"
 
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"

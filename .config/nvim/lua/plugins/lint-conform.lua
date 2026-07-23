@@ -50,6 +50,8 @@ return {
 
         go = { 'gofmt', 'gofumpt' },
 
+        -- nix = { 'nixfmt' },
+
         -- sh = { 'shfmt' },
         -- bash = { 'shfmt' },
         -- zsh = { 'shfmt' },
