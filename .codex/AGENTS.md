@@ -6,6 +6,73 @@
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
 
+## Kostyls
+
+Kostyl (Костиль/Костыль) - is an easy, fast and naive solution to a programming
+problem, that ignores underlying architectural issues.
+Usually introduced to be a temporary fix, but often it stays as a
+permanent technical debt.
+
+NEVER write kostyls yourself, offer a fix them if you see one.
+
+### LURK page (WARNING: IRONY)
+
+A **kostyl** *(scientific term: **palliative**; Wikipedian term:
+**workaround**)* is a way to add missing functionality or fix serious flaws
+without properly redesigning the system. Every kostyl makes further
+development more difficult. When a kostyl eliminates unintended
+functionality, it is called a **patch**.
+
+Definition from *Community.gifkostylism*:
+> A recursive IRL kostyl fixing itself.
+> An IRL kostyl fixing a door bug.
+> A typical implementation.
+
+There are many so-called **kostyls** in this world. There is no precise
+definition, but generally speaking, a kostyl is something attached to
+something else to solve a problem that has arisen—or to add
+functionality—instead of redesigning that “something,” possibly from
+scratch.
+
+Prominent examples of kostyls include IPsec, SMTP authentication, PPPoE,
+and so on.
+
+When a kostyl works perfectly and causes problems neither for users nor for
+developers, it may be considered a piece of **technological fastening
+hardware**.
+
+#### The essence
+
+Kostyls may be created because a developer is incapable of producing a more
+fundamental solution, or because a critical bug needs to be fixed quickly
+and there is not enough time to implement a more elegant solution.
+
+Such kostyls are called **temporary solutions**, but as the saying goes:
+
+> Nothing is more permanent than a temporary solution.
+
+A small kostyl is called a **dirty hack** or a **snot patch**. Like larger
+kostyls, these can create problems later.
+
+There is an opinion that programming has three main paradigms:
+
+- **kostylization**
+- **enkostylation**
+- **polykostylism**
+
+A synonym for code consisting almost entirely of kostyls is **Indian
+code**.
+
+#### Ways to deal with kostyls (JOKE)
+
+- Rewrite everything from scratch.
+- ~~Beat the author up.~~ Convince the author that this is a bad way to write
+  code, then rewrite everything from scratch.
+- ~~Kill the bastard.~~ Convince the PM that “only flies are born quickly,”
+  and revise the deadlines.
+- Add another kostyl.
+- Declare it a feature and build a clean application around it.
+
 ## Asking before acting
 
 ### Codex specific

@@ -20,6 +20,7 @@
       "spotify"
       "visual-studio-code"
       "xld"
+      "mactex-no-gui"
     ];
   };
 
@@ -56,6 +57,8 @@
     btop
 
     # Development
+    go
+    rustup
     nodejs
     pnpm
     uv

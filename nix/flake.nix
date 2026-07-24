@@ -36,8 +36,12 @@
           optimise.automatic = true;
         };
 
-        # Move windows by holding Control+Command and dragging anywhere.
-        system.defaults.NSGlobalDomain.NSWindowShouldDragOnGesture = true;
+        system.defaults.NSGlobalDomain = {
+          # Move windows by holding Control+Command and dragging anywhere.
+          NSWindowShouldDragOnGesture = true;
+          # No alternative characters on hold.
+          ApplePressAndHoldEnabled = false;
+        };
 
         # Keep Touch ID available inside long-running tmux sessions.
         security.pam.services.sudo_local = {

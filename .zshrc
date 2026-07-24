@@ -18,6 +18,7 @@ export EDITOR='nvim'
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 
 export GPG_TTY=$(tty)
