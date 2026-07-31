@@ -76,7 +76,7 @@ alias gw="git worktree"
 alias gs="git status"
 
 # nix rebuild
-alias nr="sudo darwin-rebuild switch --flake ~/nix"
+alias nr="sudo darwin-rebuild switch --flake ~/.nix#mac"
 
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
@@ -123,7 +123,7 @@ cll() {
 #                 Init utilities
 # =========================================================
 
-source <(fzf --zsh)
+command -v fzf >/dev/null && source <(fzf --zsh)
 
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -147,7 +147,7 @@ zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' switch-group '<' '>'
 
-source <(carapace _carapace)
+command -v carapace >/dev/null && source <(carapace _carapace)
 
 # =========================================================
 #                    Robby Russell theme
@@ -167,7 +167,7 @@ git_prompt_info() {
   echo "${ZSH_THEME_GIT_PROMPT_PREFIX}${ref}${dirty}${ZSH_THEME_GIT_PROMPT_SUFFIX}"
 }
 
-PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%}"
+PROMPT="%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[magenta]%}%m%{$reset_color%} %{$fg[cyan]%}%c%{$reset_color%}"
 PROMPT+=' $(git_prompt_info)'
 
 # Background job count on the right, only when ≥1 (s pluralizes at ≥2)

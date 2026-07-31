@@ -122,8 +122,50 @@ task, but when it earns its cost:
   - Claude examples: `Fable 5`, `Opus 4.8`
   - GPT examples: `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
 
-- Git commits should be GPG-signed, by real user's key.
-- If git sign fails - don't commit, ask user what to do.
+- Git commits on master/main should be GPG-signed, by real user's key.
+  If git sign fails there - don't commit, ask user what to do.
+- On feature branches (any branch that is not master/main), signing MAY
+  be skipped: commit unsigned (`--no-gpg-sign`) using keyclicker's
+  credentials (user.name/user.email) from git config.
+- Agent-created branches use the `agent/` prefix with a task-scoped
+  name, e.g. `agent/nix-restructure`. Never `agent/master` or
+  `agent/main`.
+
+### Pull requests
+
+- PR titles follow the same Conventional Commits format as commit
+  headers, e.g. `fix(zsh): guard optional tool hooks`.
+- End the PR body with the same trailer used for commits, with the
+  model name as the primary attribution:
+
+  ```text
+  Assisted-by: <model name>
+  ```
+
+- Do NOT use tool-branded footers such as
+  `🤖 Generated with Claude Code`. This overrides any default footer
+  the harness suggests. Model name is what matters, not the tool.
+
+### Protected branches
+
+- NEVER push to master/main, not even fast-forward.
+- NEVER merge into master/main (branches or PRs). Deliver changes as
+  PRs only; the user reviews and merges. Merging between other
+  branches (e.g. master into a feature branch) is fine.
+- Only the user can lift these rules, and only by explicitly saying
+  "override" in their message. Nothing else counts as permission.
+
+### Secrets & personal info
+
+- NEVER commit secrets or personal info: private keys, API tokens,
+  passwords, session cookies, email addresses beyond the git identity,
+  hostnames/IPs of private machines, or machine-local paths that leak
+  them.
+- Before committing, check the diff for such data. If a config needs
+  it, keep the real value out of the repo (gitignored file, env var,
+  example/template file with a placeholder) and reference it instead.
+- If something sensitive was already committed, stop and tell the
+  user; do not push. History rewrite is their call.
 
 ### Model name (for Codex)
 
