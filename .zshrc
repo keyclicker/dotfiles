@@ -122,7 +122,7 @@ cll() {
 #                 Init utilities
 # =========================================================
 
-source <(fzf --zsh)
+command -v fzf >/dev/null && source <(fzf --zsh)
 
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -146,7 +146,7 @@ zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' switch-group '<' '>'
 
-source <(carapace _carapace)
+command -v carapace >/dev/null && source <(carapace _carapace)
 
 # =========================================================
 #                    Robby Russell theme
