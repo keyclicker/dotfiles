@@ -16,6 +16,11 @@
 [init]
 	defaultBranch = master
 
+; Machine-local settings (credential helpers, etc.) live outside the
+; repo. Last include wins on key conflicts.
+[include]
+	path = ~/.gitconfig.local
+
 ; [interactive]
 ;     diffFilter = delta --color-only
 ;
