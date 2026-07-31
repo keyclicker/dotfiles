@@ -95,4 +95,4 @@ cmd + ctrl + alt - o : input select com.apple.keylayout.RussianWin
 # launch Ghosty
 # cmd + ctrl + alt - return : open -a Ghostty; skhd -k "cmd - n"
 
-cmd + ctrl + alt - v : aj paste; skhd -k "cmd - v"
+cmd + ctrl + alt - v : "$HOME/.local/bin/agent-jail" paste && skhd -k "cmd - v"

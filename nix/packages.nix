@@ -10,6 +10,7 @@
       "claude"
       "discord"
       "ghostty"
+      "github"
       "imhex"
       "karabiner-elements"
       "obs"
@@ -18,9 +19,12 @@
       "puremac"
       "qbittorrent"
       "spotify"
+      "tailscale-app"
       "visual-studio-code"
       "xld"
       "mactex-no-gui"
+      "raspberry-pi-imager"
+      "t3-code"
     ];
   };
 
@@ -64,6 +68,7 @@
     uv
     luarocks
     postgresql
+    postgresql.pg_config
 
     # Containers
     docker
