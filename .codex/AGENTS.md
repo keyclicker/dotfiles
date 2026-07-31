@@ -55,8 +55,14 @@ task, but when it earns its cost:
   - Claude examples: `Fable 5`, `Opus 4.8`
   - GPT examples: `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
 
-- Git commits should be GPG-signed, by real user's key.
-- If git sign fails - don't commit, ask user what to do.
+- Git commits on master/main should be GPG-signed, by real user's key.
+  If git sign fails there - don't commit, ask user what to do.
+- On feature branches (any branch that is not master/main), signing MAY
+  be skipped: commit unsigned (`--no-gpg-sign`) using keyclicker's
+  credentials (user.name/user.email) from git config.
+- Agent-created branches use the `agent/` prefix with a task-scoped
+  name, e.g. `agent/nix-restructure`. Never `agent/master` or
+  `agent/main`.
 
 ### Model name (for Codex)
 
