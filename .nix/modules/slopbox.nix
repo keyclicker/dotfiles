@@ -13,7 +13,7 @@
     };
     path = [
       pkgs.bash
-      pkgs.nodejs_24
+      pkgs.nodejs
     ];
     serviceConfig = {
       Type = "simple";
@@ -23,7 +23,7 @@
       StateDirectory = "t3";
       StateDirectoryMode = "0700";
       ExecStart = "${pkgs.writeShellScript "t3-server" ''
-        exec ${pkgs.nodejs_24}/bin/npx --yes t3@latest \
+        exec ${pkgs.nodejs}/bin/npx --yes t3@latest \
           --mode web \
           --host 0.0.0.0 \
           --port 3773 \
@@ -37,15 +37,15 @@
 
   environment.systemPackages = with pkgs; [
     (writeShellScriptBin "t3" ''
-      exec ${nodejs_24}/bin/npx --yes t3@latest "$@"
+      exec ${nodejs}/bin/npx --yes t3@latest "$@"
     '')
 
     (writeShellScriptBin "codex" ''
-      exec ${nodejs_24}/bin/npx --yes @openai/codex@latest "$@"
+      exec ${nodejs}/bin/npx --yes @openai/codex@latest "$@"
     '')
 
     (writeShellScriptBin "claude" ''
-      exec ${nodejs_24}/bin/npx --yes @anthropic-ai/claude-code@latest "$@"
+      exec ${nodejs}/bin/npx --yes @anthropic-ai/claude-code@latest "$@"
     '')
   ];
 }

@@ -1,4 +1,5 @@
-# Shared by every machine (darwin + NixOS).
+# Shared by every machine (darwin + NixOS): nix settings + the
+# cross-platform CLI tools the dotfiles depend on.
 { pkgs, ... }:
 
 {
@@ -19,5 +20,60 @@
     optimise.automatic = true;
   };
 
-  environment.systemPackages = (import ../packages.nix { inherit pkgs; }).common;
+  environment.systemPackages = with pkgs; [
+    # Basics
+    coreutils
+    cmake
+    openssh
+    git
+    gh
+
+    # Shell tools
+    fd
+    wget
+    bat
+    fzf
+    ripgrep
+    tealdeer # Better-maintained replacement for tldr client
+    stow
+    p7zip
+    watch
+    tree
+    carapace
+    delta
+
+    # User tools
+    tokei
+    mc
+    vifm
+    htop
+    btop
+
+    # Development
+    nodejs
+    pnpm
+    uv
+    luarocks
+    go
+    rustup
+    postgresql
+    postgresql.pg_config
+
+    # Media
+    ffmpeg
+
+    # Containers (docker itself is per-host: daemon on NixOS, colima on mac)
+    docker-compose
+    lazydocker
+
+    # Workspace
+    tmux
+    neovim
+
+    # Encryption
+    gnupg
+
+    # Dependencies
+    tree-sitter
+  ];
 }

@@ -1,6 +1,20 @@
-# Shared by desktops (darwin + NixOS).
+# Shared by desktops (mac + future NixOS desktop).
 { pkgs, ... }:
 
 {
-  environment.systemPackages = (import ../packages.nix { inherit pkgs; }).desktop;
+  environment.systemPackages = with pkgs; [
+    # Chess engines
+    stockfish
+    #gnuchess
+    #lc0
+
+    # AI
+    ollama
+
+    # Calculator
+    libqalculate
+
+    # Media downloader
+    yt-dlp
+  ];
 }

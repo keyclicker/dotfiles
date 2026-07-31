@@ -8,6 +8,8 @@
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -16,6 +18,7 @@
       nixpkgs,
       nixpkgs-darwin,
       nix-darwin,
+      home-manager,
     }:
     {
       # $ sudo darwin-rebuild switch --flake ~/.nix#mac
@@ -38,5 +41,13 @@
           ./hosts/agents.nix
         ];
       };
+
+      # Ubuntu pi: apt system, nix user environment.
+      # $ home-manager switch --flake ~/.nix#keyclicker@raspberry
+      homeConfigurations."keyclicker@raspberry" =
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.aarch64-linux;
+          modules = [ ./hosts/raspberry.nix ];
+        };
     };
 }

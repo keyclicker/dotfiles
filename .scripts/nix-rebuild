@@ -1,0 +1,32 @@
+#!/bin/sh
+# Rebuild this machine from the ~/.nix flake.
+#
+# Usage: nix-rebuild [host] [extra rebuild args...]
+#   host defaults to "mac" on darwin, short hostname on NixOS.
+set -eu
+
+flake="$HOME/.nix"
+
+case "$(uname -s)" in
+  Darwin) mode=darwin; default_host=mac ;;
+  Linux)
+    # NixOS rebuilds the system; other distros (Ubuntu pi) only get a
+    # home-manager user environment.
+    if [ -e /etc/NIXOS ]; then mode=nixos; else mode=home; fi
+    default_host="$(hostname -s)"
+    ;;
+  *) echo "nix-rebuild: unsupported OS: $(uname -s)" >&2; exit 1 ;;
+esac
+
+# First arg is a host name unless it looks like a flag.
+host="$default_host"
+if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+  host="$1"
+  shift
+fi
+
+case "$mode" in
+  darwin) exec sudo darwin-rebuild switch --flake "$flake#$host" "$@" ;;
+  nixos)  exec sudo nixos-rebuild switch --flake "$flake#$host" "$@" ;;
+  home)   exec home-manager switch --flake "$flake#$USER@$host" "$@" ;;
+esac

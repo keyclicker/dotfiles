@@ -59,10 +59,8 @@
   environment.systemPackages = with pkgs; [
     # Containers
     docker
-    docker-compose
     docker-buildx
     colima
-    lazydocker
 
     # Workspace
     skhd

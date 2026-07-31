@@ -48,19 +48,15 @@
   # Nix build sandbox unavailable inside the LXC container.
   nix.settings.sandbox = false;
 
-  # Agent-specific packages; cross-platform CLI tools (git, gh, neovim,
-  # tmux, fzf, ripgrep, tree-sitter, ...) come from modules/common.nix,
-  # server basics (zsh, terminfo, docker, tailscale) from modules/server.nix,
-  # AI coding agents from modules/slopbox.nix.
+  # Agent-specific packages; cross-platform CLI tools come from
+  # modules/common.nix, server basics (zsh, terminfo, docker, tailscale)
+  # from modules/server.nix, AI coding agents from modules/slopbox.nix.
+  # node, go, and rust (rustup) now come from modules/common.nix.
   environment.systemPackages = with pkgs; [
-    nodejs_24
     python3
     gcc
     gnumake
     pkg-config
-    go
-    rustc
-    cargo
     chromium
     playwright-test
 
@@ -69,7 +65,6 @@
       export AGENT_BROWSER_ARGS="--no-sandbox"
       exec ${lib.getExe agent-browser} "$@"
     '')
-
   ];
 
   system.stateVersion = "26.11";

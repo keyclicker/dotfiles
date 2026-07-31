@@ -76,7 +76,7 @@ alias gw="git worktree"
 alias gs="git status"
 
 # nix rebuild
-alias nr="sudo darwin-rebuild switch --flake ~/.nix#mac"
+alias nr="nix-rebuild"
 
 alias em="emacsclient -c -a \"emacs\""
 alias vi="nvim"
