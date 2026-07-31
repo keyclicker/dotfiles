@@ -64,6 +64,29 @@ task, but when it earns its cost:
   name, e.g. `agent/nix-restructure`. Never `agent/master` or
   `agent/main`.
 
+### Pull requests
+
+- PR titles follow the same Conventional Commits format as commit
+  headers, e.g. `fix(zsh): guard optional tool hooks`.
+- End the PR body with the same trailer used for commits, with the
+  model name as the primary attribution:
+
+  ```text
+  Assisted-by: <model name>
+  ```
+
+- Do NOT use tool-branded footers such as
+  `🤖 Generated with Claude Code`. This overrides any default footer
+  the harness suggests. Model name is what matters, not the tool.
+
+### Protected branches
+
+- NEVER push to master/main, not even fast-forward.
+- NEVER merge branches or PRs. Deliver changes as PRs only; the user
+  reviews and merges.
+- Only the user can lift these rules, and only by explicitly saying
+  "override" in their message. Nothing else counts as permission.
+
 ### Model name (for Codex)
 
 - This section applies only to Codex.
