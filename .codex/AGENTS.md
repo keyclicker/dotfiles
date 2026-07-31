@@ -88,6 +88,18 @@ task, but when it earns its cost:
 - Only the user can lift these rules, and only by explicitly saying
   "override" in their message. Nothing else counts as permission.
 
+### Secrets & personal info
+
+- NEVER commit secrets or personal info: private keys, API tokens,
+  passwords, session cookies, email addresses beyond the git identity,
+  hostnames/IPs of private machines, or machine-local paths that leak
+  them.
+- Before committing, check the diff for such data. If a config needs
+  it, keep the real value out of the repo (gitignored file, env var,
+  example/template file with a placeholder) and reference it instead.
+- If something sensitive was already committed, stop and tell the
+  user; do not push. History rewrite is their call.
+
 ### Model name (for Codex)
 
 - This section applies only to Codex.
