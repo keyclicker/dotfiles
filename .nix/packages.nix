@@ -1,30 +1,8 @@
-{ pkgs, ... }:
+{ pkgs }:
 
 {
-  homebrew = {
-    enable = true;
-    casks = [
-      "blender"
-      "brave-browser"
-      "chatgpt"
-      "claude"
-      "discord"
-      "ghostty"
-      "imhex"
-      "karabiner-elements"
-      "obs"
-      "obsidian"
-      "postico"
-      "puremac"
-      "qbittorrent"
-      "spotify"
-      "visual-studio-code"
-      "xld"
-    ];
-  };
-
-  # Packages installed in the system profile.
-  environment.systemPackages = with pkgs; [
+  # Cross-platform CLI tools the dotfiles depend on. Installed everywhere.
+  common = with pkgs; [
     # Basics
     coreutils
     cmake
@@ -47,8 +25,6 @@
     delta
 
     # User tools
-    # neofetch
-    ffmpeg
     tokei
     mc
     vifm
@@ -56,30 +32,26 @@
     btop
 
     # Development
-    nodejs
     pnpm
     uv
     luarocks
-    postgresql
-
-    # Containers
-    docker
-    docker-compose
-    docker-buildx
-    colima
-    lazydocker
 
     # Workspace
-    skhd
     tmux
     neovim
 
     # Encryption
     gnupg
-    pinentry_mac
 
     # Dependencies
     tree-sitter
+  ];
+
+  # Shared by desktops (mac + future NixOS desktop).
+  desktop = with pkgs; [
+    ffmpeg
+    nodejs
+    postgresql
 
     # Chess engines
     stockfish
