@@ -82,8 +82,9 @@ task, but when it earns its cost:
 ### Protected branches
 
 - NEVER push to master/main, not even fast-forward.
-- NEVER merge branches or PRs. Deliver changes as PRs only; the user
-  reviews and merges.
+- NEVER merge into master/main (branches or PRs). Deliver changes as
+  PRs only; the user reviews and merges. Merging between other
+  branches (e.g. master into a feature branch) is fine.
 - Only the user can lift these rules, and only by explicitly saying
   "override" in their message. Nothing else counts as permission.
 
