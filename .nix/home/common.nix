@@ -1,0 +1,58 @@
+# Symlinks $HOME dotfiles to their live copies in ~/.dotfiles.
+# Out-of-store links: edits apply immediately, no rebuild needed.
+# Requires the repo checked out at ~/.dotfiles on every host.
+{ config, pkgs, ... }:
+
+let
+  dotfiles = "${config.home.homeDirectory}/.dotfiles";
+  link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
+  inherit (pkgs.stdenv) isDarwin;
+in
+{
+  home.file =
+    {
+      # Suppress the "Last login" banner in login shells
+      ".hushlogin".text = "";
+
+      # Shell / editors / multiplexer
+      ".zshrc".source = link ".zshrc";
+      ".zshenv".source = link ".zshenv";
+      ".gitconfig".source = link ".gitconfig";
+      ".tmux.conf".source = link ".tmux.conf";
+      ".vimrc".source = link ".vimrc";
+      ".scripts".source = link ".scripts";
+
+      # ~/.config: per-subdir links — other apps own entries there too
+      ".config/nvim".source = link ".config/nvim";
+      ".config/git".source = link ".config/git";
+      ".config/mc".source = link ".config/mc";
+      ".config/yazi".source = link ".config/yazi";
+      ".config/opencode".source = link ".config/opencode";
+      ".config/caveman".source = link ".config/caveman";
+
+      # AI agents: per-entry — settings.json, transcripts/, memory/
+      # stay machine-local
+      ".claude/CLAUDE.md".source = link ".claude/CLAUDE.md";
+      ".claude/commands".source = link ".claude/commands";
+      ".claude/agents".source = link ".claude/agents";
+      ".claude/skills".source = link ".claude/skills";
+      ".codex/AGENTS.md".source = link ".codex/AGENTS.md";
+    }
+    // (
+      if isDarwin then
+        {
+          # brew shellenv
+          ".zprofile".source = link ".zprofile";
+          # per-file: ~/.gnupg holds keys and must stay 700
+          ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
+          # pinentry-mac path makes this darwin-only
+          ".gnupg/gpg-agent.conf".source = link ".gnupg/gpg-agent.conf";
+        }
+      else
+        { }
+    );
+
+  # Used for backwards compatibility, please read the changelog before
+  # changing: $ home-manager changelog
+  home.stateVersion = "26.05";
+}

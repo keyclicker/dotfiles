@@ -1,5 +1,3 @@
-clear
-
 # Quick terminal runs qalc instead of a shell
 if [[ -n $GHOSTTY_QUICK_TERMINAL ]] && command -v qalc >/dev/null; then
   cd
@@ -61,6 +59,7 @@ if command ls --color=auto -d . >/dev/null 2>&1; then
 else
   alias ls='ls -G' # BSD
 fi
+
 alias la="ls -lAh"
 alias grep="grep --color"
 alias cl="clear; clear"
@@ -111,12 +110,6 @@ git-pwd() {
   else
     pwd
   fi
-}
-
-cll() {
-  local root
-  root=$(git-pwd)
-  claude --settings "{\"autoMemoryDirectory\":\"$root/.claude/memory\"}" "$@"
 }
 
 # =========================================================

@@ -21,17 +21,31 @@
       home-manager,
     }:
     {
-      # $ sudo darwin-rebuild switch --flake ~/.nix#mac
+      # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
         modules = [
           ./modules/common.nix
           ./modules/desktop.nix
           ./hosts/mac.nix
+          home-manager.darwinModules.home-manager
+          {
+            # Required by the home-manager darwin module.
+            users.users.keyclicker.home = "/Users/keyclicker";
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [
+                ./home/common.nix
+                ./home/desktop.nix
+              ];
+            };
+          }
           { system.configurationRevision = self.rev or self.dirtyRev or null; }
         ];
       };
 
-      # $ sudo nixos-rebuild switch --flake ~/.nix#agents
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
       nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         modules = [
@@ -39,11 +53,20 @@
           ./modules/server.nix
           ./modules/slopbox.nix
           ./hosts/agents.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [ ./home/common.nix ];
+            };
+          }
         ];
       };
 
       # Ubuntu pi: apt system, nix user environment.
-      # $ home-manager switch --flake ~/.nix#keyclicker@raspberry
+      # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
       homeConfigurations."keyclicker@raspberry" =
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.aarch64-linux;

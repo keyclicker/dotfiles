@@ -3,12 +3,14 @@
 #
 # Bootstrap on the pi:
 #   $ sh <(curl -L https://nixos.org/nix/install) --daemon
-#   $ nix run home-manager -- switch --flake ~/.nix#keyclicker@raspberry
+#   $ nix run home-manager -- switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
 # Afterwards:
-#   $ home-manager switch --flake ~/.nix#keyclicker@raspberry
+#   $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
 { pkgs, ... }:
 
 {
+  imports = [ ../home/common.nix ];
+
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";
 
@@ -29,7 +31,5 @@
 
   programs.home-manager.enable = true;
 
-  # Used for backwards compatibility, please read the changelog before
-  # changing: $ home-manager changelog
-  home.stateVersion = "26.05";
+  # home.stateVersion comes from home/common.nix.
 }

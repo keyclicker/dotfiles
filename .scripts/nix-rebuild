@@ -1,11 +1,11 @@
 #!/bin/sh
-# Rebuild this machine from the ~/.nix flake.
+# Rebuild this machine from the ~/.dotfiles/.nix flake.
 #
 # Usage: nix-rebuild [host] [extra rebuild args...]
 #   host defaults to "mac" on darwin, short hostname on NixOS.
 set -eu
 
-flake="$HOME/.nix"
+flake="$HOME/.dotfiles/.nix"
 
 case "$(uname -s)" in
   Darwin) mode=darwin; default_host=mac ;;
