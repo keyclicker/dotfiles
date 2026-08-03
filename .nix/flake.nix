@@ -26,6 +26,7 @@
         modules = [
           ./modules/common.nix
           ./modules/desktop.nix
+          ./modules/agents.nix
           ./hosts/mac.nix
           home-manager.darwinModules.home-manager
           {
@@ -51,6 +52,7 @@
         modules = [
           ./modules/common.nix
           ./modules/server.nix
+          ./modules/agents.nix
           ./modules/slopbox.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager

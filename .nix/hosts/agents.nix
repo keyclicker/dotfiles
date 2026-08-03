@@ -48,10 +48,10 @@
   # Nix build sandbox unavailable inside the LXC container.
   nix.settings.sandbox = false;
 
-  # Agent-specific packages; cross-platform CLI tools come from
+  # Host-specific packages; cross-platform CLI tools come from
   # modules/common.nix, server basics (zsh, terminfo, docker, tailscale)
-  # from modules/server.nix, AI coding agents from modules/slopbox.nix.
-  # node, go, and rust (rustup) now come from modules/common.nix.
+  # from modules/server.nix, AI coding agents from modules/agents.nix,
+  # t3 web server from modules/slopbox.nix.
   environment.systemPackages = with pkgs; [
     python3
     gcc

@@ -9,26 +9,32 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 ```
 .nix/
 ├── flake.nix           # inputs + one output per machine:
-│                       # mac       = common + desktop + hosts/mac
-│                       #             + home/common + home/desktop
-│                       # agents    = common + server + slopbox
-│                       #             + hosts/agents + home/common
+│                       # mac       = common + desktop + agents
+│                       #             + hosts/mac + home/common
+│                       #             + home/desktop
+│                       # agents    = common + server + agents +
+│                       #             slopbox + hosts/agents
+│                       #             + home/common
 │                       # raspberry = standalone home-manager,
-│                       #             hosts/raspberry (home/common
-│                       #             + common's packages)
+│                       #             home/standalone + hosts/raspberry
 ├── modules/            # system modules (nix-darwin / NixOS)
 │   ├── common.nix      # every machine: nix settings (flakes, gc,
 │   │                   # optimise) + cross-platform CLI tools
 │   ├── desktop.nix     # desktops: shared desktop packages
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
 │   │                   # mDNS resolution, tailscale, docker, terminfo
-│   └── slopbox.nix     # AI coding agents: claude, codex, t3 CLI
-│                       # wrappers + t3 web server (port 3773)
+│   ├── agents.nix      # AI coding agent CLIs (claude, codex,
+│   │                   # opencode), every machine
+│   └── slopbox.nix     # t3 code: CLI wrapper + web server
+│                       # (port 3773)
 ├── home/               # home-manager modules, mirror modules/ layers
 │   ├── common.nix      # core dotfile symlinks (shell, git, tmux,
 │   │                   # vim, nvim, scripts, ai)
-│   └── desktop.nix     # GUI/desktop dotfile symlinks
-│                       # (.doom.d, ghostty, karabiner, sway, ...)
+│   ├── desktop.nix     # GUI/desktop dotfile symlinks
+│   │                   # (.doom.d, ghostty, karabiner, sway, ...)
+│   └── standalone.nix  # foreign (non-NixOS) Linux: emulates the
+│                       # system layer at user level — common's
+│                       # packages as home.packages, user gc
 └── hosts/              # leaves: machine-specific config + packages
     ├── mac.nix         # nix-darwin: homebrew casks, macOS defaults
     ├── agents.nix      # NixOS LXC guest: networking, toolchains
@@ -56,11 +62,14 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
   of its modules' `environment.systemPackages` — read the module list
   in `flake.nix`, then each module is self-contained. No separate
   package data file to cross-reference.
-- **Reuse on non-NixOS hosts**: the raspberry home-manager config feeds
-  `common`'s `environment.systemPackages` into `home.packages` by
-  importing the module directly. This works while `modules/common.nix`
-  stays a plain `{ pkgs, ... }` function; the moment it needs
-  config/lib, extract the package list into shared data instead.
+- **Reuse on non-NixOS hosts**: `home/standalone.nix` is the role
+  module for machines where the distro owns the system layer — it
+  feeds `common`'s `environment.systemPackages` into `home.packages`
+  by importing the module directly and re-declares user-level gc.
+  This works while `modules/common.nix` stays a plain `{ pkgs, ... }`
+  function; the moment it needs config/lib, extract the package list
+  into shared data instead. Host leaves (raspberry) stay identity-only:
+  username, home directory.
 - **Layers**: `common` = everywhere. `desktop` = mac + future NixOS
   desktop. Role modules (`server`, `slopbox`) add only packages coupled
   to the services they configure. Host-only packages stay in the host

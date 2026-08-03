@@ -5,6 +5,14 @@
     primaryUser = "keyclicker";
   };
 
+  # Pin the name — macOS silently renames to "MacBookPro" after name
+  # conflicts on the network, OS updates, or iCloud sync.
+  networking = {
+    hostName = "mac";
+    localHostName = "mac";
+    computerName = "mac";
+  };
+
   system.defaults.NSGlobalDomain = {
     # Move windows by holding Control+Command and dragging anywhere.
     NSWindowShouldDragOnGesture = true;

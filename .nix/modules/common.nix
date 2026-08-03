@@ -3,6 +3,8 @@
 { pkgs, ... }:
 
 {
+  time.timeZone = "America/Vancouver";
+
   nix = {
     # Necessary for using flakes on this system.
     settings.experimental-features = [

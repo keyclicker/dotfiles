@@ -19,7 +19,9 @@ window-padding-y = 0
 
 cursor-style = bar
 cursor-style-blink = false
-shell-integration-features = no-cursor
+# ssh-terminfo: auto-install xterm-ghostty terminfo on remote hosts;
+# ssh-env: fall back to TERM=xterm-256color + COLORTERM where it can't
+shell-integration-features = no-cursor,ssh-env,ssh-terminfo
 adjust-cursor-thickness = 2
 cursor-invert-fg-bg = false
 cursor-text = #0b0d0b

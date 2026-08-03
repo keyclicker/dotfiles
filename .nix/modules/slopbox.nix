@@ -1,4 +1,4 @@
-# AI coding agents: claude, codex, t3 (CLI wrappers + t3 web server).
+# T3 Code: CLI wrapper + web server.
 { pkgs, ... }:
 
 {
@@ -38,14 +38,6 @@
   environment.systemPackages = with pkgs; [
     (writeShellScriptBin "t3" ''
       exec ${nodejs}/bin/npx --yes t3@latest "$@"
-    '')
-
-    (writeShellScriptBin "codex" ''
-      exec ${nodejs}/bin/npx --yes @openai/codex@latest "$@"
-    '')
-
-    (writeShellScriptBin "claude" ''
-      exec ${nodejs}/bin/npx --yes @anthropic-ai/claude-code@latest "$@"
     '')
   ];
 }
