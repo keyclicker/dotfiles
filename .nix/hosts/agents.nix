@@ -54,7 +54,6 @@
   # t3 web server from modules/slopbox.nix.
   environment.systemPackages = with pkgs; [
     python3
-    gcc
     gnumake
     pkg-config
     chromium
