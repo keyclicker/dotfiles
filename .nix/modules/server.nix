@@ -9,7 +9,6 @@
   virtualisation.docker.enable = true;
 
   environment.systemPackages = with pkgs; [
-    zsh
     ncurses
     ghostty.terminfo
   ];

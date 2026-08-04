@@ -29,8 +29,13 @@
     git
     gh
 
+    # Shell (NixOS hosts also set programs.zsh.enable in server.nix;
+    # foreign hosts get the binary from here)
+    zsh
+
     # Shell tools
     fd
+    rsync
     wget
     bat
     fzf

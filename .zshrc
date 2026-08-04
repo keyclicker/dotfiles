@@ -71,6 +71,11 @@ alias yt="yt-dlp"
 alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
 
+# rsync: archive, human sizes, resumable with progress (-P)
+alias rs="rsync -avhP"
+alias rsd="rsync -avhP --delete" # mirror: removes extra files at target
+alias rsc="rsync -avhn --delete --itemize-changes" # check: dry-run diff, no changes
+
 alias gw="git worktree"
 alias gs="git status"
 
