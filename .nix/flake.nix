@@ -25,6 +25,7 @@
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
         modules = [
           ./modules/common.nix
+          ./modules/dev.nix
           ./modules/desktop.nix
           ./modules/agents.nix
           ./hosts/mac.nix
@@ -51,6 +52,7 @@
         system = "aarch64-linux";
         modules = [
           ./modules/common.nix
+          ./modules/dev.nix
           ./modules/server.nix
           ./modules/agents.nix
           ./modules/slopbox.nix
@@ -73,6 +75,14 @@
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.aarch64-linux;
           modules = [ ./hosts/raspberry.nix ];
+        };
+
+      # Ubuntu VPS: apt system, nix user environment, no agent CLIs.
+      # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
+      homeConfigurations."keyclicker@vps" =
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          modules = [ ./hosts/vps.nix ];
         };
     };
 }

@@ -10,9 +10,9 @@
   # System packages become user packages. The imported modules must
   # stay plain { pkgs, ... } functions for this to keep working; the
   # moment one needs config/lib, extract its list into shared data.
+  # Extras (dev toolchains, agent CLIs) are added by the host leaf.
   home.packages =
     (import ../modules/common.nix { inherit pkgs; }).environment.systemPackages
-    ++ (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
     ++ [
       # Terminfo for terminals the distro's ncurses doesn't know yet;
       # picked up via TERMINFO_DIRS exported in .zshenv.

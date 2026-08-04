@@ -25,7 +25,6 @@
   environment.systemPackages = with pkgs; [
     # Basics
     coreutils
-    cmake
     openssh
     git
     gh
@@ -51,16 +50,6 @@
     htop
     btop
 
-    # Development
-    nodejs
-    pnpm
-    uv
-    luarocks
-    go
-    rustup
-    postgresql
-    postgresql.pg_config
-
     # Media
     ffmpeg
 
@@ -76,6 +65,6 @@
     gnupg
 
     # Dependencies
-    tree-sitter
+    tree-sitter # nvim
   ];
 }

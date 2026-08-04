@@ -9,17 +9,21 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 ```
 .nix/
 ├── flake.nix           # inputs + one output per machine:
-│                       # mac       = common + desktop + agents
+│                       # mac       = common + dev + desktop + agents
 │                       #             + hosts/mac + home/common
 │                       #             + home/desktop
-│                       # agents    = common + server + agents +
+│                       # agents    = common + dev + server + agents +
 │                       #             slopbox + hosts/agents
 │                       #             + home/common
 │                       # raspberry = standalone home-manager,
 │                       #             home/standalone + hosts/raspberry
+│                       # vps       = standalone home-manager,
+│                       #             home/standalone + hosts/vps
 ├── modules/            # system modules (nix-darwin / NixOS)
 │   ├── common.nix      # every machine: nix settings (flakes, gc,
-│   │                   # optimise) + cross-platform CLI tools
+│   │                   # optimise) + core cross-platform CLI tools
+│   ├── dev.nix         # dev toolchains (cmake, node, go, rust,
+│   │                   # postgres, ...); every full machine
 │   ├── desktop.nix     # desktops: shared desktop packages
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
 │   │                   # mDNS resolution, tailscale, docker, terminfo
@@ -38,7 +42,8 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 └── hosts/              # leaves: machine-specific config + packages
     ├── mac.nix         # nix-darwin: homebrew casks, macOS defaults
     ├── agents.nix      # NixOS LXC guest: networking, toolchains
-    └── raspberry.nix   # Ubuntu pi: home-manager user env, apt system
+    ├── raspberry.nix   # Ubuntu pi: home-manager user env, apt system
+    └── vps.nix         # Ubuntu VPS: like raspberry, no agent CLIs
 ```
 
 ## Design
@@ -66,10 +71,11 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
   module for machines where the distro owns the system layer — it
   feeds `common`'s `environment.systemPackages` into `home.packages`
   by importing the module directly and re-declares user-level gc.
-  This works while `modules/common.nix` stays a plain `{ pkgs, ... }`
-  function; the moment it needs config/lib, extract the package list
-  into shared data instead. Host leaves (raspberry) stay identity-only:
-  username, home directory.
+  This works while the imported modules stay plain `{ pkgs, ... }`
+  functions; the moment one needs config/lib, extract the package list
+  into shared data instead. Host leaves add their extra layers the
+  same way (raspberry: dev + agents, vps: dev) on top of identity
+  (username, home directory).
 - **Layers**: `common` = everywhere. `desktop` = mac + future NixOS
   desktop. Role modules (`server`, `slopbox`) add only packages coupled
   to the services they configure. Host-only packages stay in the host
@@ -97,6 +103,9 @@ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 # raspberry (Ubuntu, user environment only; see hosts/raspberry.nix
 # for first-time bootstrap)
 home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
+
+# vps (Ubuntu, user environment only, no agent CLIs; see hosts/vps.nix)
+home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
 ```
 
 The flake is addressed as `~/.dotfiles/.nix` directly; the old `~/.nix`

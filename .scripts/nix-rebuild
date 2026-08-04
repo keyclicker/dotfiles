@@ -28,5 +28,13 @@ fi
 case "$mode" in
   darwin) exec sudo darwin-rebuild switch --flake "$flake#$host" "$@" ;;
   nixos)  exec sudo nixos-rebuild switch --flake "$flake#$host" "$@" ;;
-  home)   exec home-manager switch --flake "$flake#$USER@$host" "$@" ;;
+  home)
+    # First switch on a fresh host: home-manager isn't installed yet
+    # (programs.home-manager.enable only applies after activation).
+    if command -v home-manager >/dev/null 2>&1; then
+      exec home-manager switch --flake "$flake#$USER@$host" "$@"
+    else
+      exec nix run home-manager -- switch --flake "$flake#$USER@$host" "$@"
+    fi
+    ;;
 esac
