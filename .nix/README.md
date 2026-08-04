@@ -91,6 +91,10 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 ## Usage
 
 ```sh
+# fresh machine: install nix if missing, enable flakes, first switch;
+# optional second arg sets the login shell from the nix profile
+~/.dotfiles/install.sh vps zsh
+
 # any machine (wraps the right rebuild command)
 nix-rebuild
 
