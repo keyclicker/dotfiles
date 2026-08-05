@@ -15,13 +15,10 @@ mkdir -p "$INSTALL_DIR"
 install -m 755 "$SOURCE_DIR/agent-jail" "$INSTALL_DIR/agent-jail"
 install -m 644 \
     "$SOURCE_DIR/Dockerfile" \
-    "$SOURCE_DIR/flake.nix" \
-    "$SOURCE_DIR/flake.lock" \
     "$SOURCE_DIR/jail-prompt.md" \
     "$INSTALL_DIR/"
 cp -R \
     "$SOURCE_DIR/config-templates" \
-    "$SOURCE_DIR/user-flake" \
     "$SOURCE_DIR/agent-flake" \
     "$INSTALL_DIR/"
 

@@ -8,21 +8,21 @@ beyond the project directory you launch it from.
 cd ~/some-project
 agent-jail --claude # Claude Code (also the default)
 agent-jail --codex  # Codex
-agent-jail paste    # clipboard image -> jail (see "Pasting images")
+agent-jail paste    # clipboard image -> jail (macOS; see "Pasting images")
 ```
 
 Each agent authenticates independently on first use. Its login is saved in the
 private jail home and reused on later runs.
 
-Each launch starts or reuses a dedicated Colima profile named `agent-jail`; it
-does not change the host's active Docker context. Concurrent jail sessions share
-that profile, which remains running between sessions. New profiles use 4 CPUs,
-4 GiB RAM, a 30 GiB sparse disk, Apple's Virtualization framework, and VirtioFS.
+On macOS each launch starts or reuses a dedicated Colima profile named
+`agent-jail`; it does not change the host's active Docker context. Concurrent
+jail sessions share that profile, which remains running between sessions. New
+profiles use 4 CPUs, 4 GiB RAM, a 30 GiB sparse disk, Apple's Virtualization
+framework, and VirtioFS. On Linux the host's own Docker daemon is used directly.
 
-The image builds automatically on first use. Claude Code and Codex install
-separately on first use; update both with `agent-jail --update`. Rebuild the image
-after changing the
-`Dockerfile`, flake, or your UID:GID with `agent-jail --rebuild`.
+The image builds automatically on first use, and the jail environment is
+provisioned whenever `~/.dotfiles/.nix` changes (see below). Rebuild the image
+after changing the `Dockerfile` or your UID:GID with `agent-jail --rebuild`.
 Everything after the launcher flags is passed to the selected agent.
 The launcher exits without making changes unless the current directory is inside
 a Git repository.
@@ -48,16 +48,70 @@ version control.
   deterministic per-project path, so each project's sessions, memory, and
   transcripts stay separate inside the shared jail home. Edits land on your
   host.
-- Copies its own Claude `settings.json` template into the jail state on first
-  run only. Host
-  `~/.claude/settings.json` is never read, and later launches preserve jail-local
-  settings changes.
-- Mounts only host `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`, read-only.
-  Nothing else from host `~/.claude` or `~/.codex` is shared or written.
-- Mounts `~/.agent-jail` as the container's complete `/home/agent`, so its login,
-  config, transcripts, memory, package state, caches, and scratch files persist
-  together and are shared across projects. Its credentials are plaintext here;
-  your host credentials are untouched.
+- Mounts `~/.dotfiles` **read-only** at `/home/keyclicker/.dotfiles`. It is both
+  the source of the jail's environment and the source of the instructions,
+  editor config, and shell config the agent works with.
+- Mounts `~/.agent-jail` as the container's complete `/home/keyclicker`, so its
+  login, config, transcripts, memory, package state, caches, and scratch files
+  persist together and are shared across projects. Its credentials are plaintext
+  here; your host credentials are untouched.
+- Copies its own Claude `settings.json` and Codex `config.toml` templates into
+  the jail home on first run only. Host settings are never read, and later
+  launches preserve jail-local changes.
+
+## The jail environment
+
+The image bakes no packages. The toolchain is a home-manager leaf in the
+dotfiles flake — `.nix/hosts/jail.nix`, exposed as
+`homeConfigurations."keyclicker@jail-<system>"` — built and activated **inside
+the container** from the read-only mount:
+
+```
+nix build "path:~/.dotfiles/.nix#homeConfigurations.\"keyclicker@jail-aarch64-linux\".activationPackage"
+~/.jail-activation/activate
+```
+
+The launcher does this whenever the contents of `~/.dotfiles/.nix` change,
+tracked by a hash in `~/.agent-jail/.jail-generation`. The first provision after
+a `--rebuild` downloads the whole closure and takes a while; later launches
+compare the hash and start immediately.
+
+Consequences worth knowing:
+
+- The jail and the real machines share one package definition. `hosts/jail.nix`
+  stacks the same modules the other hosts do (`common`, `dev`, `agents`,
+  `browser`) and adds what a bare container lacks — libc tooling, locales,
+  certificates — plus everyday project tooling (eslint, prettier, ruff, pytest,
+  tsx, typescript, yarn, nginx).
+- `claude`, `codex`, and `opencode` come from `modules/agents.nix` as
+  `npx ...@latest` wrappers, so the jail always runs the current release and
+  nothing needs updating by hand.
+- `home/common.nix` links your dotfiles into `$HOME`, so the agent gets your
+  nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
+  It deliberately does **not** manage `.claude/settings.json`, which is why the
+  jail's own settings survive the mount.
+- Those links point into a read-only mount: the agent can read your config and
+  cannot edit it. Adding a tool to the jail is a host-side edit of
+  `hosts/jail.nix`.
+
+Anything else is added **at runtime** (it can't `apt` — non-root — but these
+persist under `~/.agent-jail` and the Nix volume):
+
+- `nix profile install nixpkgs#<pkg>` — anything in nixpkgs
+- `pnpm add -g <pkg>` — Node CLIs
+- `uv tool install <tool>` — Python CLIs (or `uvx <tool>` ad-hoc); plus
+  `uv venv` / `uv pip` / `uv python install` — all persistent
+
+Agents can manage their own persistent tools in **`~/agent-flake/`** inside the
+jail (seeded once from `agent-flake/`, and writable unlike the dotfiles).
+Install it with
+`nix profile install --profile ~/.agent-tools-profile ~/agent-flake`; after
+editing it, update with
+`nix profile upgrade --profile ~/.agent-tools-profile --all`. This profile is on
+`PATH` and survives normal launches. `--rebuild` clears installed agent tools,
+but keeps the flake so they can be installed again.
+Per-project deps install normally via `uv sync` / `pnpm install` into the
+mounted project.
 
 ## Pasting images
 
@@ -72,56 +126,19 @@ agent-jail paste
 It saves the image to `~/.agent-jail/clipboard/` — which the jail sees as
 `~/clipboard/` — and copies that in-jail path. Paste the path (Cmd+V) into the
 agent's prompt; the agent reads the image from there. macOS built-ins only
-(`osascript`, `sips`).
-
-## Bundled tooling
-
-A deliberately small **general** base — what an agent needs on almost any project:
-
-- **CLI:** git, gh, ripgrep, fd, jq, git-delta, curl, wget, less, openssh-client.
-- **Node:** node, npm, pnpm, yarn, and TypeScript.
-- **Python:** python3, Poetry, uv (full toolkit — all state persistent),
-  plus GCC, make, binutils, and pkg-config for native deps.
-- **Browser:** Playwright + Chromium (e2e / debugging).
-
-Claude Code and Codex are intentionally not built into the image. The launcher
-installs their latest releases with pnpm into the persistent jail home on first
-use. Run `agent-jail --update` to resolve current registry versions and update
-both without rebuilding the image.
-
-Anything else is added **at runtime** (it can't `apt` — non-root — but these
-persist under `~/.agent-jail` and the Nix volume):
-
-- `nix profile install nixpkgs#<pkg>` — anything in nixpkgs
-- `pnpm add -g <pkg>` — Node CLIs
-- `uv tool install <tool>` — Python CLIs (or `uvx <tool>` ad-hoc); plus
-  `uv venv` / `uv pip` / `uv python install` — all persistent
-
-Recurring extras go in **`user-flake/`**. The launcher installs that flake on
-first use and reinstalls it with `agent-jail --rebuild`.
-
-Agents can manage their own persistent tools in **`~/agent-flake/`** inside the
-jail. Install it with
-`nix profile install --profile ~/.agent-tools-profile ~/agent-flake`; after
-editing it, update with
-`nix profile upgrade --profile ~/.agent-tools-profile --all`. This profile is on
-`PATH` and survives normal launches. `--rebuild` clears installed agent tools,
-but keeps the flake so they can be installed again.
-Per-project deps install normally via `poetry install` / `pnpm install` into the
-mounted project.
+(`osascript`, `sips`), so this subcommand is macOS-only.
 
 ## Files
 
-| File             | Purpose                                                       |
-|------------------|---------------------------------------------------------------|
-| `Dockerfile`     | Assembles the Nix base and host-matched non-root user.         |
-| `flake.nix`      | Declares the complete base package set for Linux architectures.|
-| `flake.lock`     | Pins nixpkgs for reproducible base builds.                    |
-| `agent-jail`     | Launcher: manages Colima, builds the image, and runs the jail. |
-| `jail-prompt.md` | Session-only jail instructions passed to either agent.         |
-| `config-templates/` | Initial Claude and Codex configuration templates.         |
-| `user-flake/`    | User-defined runtime tools in the persistent Nix profile.      |
-| `agent-flake/`   | Initial agent-owned flake for persistent tools.                 |
+| File                | Purpose                                                   |
+|---------------------|-----------------------------------------------------------|
+| `agent-jail`        | Launcher: picks the daemon, builds, provisions, runs.      |
+| `Dockerfile`        | System layer only: nix, a host-UID account, loader path.   |
+| `jail-prompt.md`    | Session-only jail instructions passed to either agent.     |
+| `config-templates/` | Initial Claude and Codex configuration templates.          |
+| `agent-flake/`      | Initial agent-owned flake for persistent tools.            |
+
+The package set lives in `~/.dotfiles/.nix/hosts/jail.nix`, not here.
 
 ## Install
 
@@ -136,29 +153,35 @@ line to add it.
 
 ## Threat model
 
-**Isolated:** host filesystem (only the project + agent home are mounted), host
-processes, Keychain, your real Claude and Codex config. Runs as a non-root user with
-`--cap-drop ALL` and `--security-opt no-new-privileges`.
+**Isolated:** the host filesystem (only the project, the agent home, and the
+read-only dotfiles are mounted), host processes, the Keychain, your real Claude
+and Codex config. Runs as a non-root user with `--cap-drop ALL` and
+`--security-opt no-new-privileges`.
+
+**Readable, not isolated:** `~/.dotfiles` in full. It is a config repo, not a
+secret store — but it is your whole config tree, and the agent can read it.
 
 **NOT isolated:** the network — full egress is on (needed for the API, WebFetch,
-WebSearch, and package downloads). A compromised tool could exfiltrate the mounted
-project, which is read-write by design.
+WebSearch, and package downloads). A compromised tool could exfiltrate the
+mounted project, which is read-write by design, or the dotfiles.
 
 The container gets exactly these from the host (see `agent-jail`):
 
 ```
--v "$PROJECT:/work/<name>-<hash>"                             # project, rw, deterministic path
--v "$HOME/.agent-jail:/home/agent"                            # complete agent home
--v "$HOME/.claude/CLAUDE.md:/home/agent/.claude/CLAUDE.md:ro" # instructions, if present
--v "$HOME/.codex/AGENTS.md:/home/agent/.codex/AGENTS.md:ro"   # instructions, if present
--v agent-jail-nix:/nix                                        # nix store (named volume)
+-v "$PROJECT:/work/<name>-<hash>"                    # project, rw, deterministic path
+-v "$HOME/.agent-jail:/home/keyclicker"              # complete agent home
+-v "$HOME/.dotfiles:/home/keyclicker/.dotfiles:ro"   # environment + instructions
+-v agent-jail-nix:/nix                               # nix store (named volume)
 --cap-drop ALL  --security-opt no-new-privileges  --pids-limit 512
 ```
 
 The Nix store remains a Docker named volume because the macOS host filesystem is
 case-insensitive while the store is not. It auto-seeds from the image on first
-mount. `agent-jail --rebuild` recreates it from the rebuilt image and reinstalls
-`user-flake/`.
+mount. `agent-jail --rebuild` recreates it from the rebuilt image, which also
+forces the jail environment to be provisioned again.
+
+The jail links your `~/.gitconfig`, so it commits as you — but it has no GPG key
+and no push credentials, so signing and pushing fail there by construction.
 
 No Docker socket, host home, `~/.ssh`, or host credentials are mounted.
 
@@ -169,8 +192,10 @@ rm ~/.local/bin/agent-jail
 rm ~/.local/bin/aj
 rm -rf ~/.local/libexec/agent-jail
 rm -rf ~/.agent-jail            # forget login, jail config, package stores
-colima start agent-jail --activate=false
-docker --context colima-agent-jail volume rm agent-jail-nix # drop the Nix store
-docker --context colima-agent-jail image rm agent-jail      # drop the image
-colima delete agent-jail
+docker volume rm agent-jail-nix # drop the Nix store
+docker image rm agent-jail      # drop the image
 ```
+
+On macOS the two `docker` commands need the jail's context
+(`docker --context colima-agent-jail ...`, after `colima start agent-jail
+--activate=false`), and the VM itself goes with `colima delete agent-jail`.

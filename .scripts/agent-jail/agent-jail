@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 #
 # agent-jail — run Claude Code or Codex in an isolated Docker container.
-# Only the project (under /work) and a private persistent home are visible;
-# host home, ~/.ssh, ~/.claude.json and the Keychain are not. Only host
-# ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md are mounted, read-only.
-# Container state persists under ~/.agent-jail.
+# Only the project (under /work), a private persistent home, and a
+# read-only ~/.dotfiles are visible; the host home, ~/.ssh, ~/.claude.json
+# and the Keychain are not. Container state persists under ~/.agent-jail.
+#
+# The jail's toolchain is not baked into the image: it is the flake's
+# jail leaf (.nix/hosts/jail.nix), built and activated inside the
+# container from the read-only ~/.dotfiles mount. One definition for the
+# jail and the real machines; editing .nix reprovisions on the next launch.
 #
 # The container IS the sandbox, so in-container prompts are redundant.
-# /work is read-write
-# and egress is open, so only point it at projects (ideally git-tracked)
-# you'd trust an autonomous agent with.
+# /work is read-write and egress is open, so only point it at projects
+# (ideally git-tracked) you'd trust an autonomous agent with.
 #
-#   agent-jail [--claude | --codex] [--rebuild] [--update] [agent args...]
+#   agent-jail [--claude | --codex] [--rebuild] [agent args...]
 #   agent-jail paste   # clipboard image -> shared jail home, jail path copied
 #
 # See README.md for the mount table and threat model.
@@ -20,7 +23,6 @@ set -euo pipefail
 IMAGE="agent-jail"
 NIX_VOLUME="agent-jail-nix" # store; named vol, see seed block
 COLIMA_PROFILE="agent-jail"
-DOCKER_CONTEXT="colima-$COLIMA_PROFILE"
 COLIMA_CPUS=4
 COLIMA_MEMORY=4
 COLIMA_DISK=30
@@ -34,11 +36,24 @@ while [ -L "$SOURCE" ]; do
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
+# macOS ships shasum, Linux sha256sum; both hash stdin here.
+sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum
+    else
+        shasum -a 256
+    fi | cut -d' ' -f1
+}
+
 # `agent-jail paste` — save the clipboard image (screenshot, browser "Copy
 # Image") into the shared jail home and copy its in-jail path, ready to paste
 # into either agent's prompt. Terminal paste is text-only, so this is the
 # only route from the host clipboard into the jail.
 if [ "${1:-}" = paste ]; then
+    if [ "$(uname -s)" != Darwin ]; then
+        echo "agent-jail: paste is macOS-only (osascript, sips, pbcopy)" >&2
+        exit 1
+    fi
     dir="$HOME/.agent-jail/clipboard" # visible in the jail as ~/clipboard
     file="$(date +%Y%m%d-%H%M%S).png"
     mkdir -p "$dir"
@@ -60,16 +75,11 @@ fi
 
 # Launcher flags must lead. Everything else is passed to the selected agent.
 FORCE_REBUILD=0
-UPDATE_AGENTS=0
 AGENT=codex
 while :; do
     case "${1:-}" in
     --rebuild)
         FORCE_REBUILD=1
-        shift
-        ;;
-    --update)
-        UPDATE_AGENTS=1
         shift
         ;;
     --claude)
@@ -89,26 +99,37 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
     exit 1
 fi
 
-# Keep the jail on its own Docker VM without changing the host's active context.
-if ! command -v colima >/dev/null 2>&1 ||
-    ! command -v docker >/dev/null 2>&1; then
-    echo "agent-jail: Colima and the Docker CLI are required" >&2
+if ! command -v docker >/dev/null 2>&1; then
+    echo "agent-jail: the Docker CLI is required" >&2
     exit 1
 fi
-if ! colima status "$COLIMA_PROFILE" >/dev/null 2>&1; then
-    echo "agent-jail: starting Colima profile '$COLIMA_PROFILE'..." >&2
-    colima start "$COLIMA_PROFILE" \
-        --activate=false \
-        --cpus "$COLIMA_CPUS" \
-        --memory "$COLIMA_MEMORY" \
-        --disk "$COLIMA_DISK" \
-        --vm-type vz \
-        --mount-type virtiofs
+
+# macOS has no native containers, so keep the jail on its own Colima VM
+# without changing the host's active Docker context. Linux talks to its
+# own daemon: nothing to start, no context to override.
+if [ "$(uname -s)" = Darwin ]; then
+    if ! command -v colima >/dev/null 2>&1; then
+        echo "agent-jail: Colima is required on macOS" >&2
+        exit 1
+    fi
+    if ! colima status "$COLIMA_PROFILE" >/dev/null 2>&1; then
+        echo "agent-jail: starting Colima profile '$COLIMA_PROFILE'..." >&2
+        colima start "$COLIMA_PROFILE" \
+            --activate=false \
+            --cpus "$COLIMA_CPUS" \
+            --memory "$COLIMA_MEMORY" \
+            --disk "$COLIMA_DISK" \
+            --vm-type vz \
+            --mount-type virtiofs
+    fi
+    DOCKER_ARGS=(--context "colima-$COLIMA_PROFILE")
+else
+    DOCKER_ARGS=()
 fi
 
-# Route every Docker command in this script to the jail's Colima profile.
+# Route every Docker command in this script to the jail's daemon.
 docker() {
-    command docker --context "$DOCKER_CONTEXT" "$@"
+    command docker ${DOCKER_ARGS[@]+"${DOCKER_ARGS[@]}"} "$@"
 }
 
 # ============================================================
@@ -117,26 +138,40 @@ docker() {
 
 # Host (your machine).
 HOST_PROJECT="$(pwd -P)"      # launch dir -> /work
-HOST_HOME="$HOME/.agent-jail" # jail's complete /home/agent
-HOST_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-HOST_CODEX_AGENTS_MD="$HOME/.codex/AGENTS.md"
+HOST_HOME="$HOME/.agent-jail" # jail's complete /home/keyclicker
+HOST_DOTFILES="$HOME/.dotfiles"
+HOST_GENERATION="$HOST_HOME/.jail-generation"
+HOST_AGENT_FLAKE="$HOST_HOME/agent-flake"
 HOST_CLAUDE_HOME="$HOST_HOME/.claude"
 HOST_CODEX_HOME="$HOST_HOME/.codex"
-HOST_USER_FLAKE="$HOST_HOME/user-flake"
-HOST_USER_FLAKE_MARKER="$HOST_HOME/.user-flake-installed"
-HOST_AGENT_FLAKE="$HOST_HOME/agent-flake"
-HOST_AGENT_PROFILE="$HOST_HOME/.agent-tools-profile"
+
+if [ ! -d "$HOST_DOTFILES/.nix" ]; then
+    echo "agent-jail: no flake at $HOST_DOTFILES/.nix" >&2
+    exit 1
+fi
 
 # Container (inside the jail). The project mounts at a deterministic
 # per-project path so sessions, memory, and transcripts in the shared
 # jail home stay separate per project.
 PROJECT_NAME="$(basename "$HOST_PROJECT" | tr -cd '[:alnum:]._-')"
-PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | shasum -a 256 | cut -c1-8)"
+PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | sha256 | cut -c1-8)"
 CONTAINER_WORK="/work/$PROJECT_NAME-$PROJECT_HASH"
-CONTAINER_HOME="/home/agent"
-CONTAINER_CLAUDE_HOME="/home/agent/.claude"
-CONTAINER_CODEX_HOME="/home/agent/.codex"
+CONTAINER_HOME="/home/keyclicker"              # matches hosts/jail.nix
+CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home/common.nix links here
+CONTAINER_CLAUDE_HOME="$CONTAINER_HOME/.claude"
 CONTAINER_NIX="/nix"
+
+# The jail leaf is instantiated per architecture; the container runs the
+# host's, Colima included.
+case "$(uname -m)" in
+arm64 | aarch64) JAIL_SYSTEM="aarch64-linux" ;;
+amd64 | x86_64) JAIL_SYSTEM="x86_64-linux" ;;
+*)
+    echo "agent-jail: unsupported architecture $(uname -m)" >&2
+    exit 1
+    ;;
+esac
+JAIL_FLAKE="path:$CONTAINER_DOTFILES/.nix#homeConfigurations.\"keyclicker@jail-$JAIL_SYSTEM\".activationPackage"
 
 mkdir -p "$HOST_CLAUDE_HOME" "$HOST_CODEX_HOME"
 
@@ -153,16 +188,18 @@ if [ "$FORCE_REBUILD" = 1 ] || ! docker image inspect "$IMAGE" >/dev/null 2>&1; 
 fi
 
 # A rebuild needs a fresh volume so Docker seeds it from the new image.
+# That drops the store the jail environment lives in, so drop the
+# profiles pointing into it too and reprovision below.
 if [ "$FORCE_REBUILD" = 1 ]; then
     docker volume rm "$NIX_VOLUME" >/dev/null 2>&1 || true
-    rm -f "$HOST_HOME/.nix-profile"
+    rm -f "$HOST_GENERATION"
+    rm -f "$HOST_HOME/.nix-profile" "$HOST_HOME/.jail-activation"
     rm -rf "$HOST_HOME/.local/state/nix/profiles"
-    rm -f "$HOST_USER_FLAKE_MARKER"
-    rm -f "$HOST_AGENT_PROFILE" "$HOST_AGENT_PROFILE"-*-link
+    rm -f "$HOST_HOME/.agent-tools-profile" "$HOST_HOME/.agent-tools-profile"-*-link
 fi
 
 # Seed an agent-owned flake once. Agents may edit it and update its separate,
-# persistent profile without touching the repository's user flake.
+# persistent profile without touching the read-only dotfiles.
 if [ ! -d "$HOST_AGENT_FLAKE" ]; then
     cp -R "$SCRIPT_DIR/agent-flake" "$HOST_AGENT_FLAKE"
 fi
@@ -173,7 +210,9 @@ docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1 ||
 #                      Config & mounts
 # ============================================================
 
-# Seed the jail's own settings once. Host settings are never read.
+# Seed the jail's own settings once. Host settings are never read, and
+# home/common.nix deliberately leaves these two files unmanaged, so the
+# dotfiles mount cannot clobber them either.
 if [ ! -f "$HOST_CLAUDE_HOME/settings.json" ]; then
     cp "$SCRIPT_DIR/config-templates/settings.json" "$HOST_CLAUDE_HOME/settings.json"
 fi
@@ -182,69 +221,39 @@ if [ ! -f "$HOST_CODEX_HOME/config.toml" ]; then
 fi
 
 mounts=(
-    -v "$HOST_PROJECT:$CONTAINER_WORK" # project, rw
-    -v "$HOST_HOME:$CONTAINER_HOME"    # complete persistent agent home
-    -v "$NIX_VOLUME:$CONTAINER_NIX"    # case-sensitive Nix store
+    -v "$HOST_PROJECT:$CONTAINER_WORK"         # project, rw
+    -v "$HOST_HOME:$CONTAINER_HOME"            # complete persistent agent home
+    -v "$HOST_DOTFILES:$CONTAINER_DOTFILES:ro" # environment + instructions, ro
+    -v "$NIX_VOLUME:$CONTAINER_NIX"            # case-sensitive Nix store
 )
 
-# Claude Code and Codex update independently of the image. Their pnpm install
-# lives in the persistent home and is refreshed when missing, broken, or requested.
-agents_healthy=0
-if [ -x "$HOST_HOME/.local/share/pnpm/bin/claude" ] &&
-    [ -x "$HOST_HOME/.local/share/pnpm/bin/codex" ] &&
+# ============================================================
+#                        Provisioning
+# ============================================================
+
+# .nix is the entire build input: `path:` copies that directory alone,
+# and the dotfile symlinks it declares resolve at runtime, not at build
+# time. So its contents identify the generation the jail home carries.
+generation="$(
+    find "$HOST_DOTFILES/.nix" -type f -print0 |
+        LC_ALL=C sort -z |
+        xargs -0 cat |
+        sha256
+)"
+
+if [ "$(cat "$HOST_GENERATION" 2>/dev/null || true)" != "$generation" ]; then
+    echo "agent-jail: building the jail environment from ~/.dotfiles..." >&2
     docker run --rm \
         --cap-drop ALL --security-opt no-new-privileges \
+        -e "JAIL_FLAKE=$JAIL_FLAKE" \
+        -e "HOME_MANAGER_BACKUP_EXT=jail-bak" \
         "${mounts[@]}" "$IMAGE" \
-        sh -c 'claude --version >/dev/null 2>&1 && codex --version >/dev/null 2>&1'; then
-    agents_healthy=1
-fi
-if [ "$UPDATE_AGENTS" = 1 ] || [ "$agents_healthy" = 0 ]; then
-    echo "agent-jail: installing latest Claude Code and Codex..." >&2
-    docker run --rm \
-        --cap-drop ALL --security-opt no-new-privileges \
-        "${mounts[@]}" "$IMAGE" \
-        sh -eu -c '
-            claude_version="$(pnpm view @anthropic-ai/claude-code version)"
-            codex_version="$(pnpm view @openai/codex version)"
-            exec pnpm add --global \
-                --allow-build=@anthropic-ai/claude-code \
-                "@anthropic-ai/claude-code@$claude_version" \
-                "@openai/codex@$codex_version"
+        bash -eu -c '
+            nix build --no-write-lock-file \
+                --out-link ~/.jail-activation "$JAIL_FLAKE"
+            ~/.jail-activation/activate
         '
-fi
-
-# Share the host instructions directly, without letting the jail edit them.
-rm -f "$HOST_CLAUDE_HOME/CLAUDE.md"
-if [ -f "$HOST_CLAUDE_MD" ]; then
-    mounts+=(
-        -v "$HOST_CLAUDE_MD:$CONTAINER_CLAUDE_HOME/CLAUDE.md:ro"
-    )
-fi
-rm -f "$HOST_CODEX_HOME/AGENTS.md"
-if [ -f "$HOST_CODEX_AGENTS_MD" ]; then
-    mounts+=(
-        -v "$HOST_CODEX_AGENTS_MD:$CONTAINER_CODEX_HOME/AGENTS.md:ro"
-    )
-fi
-
-# ============================================================
-#                         User tools
-# ============================================================
-
-# Install the user-defined runtime flake on first use and after --rebuild.
-if [ -d "$SCRIPT_DIR/user-flake" ] &&
-    [ ! -f "$HOST_USER_FLAKE_MARKER" ]; then
-    rm -rf "$HOST_USER_FLAKE"
-    cp -R "$SCRIPT_DIR/user-flake" "$HOST_USER_FLAKE"
-    echo "agent-jail: installing user flake..." >&2
-    if docker run --rm \
-        --cap-drop ALL --security-opt no-new-privileges \
-        "${mounts[@]}" "$IMAGE" \
-        nix profile install /home/agent/user-flake; then
-        touch "$HOST_USER_FLAKE_MARKER"
-    else
-        echo "agent-jail: user flake install failed; retry next launch" >&2
-    fi
+    printf '%s\n' "$generation" >"$HOST_GENERATION"
 fi
 
 # ============================================================
@@ -273,9 +282,11 @@ else
     )
 fi
 
+# Agents are exec'd directly rather than through a login shell, so the
+# wrapper sources what home-manager generated for the jail leaf first.
 # Non-root, dropped caps, no priv-escalation, no host access beyond
 # mounts; egress open. CLAUDE_CONFIG_DIR pins .claude.json inside the
-# mounted state dir, else it's lost each --rm run.
+# mounted home, else it's lost each --rm run.
 docker run -it --rm \
     --cap-drop ALL \
     --security-opt no-new-privileges \
@@ -285,8 +296,7 @@ docker run -it --rm \
     -e "TERM=${TERM:-xterm-256color}" \
     -e "COLORTERM=${COLORTERM:-truecolor}" \
     -e "CLAUDE_CODE_NO_FLICKER=1" \
-    -e "EDITOR=nvim" \
-    -e "PATH=$CONTAINER_HOME/.agent-tools-profile/bin:$CONTAINER_HOME/.nix-profile/bin:$CONTAINER_HOME/.local/share/pnpm/bin:$CONTAINER_HOME/.local/bin:/opt/agent-jail/bin" \
     "${mounts[@]}" \
     "$IMAGE" \
-    "${agent_command[@]}" "$@"
+    bash -c '. ~/.nix-profile/etc/profile.d/hm-session-vars.sh; exec "$@"' \
+    agent-jail "${agent_command[@]}" "$@"
