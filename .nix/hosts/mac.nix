@@ -46,6 +46,7 @@
       "discord"
       "ghostty"
       "github"
+      "google-chrome"
       "imhex"
       "karabiner-elements"
       "obs"
