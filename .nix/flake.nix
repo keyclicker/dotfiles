@@ -55,6 +55,7 @@
           ./modules/dev.nix
           ./modules/server.nix
           ./modules/agents.nix
+          ./modules/browser.nix
           ./modules/slopbox.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager

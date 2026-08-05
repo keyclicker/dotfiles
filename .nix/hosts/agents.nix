@@ -1,5 +1,4 @@
 {
-  lib,
   modulesPath,
   pkgs,
   ...
@@ -51,19 +50,12 @@
   # Host-specific packages; cross-platform CLI tools come from
   # modules/common.nix, server basics (zsh, terminfo, docker, tailscale)
   # from modules/server.nix, AI coding agents from modules/agents.nix,
-  # t3 web server from modules/slopbox.nix.
+  # chromium and agent-browser from modules/browser.nix, t3 web server
+  # from modules/slopbox.nix.
   environment.systemPackages = with pkgs; [
     python3
     gnumake
     pkg-config
-    chromium
-    playwright-test
-
-    (writeShellScriptBin "agent-browser" ''
-      export AGENT_BROWSER_EXECUTABLE_PATH="${lib.getExe chromium}"
-      export AGENT_BROWSER_ARGS="--no-sandbox"
-      exec ${lib.getExe agent-browser} "$@"
-    '')
   ];
 
   system.stateVersion = "26.11";
