@@ -20,6 +20,25 @@
       nix-darwin,
       home-manager,
     }:
+    let
+      # The jail image is built for whatever the Docker host runs, so
+      # the leaf is instantiated once per architecture and the
+      # launcher asks for the name matching its own.
+      jailConfigurations = nixpkgs.lib.listToAttrs (
+        map
+          (system: {
+            name = "keyclicker@jail-${system}";
+            value = home-manager.lib.homeManagerConfiguration {
+              pkgs = nixpkgs.legacyPackages.${system};
+              modules = [ ./hosts/jail.nix ];
+            };
+          })
+          [
+            "aarch64-linux"
+            "x86_64-linux"
+          ]
+      );
+    in
     {
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
@@ -70,20 +89,23 @@
         ];
       };
 
-      # Ubuntu pi: apt system, nix user environment.
-      # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
-      homeConfigurations."keyclicker@raspberry" =
-        home-manager.lib.homeManagerConfiguration {
+      homeConfigurations = {
+        # Ubuntu pi: apt system, nix user environment.
+        # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
+        "keyclicker@raspberry" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.aarch64-linux;
           modules = [ ./hosts/raspberry.nix ];
         };
 
-      # Ubuntu VPS: apt system, nix user environment, no agent CLIs.
-      # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
-      homeConfigurations."keyclicker@vps" =
-        home-manager.lib.homeManagerConfiguration {
+        # Ubuntu VPS: apt system, nix user environment, no agent CLIs.
+        # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
+        "keyclicker@vps" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           modules = [ ./hosts/vps.nix ];
         };
+      }
+      # Docker jail: activated inside the container by
+      # .scripts/agent-jail, one entry per supported architecture.
+      // jailConfigurations;
     };
 }
