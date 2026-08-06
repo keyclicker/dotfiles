@@ -78,7 +78,11 @@ return { -- Fuzzy Finder (files, lsp, etc)
             preview_width = 0.55,
           },
         },
-        file_ignore_patterns = { 'package%-lock.json' },
+        -- `^%.worktrees/` must stay anchored: find_files/live_grep emit
+        -- cwd-relative paths, but lsp_* pickers emit absolute ones, and an
+        -- unanchored pattern would drop every LSP result while working
+        -- inside a worktree.
+        file_ignore_patterns = { 'package%-lock.json', '^%.worktrees/' },
       },
 
       pickers = {
