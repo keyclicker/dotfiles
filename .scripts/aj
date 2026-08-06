@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# aj — launch agent-jail from any cwd (cwd stays your project = /work mount).
+set -euo pipefail
+exec "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/agent-jail/agent-jail" "$@"
