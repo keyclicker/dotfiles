@@ -33,6 +33,7 @@
       bashInteractive
       cacert
       glibcLocales
+      procps
       shadow
 
       # The image links /lib/ld-linux-* into this profile, so prebuilt

@@ -46,7 +46,6 @@
     gzip
     jq
     less
-    procps
     which
     xz
 
