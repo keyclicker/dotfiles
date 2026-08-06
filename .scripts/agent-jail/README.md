@@ -80,9 +80,11 @@ Consequences worth knowing:
 
 - The jail and the real machines share one package definition. `hosts/jail.nix`
   stacks the same modules the other hosts do (`common`, `dev`, `agents`,
-  `browser`) and adds what a bare container lacks — libc tooling, locales,
-  certificates — plus everyday project tooling (eslint, prettier, ruff, pytest,
-  tsx, typescript, yarn, nginx).
+  `browser`); almost nothing is declared there directly, only what a bare
+  container lacks — libc, locales, certificates — and `nginx`.
+- Per-project tooling (linters, formatters, test runners) is deliberately not
+  in the package set: it belongs to the project's lockfile, and a second global
+  copy only drifts from it. Reach for `uvx <tool>` or `pnpm dlx <tool>`.
 - `claude`, `codex`, and `opencode` come from `modules/agents.nix` as
   `npx ...@latest` wrappers, so the jail always runs the current release and
   nothing needs updating by hand.

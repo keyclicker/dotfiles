@@ -22,6 +22,8 @@
   # standalone's common set (same import-as-function pattern as
   # hosts/raspberry.nix). Only libc, locales, and certificates are
   # jail-specific: a real host has a distro underneath, this has not.
+  # Per-project tools are not declared here — they come from the
+  # project's own lockfile, via `uvx` or `pnpm dlx`.
   home.packages =
     (import ../modules/dev.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
@@ -39,15 +41,8 @@
       # is the half without the loader in it.
       glibc.out
 
-      # Everyday project tooling the agent shouldn't have to install
-      eslint
+      # Not a toolchain, and only the jail ever serves anything
       nginx
-      prettier
-      python3Packages.pytest
-      ruff
-      tsx
-      typescript
-      yarn
     ]);
 
   # The jail runs agents directly, not through a login shell, so the
