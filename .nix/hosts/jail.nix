@@ -52,6 +52,10 @@
   # launcher sources hm-session-vars.sh before exec'ing them.
   home.sessionVariables = {
     EDITOR = "nvim";
+    # Agents never source .zshrc, so UTF-8 must be set here, or the
+    # locale archive goes unused and everything runs under POSIX C.
+    LANG = "en_US.UTF-8";
+    LC_ALL = "en_US.UTF-8";
     LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
     PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
     SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
