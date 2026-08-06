@@ -10,8 +10,11 @@
 #   $ ./result/activate
 #
 # The launcher does this; nothing here is meant to be run by hand.
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  pnpmHome = "${config.home.homeDirectory}/.local/share/pnpm";
+in
 {
   imports = [ ../home/standalone.nix ];
 
@@ -61,5 +64,10 @@
     SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     GIT_SSL_CAINFO = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    PNPM_HOME = pnpmHome;
   };
+
+  # pnpm puts global bins in $PNPM_HOME/bin and refuses `pnpm add -g`
+  # unless that directory is on PATH.
+  home.sessionPath = [ "${pnpmHome}/bin" ];
 }
