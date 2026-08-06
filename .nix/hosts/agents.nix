@@ -1,9 +1,4 @@
-{
-  lib,
-  modulesPath,
-  pkgs,
-  ...
-}:
+{ modulesPath, ... }:
 
 {
   imports = [
@@ -48,23 +43,11 @@
   # Nix build sandbox unavailable inside the LXC container.
   nix.settings.sandbox = false;
 
-  # Host-specific packages; cross-platform CLI tools come from
-  # modules/common.nix, server basics (zsh, terminfo, docker, tailscale)
-  # from modules/server.nix, AI coding agents from modules/agents.nix,
-  # t3 web server from modules/slopbox.nix.
-  environment.systemPackages = with pkgs; [
-    python3
-    gnumake
-    pkg-config
-    chromium
-    playwright-test
-
-    (writeShellScriptBin "agent-browser" ''
-      export AGENT_BROWSER_EXECUTABLE_PATH="${lib.getExe chromium}"
-      export AGENT_BROWSER_ARGS="--no-sandbox"
-      exec ${lib.getExe agent-browser} "$@"
-    '')
-  ];
+  # No host-specific packages: CLI tools come from modules/common.nix,
+  # toolchains from modules/dev.nix, server basics (zsh, terminfo,
+  # docker, tailscale) from modules/server.nix, AI coding agents from
+  # modules/agents.nix, chromium and agent-browser from
+  # modules/browser.nix, t3 web server from modules/slopbox.nix.
 
   system.stateVersion = "26.11";
 }

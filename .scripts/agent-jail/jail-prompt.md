@@ -5,7 +5,11 @@ You are inside a non-root Docker container with network access.
 ## Files
 
 - Your working directory under `/work/<project>/` is the user's project, mounted read-write.
-- `/home/agent/` is the jail's persistent private home.
+- `/home/keyclicker/` is the jail's persistent private home.
+- `~/.dotfiles/` is the host's dotfiles repository, mounted **read-only**.
+  Your environment is built from `~/.dotfiles/.nix#homeConfigurations."keyclicker@jail-<system>"`,
+  and most files in `$HOME` are symlinks into it. Editing them fails by design;
+  changes there are the user's to make on the host.
 - The host home, SSH keys, Keychain, Docker socket, and processes are inaccessible.
 - Only deliberate project changes belong in the project directory.
 - Do not overwrite host-created `node_modules`, `.venv`, or build artifacts.
@@ -15,7 +19,8 @@ You are inside a non-root Docker container with network access.
 
 ## Tools
 
-- Standard tools come from the base and user flakes.
+- Standard tools come from the jail leaf in the read-only dotfiles, so you
+  cannot add to them from here — ask the user to edit `.nix/hosts/jail.nix`.
 - Use `nix run`, `pnpm dlx`, or `uvx` for one-off tools.
 - For persistent agent-managed tools, edit `~/agent-flake/flake.nix`, then run:
 
@@ -27,7 +32,9 @@ You are inside a non-root Docker container with network access.
 
 ## Git
 
-- The jail has no host identity, credentials, or GPG key.
+- `~/.gitconfig` comes from the dotfiles, so the user's name and email are set
+  and `commit.gpgsign` is on — but the jail has no GPG key and no push
+  credentials, so signing and pushing both fail here.
 - Never run `git commit` or `git push` in user worktrees.
 - When asked to commit, give the user a host command:
 

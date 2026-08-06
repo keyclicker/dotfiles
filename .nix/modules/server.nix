@@ -8,10 +8,8 @@
   services.tailscale.enable = true;
   virtualisation.docker.enable = true;
 
-  environment.systemPackages = with pkgs; [
-    ncurses
-    ghostty.terminfo
-  ];
+  # ncurses comes with NixOS; only the terminfo database needs adding.
+  environment.systemPackages = [ pkgs.ghostty.terminfo ];
 
   users.users.keyclicker = {
     isNormalUser = true;

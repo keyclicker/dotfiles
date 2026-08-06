@@ -33,6 +33,24 @@
     # foreign hosts get the binary from here)
     zsh
 
+    # Userland the dotfiles assume. NixOS lists the same store paths in
+    # its required set, so the overlap there is free; nix-darwin ships
+    # none of it, Ubuntu defaults to mawk over gawk, and the jail has
+    # no platform at all. Declaring it here is what makes the four
+    # behave the same.
+    curl
+    diffutils
+    findutils
+    gawk
+    gnugrep
+    gnused
+    gnutar
+    gzip
+    jq
+    less
+    which
+    xz
+
     # Shell tools
     fd
     rsync
