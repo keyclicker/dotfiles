@@ -20,41 +20,24 @@
 
   # Dev toolchains, agent CLIs, and the browser stack on top of
   # standalone's common set (same import-as-function pattern as
-  # hosts/raspberry.nix), plus what a bare container lacks: on real
-  # hosts the distro supplies libc tooling, locales, and certificates.
+  # hosts/raspberry.nix). Only libc, locales, and certificates are
+  # jail-specific: a real host has a distro underneath, this has not.
   home.packages =
     (import ../modules/dev.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ../modules/browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
-      # Base system, absent from the image
+      # Base system the image has no distro to provide
       bashInteractive
-      binutils
       cacert
-      curl
-      diffutils
-      findutils
-      gawk
+      glibcLocales
+      shadow
 
       # The image links /lib/ld-linux-* into this profile, so prebuilt
       # binaries (the agent CLIs ship some) find the loader. Explicitly
       # the `out` output: glibc installs only `bin` by default, which
       # is the half without the loader in it.
       glibc.out
-      glibcLocales
-      gnugrep
-      gnumake
-      gnused
-      gnutar
-      gzip
-      jq
-      less
-      pkg-config
-      procps
-      python3
-      shadow
-      which
-      xz
 
       # Everyday project tooling the agent shouldn't have to install
       eslint

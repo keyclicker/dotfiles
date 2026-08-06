@@ -6,8 +6,12 @@
   environment.systemPackages = with pkgs; [
     # Build
     cmake
+    gnumake
+    pkg-config
+    binutils
 
     # Languages
+    python3
     nodejs
     pnpm
     uv

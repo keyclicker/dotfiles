@@ -33,6 +33,23 @@
     # foreign hosts get the binary from here)
     zsh
 
+    # Userland the dotfiles and their scripts assume. Real hosts also
+    # get most of these from the distro; the Docker jail has nothing
+    # underneath, so they are declared here rather than per-host.
+    curl
+    diffutils
+    findutils
+    gawk
+    gnugrep
+    gnused
+    gnutar
+    gzip
+    jq
+    less
+    procps
+    which
+    xz
+
     # Shell tools
     fd
     rsync
