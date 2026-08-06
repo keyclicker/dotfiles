@@ -36,15 +36,6 @@ while [ -L "$SOURCE" ]; do
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
-# macOS ships shasum, Linux sha256sum; both hash stdin here.
-sha256() {
-    if command -v sha256sum >/dev/null 2>&1; then
-        sha256sum
-    else
-        shasum -a 256
-    fi | cut -d' ' -f1
-}
-
 # `agent-jail paste` — save the clipboard image (screenshot, browser "Copy
 # Image") into the shared jail home and copy its in-jail path, ready to paste
 # into either agent's prompt. Terminal paste is text-only, so this is the
@@ -140,7 +131,7 @@ docker() {
 HOST_PROJECT="$(pwd -P)"      # launch dir -> /work
 HOST_HOME="$HOME/.agent-jail" # jail's complete /home/keyclicker
 HOST_DOTFILES="$HOME/.dotfiles"
-HOST_GENERATION="$HOST_HOME/.jail-generation"
+HOST_ENV_HASH="$HOST_HOME/.env-hash"
 HOST_AGENT_FLAKE="$HOST_HOME/agent-flake"
 HOST_CLAUDE_HOME="$HOST_HOME/.claude"
 HOST_CODEX_HOME="$HOST_HOME/.codex"
@@ -154,7 +145,7 @@ fi
 # per-project path so sessions, memory, and transcripts in the shared
 # jail home stay separate per project.
 PROJECT_NAME="$(basename "$HOST_PROJECT" | tr -cd '[:alnum:]._-')"
-PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | sha256 | cut -c1-8)"
+PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | sha256sum | cut -c1-8)"
 CONTAINER_WORK="/work/$PROJECT_NAME-$PROJECT_HASH"
 CONTAINER_HOME="/home/keyclicker"              # matches hosts/jail.nix
 CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home/common.nix links here
@@ -192,7 +183,7 @@ fi
 # profiles pointing into it too and reprovision below.
 if [ "$FORCE_REBUILD" = 1 ]; then
     docker volume rm "$NIX_VOLUME" >/dev/null 2>&1 || true
-    rm -f "$HOST_GENERATION"
+    rm -f "$HOST_ENV_HASH"
     rm -f "$HOST_HOME/.nix-profile" "$HOST_HOME/.jail-activation"
     rm -rf "$HOST_HOME/.local/state/nix/profiles"
     rm -f "$HOST_HOME/.agent-tools-profile" "$HOST_HOME/.agent-tools-profile"-*-link
@@ -233,15 +224,16 @@ mounts=(
 
 # .nix is the entire build input: `path:` copies that directory alone,
 # and the dotfile symlinks it declares resolve at runtime, not at build
-# time. So its contents identify the generation the jail home carries.
-generation="$(
+# time. So its contents identify the environment the jail home holds.
+env_hash="$(
     find "$HOST_DOTFILES/.nix" -type f -print0 |
         LC_ALL=C sort -z |
         xargs -0 cat |
-        sha256
+        sha256sum |
+        cut -d' ' -f1
 )"
 
-if [ "$(cat "$HOST_GENERATION" 2>/dev/null || true)" != "$generation" ]; then
+if [ "$(cat "$HOST_ENV_HASH" 2>/dev/null || true)" != "$env_hash" ]; then
     echo "agent-jail: building the jail environment from ~/.dotfiles..." >&2
     docker run --rm \
         --cap-drop ALL --security-opt no-new-privileges \
@@ -253,7 +245,7 @@ if [ "$(cat "$HOST_GENERATION" 2>/dev/null || true)" != "$generation" ]; then
                 --out-link ~/.jail-activation "$JAIL_FLAKE"
             ~/.jail-activation/activate
         '
-    printf '%s\n' "$generation" >"$HOST_GENERATION"
+    printf '%s\n' "$env_hash" >"$HOST_ENV_HASH"
 fi
 
 # ============================================================

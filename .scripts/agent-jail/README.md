@@ -72,7 +72,7 @@ nix build "path:~/.dotfiles/.nix#homeConfigurations.\"keyclicker@jail-aarch64-li
 ```
 
 The launcher does this whenever the contents of `~/.dotfiles/.nix` change,
-tracked by a hash in `~/.agent-jail/.jail-generation`. The first provision after
+tracked by a hash in `~/.agent-jail/.env-hash`. The first provision after
 a `--rebuild` downloads the whole closure and takes a while; later launches
 compare the hash and start immediately.
 
