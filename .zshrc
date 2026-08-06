@@ -126,16 +126,17 @@ git-worktree-pick() {
 
 # gwc - worktree cd: pick a worktree and enter it
 gwc() {
-  local path
-  path=$(git-worktree-pick 'cd worktree') || return
-  [[ -n "$path" ]] && cd -- "$path"
+  # NB: not `path` - zsh ties that to $PATH and would break the function
+  local worktree
+  worktree=$(git-worktree-pick 'cd worktree') || return
+  [[ -n "$worktree" ]] && cd -- "$worktree"
 }
 
 # gwr - worktree remove: pick a worktree and remove it
 gwr() {
-  local path
-  path=$(git-worktree-pick 'remove worktree') || return
-  [[ -n "$path" ]] && git worktree remove -- "$path"
+  local worktree
+  worktree=$(git-worktree-pick 'remove worktree') || return
+  [[ -n "$worktree" ]] && git worktree remove -- "$worktree"
 }
 
 # =========================================================
