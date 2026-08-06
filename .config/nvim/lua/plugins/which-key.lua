@@ -38,6 +38,7 @@ return { -- Useful plugin to show you pending keybinds.
       { '<leader>z', group = 'Toggle' },
       { '<leader>t', group = '[T]esting' },
       { '<leader>m', group = 'Session [M]anagement' },
+      { '<leader>w', group = 'Git [W]orktree' },
     }
   end,
 }

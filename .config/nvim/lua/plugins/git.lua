@@ -1,3 +1,7 @@
+-- git-worktree.nvim runs `git worktree add` from the git common dir, so paths
+-- typed at its prompt are relative to `.git`, not to the repo root.
+local worktree_prefix = '../.worktrees/'
+
 return {
   {
     'tpope/vim-fugitive',
@@ -79,6 +83,23 @@ return {
     --stylua: ignore
     keys = {
       { '<leader>g', function() require('neogit').open() end, desc = 'Neogit' },
+    },
+  },
+  {
+    -- Maintained v2 fork of ThePrimeagen/git-worktree.nvim
+    'polarmutex/git-worktree.nvim',
+    version = '^2',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+    },
+    config = function()
+      require('telescope').load_extension 'git_worktree'
+    end,
+    --stylua: ignore
+    keys = {
+      { '<leader>ww', function() require('telescope').extensions.git_worktree.git_worktree() end, desc = 'S[w]itch worktree' },
+      { '<leader>wc', function() require('telescope').extensions.git_worktree.create_git_worktree { prefix = worktree_prefix } end, desc = '[C]reate worktree' },
     },
   },
   {
