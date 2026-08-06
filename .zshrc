@@ -132,11 +132,15 @@ gwc() {
   [[ -n "$worktree" ]] && cd -- "$worktree"
 }
 
-# gwr - worktree remove: pick a worktree and remove it
+# gwr - worktree remove: pick a worktree and remove it.
+# Removing the one we stand in drops us back to the main worktree.
 gwr() {
-  local worktree
+  local worktree main
   worktree=$(git-worktree-pick 'remove worktree') || return
-  [[ -n "$worktree" ]] && git worktree remove -- "$worktree"
+  [[ -n "$worktree" ]] || return
+  main=$(git-pwd)
+  git worktree remove -- "$worktree" || return
+  [[ $PWD == "$worktree" || $PWD == "$worktree"/* ]] && cd -- "$main"
 }
 
 # =========================================================
