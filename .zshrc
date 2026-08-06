@@ -117,6 +117,27 @@ git-pwd() {
   fi
 }
 
+# Pick a worktree with fzf, print its path
+git-worktree-pick() {
+  git worktree list --porcelain |
+    sed -n 's/^worktree //p' |
+    fzf --prompt="${1:-worktree}> "
+}
+
+# gwc - worktree cd: pick a worktree and enter it
+gwc() {
+  local path
+  path=$(git-worktree-pick 'cd worktree') || return
+  [[ -n "$path" ]] && cd -- "$path"
+}
+
+# gwr - worktree remove: pick a worktree and remove it
+gwr() {
+  local path
+  path=$(git-worktree-pick 'remove worktree') || return
+  [[ -n "$path" ]] && git worktree remove -- "$path"
+}
+
 # =========================================================
 #                 Init utilities
 # =========================================================
