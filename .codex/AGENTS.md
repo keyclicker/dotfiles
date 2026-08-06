@@ -184,6 +184,19 @@ Pull the updates to the repo if:
   Assisted-by: <model name>
   ```
 
+### GitHub message attribution
+
+- Start every message posted to GitHub — PR comments, review
+  summaries, inline review comments, replies, issue and discussion
+  comments — with a bold attribution line and a blank line:
+
+  ```markdown
+  **By <model name>:**
+  ```
+
+- Model name: same format as the `Assisted-by` trailer.
+- PR bodies: no prefix, `Assisted-by` trailer only.
+
 ### Protected branches
 
 - NEVER push to master, not even fast-forward.
