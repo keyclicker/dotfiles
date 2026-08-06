@@ -85,9 +85,13 @@ Consequences worth knowing:
 - Per-project tooling (linters, formatters, test runners) is deliberately not
   in the package set: it belongs to the project's lockfile, and a second global
   copy only drifts from it. Reach for `uvx <tool>` or `pnpm dlx <tool>`.
-- `claude`, `codex`, and `opencode` come from `modules/agents.nix` as
-  `npx ...@latest` wrappers, so the jail always runs the current release and
-  nothing needs updating by hand.
+- `claude`, `codex`, and `opencode` come from `modules/agents.nix`, pinned by
+  the flake's `nixpkgs-agents` input. They start without a registry roundtrip
+  and are the same versions your host runs. To move them, bump the pin on the
+  host (`nix flake update nixpkgs-agents --flake ~/.dotfiles/.nix`); `.nix`
+  changes, so the next launch reprovisions the jail with them. A newer release
+  than the lock, once, without touching the environment:
+  `npx --yes @anthropic-ai/claude-code@latest`.
 - `home/common.nix` links your dotfiles into `$HOME`, so the agent gets your
   nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
   It deliberately does **not** manage `.claude/settings.json`, which is why the

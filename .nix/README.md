@@ -28,7 +28,8 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
 │   │                   # mDNS resolution, tailscale, docker, terminfo
 │   ├── agents.nix      # AI coding agent CLIs (claude, codex,
-│   │                   # opencode), every machine
+│   │                   # opencode) from the nixpkgs-agents pin,
+│   │                   # every machine but vps
 │   └── slopbox.nix     # t3 code: CLI wrapper + web server
 │                       # (port 3773)
 ├── home/               # home-manager modules, mirror modules/ layers
@@ -82,7 +83,11 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
   leaf.
 - **Pins**: Linux hosts follow `nixos-unstable` (`nixpkgs`); mac follows
   `nixpkgs-unstable` (`nixpkgs-darwin`), matching the original
-  standalone darwin flake.
+  standalone darwin flake. The agent CLIs release far faster than
+  either, so `nixpkgs-agents` carries those three alone and can be
+  bumped on its own; `agentOverlay` in `flake.nix` grafts them onto
+  every host's package set, which is why `modules/agents.nix` can name
+  them like ordinary packages.
 
 ## Planned hosts
 
@@ -97,6 +102,12 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 
 # any machine (wraps the right rebuild command)
 nix-rebuild
+
+# newer claude / codex / opencode, nothing else moved
+nix flake update nixpkgs-agents --flake ~/.dotfiles/.nix && nix-rebuild
+
+# everything: nixpkgs, home-manager, nix-darwin, the agents pin
+nix flake update --flake ~/.dotfiles/.nix && nix-rebuild
 
 # mac
 sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
