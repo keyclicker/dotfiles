@@ -29,7 +29,9 @@
     ++ (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ../modules/browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
-      # Base system the image has no distro to provide
+      # Base system the image has no distro to provide. procps is here
+      # rather than in common.nix because its ps reads /proc, so on
+      # darwin it would shadow the native tool with a broken one.
       bashInteractive
       cacert
       glibcLocales
