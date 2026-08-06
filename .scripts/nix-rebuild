@@ -26,8 +26,8 @@ if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
 fi
 
 case "$mode" in
-  darwin) exec sudo darwin-rebuild switch --flake "$flake#$host" "$@" ;;
-  nixos)  exec sudo nixos-rebuild switch --flake "$flake#$host" "$@" ;;
+  darwin) sudo darwin-rebuild switch --flake "$flake#$host" "$@" ;;
+  nixos)  sudo nixos-rebuild switch --flake "$flake#$host" "$@" ;;
   home)
     # -b: standalone home-manager has no backupFileExtension option in
     # the flake (unlike the darwin/NixOS blocks), so back up clashing
@@ -35,10 +35,20 @@ case "$mode" in
     # First switch on a fresh host: home-manager isn't installed yet
     # (programs.home-manager.enable only applies after activation).
     if command -v home-manager >/dev/null 2>&1; then
-      exec home-manager switch -b hm-bak --flake "$flake#$USER@$host" "$@"
+      home-manager switch -b hm-bak --flake "$flake#$USER@$host" "$@"
     else
-      exec nix run home-manager -- switch -b hm-bak \
+      nix run home-manager -- switch -b hm-bak \
         --flake "$flake#$USER@$host" "$@"
     fi
     ;;
 esac
+
+# The agent CLIs live in $HOME, not the store (see
+# .nix/modules/agents.nix), so the switch alone does not move them.
+# agent-update comes from that module: hosts without agent CLIs (vps)
+# have no such command and skip this. A failure here is not a failed
+# rebuild, hence the `||` shielding it from set -e.
+if command -v agent-update >/dev/null 2>&1; then
+  agent-update ||
+    echo "nix-rebuild: agent-update failed; CLIs left as they were" >&2
+fi

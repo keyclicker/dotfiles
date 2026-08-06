@@ -85,9 +85,11 @@ Consequences worth knowing:
 - Per-project tooling (linters, formatters, test runners) is deliberately not
   in the package set: it belongs to the project's lockfile, and a second global
   copy only drifts from it. Reach for `uvx <tool>` or `pnpm dlx <tool>`.
-- `claude`, `codex`, and `opencode` come from `modules/agents.nix` as
-  `npx ...@latest` wrappers, so the jail always runs the current release and
-  nothing needs updating by hand.
+- `claude`, `codex`, and `opencode` are not in the package set. `agent-update`
+  (from `modules/agents.nix`) installs them into the jail home when the
+  environment is provisioned, and they update themselves after that — claude
+  in the background, the other two via `codex update` and `agent-update`. Run
+  `agent-update` inside the jail to force a refresh; it needs no rebuild.
 - `home/common.nix` links your dotfiles into `$HOME`, so the agent gets your
   nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
   It deliberately does **not** manage `.claude/settings.json`, which is why the

@@ -27,8 +27,9 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 │   ├── desktop.nix     # desktops: shared desktop packages
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
 │   │                   # mDNS resolution, tailscale, docker, terminfo
-│   ├── agents.nix      # AI coding agent CLIs (claude, codex,
-│   │                   # opencode), every machine
+│   ├── agents.nix      # agent-update: installs and refreshes the
+│   │                   # AI coding agent CLIs (claude, codex,
+│   │                   # opencode); every machine but vps
 │   └── slopbox.nix     # t3 code: CLI wrapper + web server
 │                       # (port 3773)
 ├── home/               # home-manager modules, mirror modules/ layers
@@ -76,6 +77,16 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
   into shared data instead. Host leaves add their extra layers the
   same way (raspberry: dev + agents, vps: dev) on top of identity
   (username, home directory).
+- **Agent CLIs are not nix-managed**: `claude`, `codex` and `opencode`
+  release near-daily and each ships an updater that a read-only store
+  path cannot run — packaging them would mean disabling exactly the
+  mechanism that keeps them current. `modules/agents.nix` therefore
+  ships only `agent-update`, which installs them into `$HOME`
+  (`~/.local/bin` for claude's native build, pnpm's global bin for the
+  other two) and afterwards lets each update itself. `nix-rebuild`
+  calls it after every switch, so a rebuild is also a refresh; run it
+  by hand any time. This is the one place where the config is
+  deliberately imperative.
 - **Layers**: `common` = everywhere. `desktop` = mac + future NixOS
   desktop. Role modules (`server`, `slopbox`) add only packages coupled
   to the services they configure. Host-only packages stay in the host
@@ -95,8 +106,11 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 # optional second arg sets the login shell from the nix profile
 ~/.dotfiles/install.sh vps zsh
 
-# any machine (wraps the right rebuild command)
+# any machine (wraps the right rebuild command, then agent-update)
 nix-rebuild
+
+# agent CLIs only, without a rebuild
+agent-update
 
 # mac
 sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac

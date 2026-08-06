@@ -244,6 +244,12 @@ if [ "$(cat "$HOST_ENV_HASH" 2>/dev/null || true)" != "$env_hash" ]; then
             nix build --no-write-lock-file \
                 --out-link ~/.jail-activation "$JAIL_FLAKE"
             ~/.jail-activation/activate
+            # The agent CLIs are installed into the jail home rather
+            # than the store, so provisioning is where they arrive and
+            # where they are refreshed; between provisions they update
+            # themselves, or the agent runs agent-update itself.
+            . ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+            agent-update || echo "agent-jail: agent-update failed" >&2
         '
     printf '%s\n' "$env_hash" >"$HOST_ENV_HASH"
 fi

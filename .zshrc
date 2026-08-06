@@ -237,5 +237,8 @@ if [[ -r ~/.config/zsh/plugins.zsh ]]; then
   HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
 fi
 
-# opencode
-export PATH=/Users/keyclicker/.opencode/bin:$PATH
+# Agent CLIs: claude installs itself into ~/.local/bin (already on
+# PATH above), codex and opencode land in pnpm's global bin. See
+# `agent-update` in .nix/modules/agents.nix.
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME/bin:$PATH"

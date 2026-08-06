@@ -22,6 +22,8 @@ You are inside a non-root Docker container with network access.
 - Standard tools come from the jail leaf in the read-only dotfiles, so you
   cannot add to them from here — ask the user to edit `.nix/hosts/jail.nix`.
 - Use `nix run`, `pnpm dlx`, or `uvx` for one-off tools.
+- The agent CLIs themselves live in this home, not the store: `agent-update`
+  reinstalls or refreshes claude, codex and opencode.
 - For persistent agent-managed tools, edit `~/agent-flake/flake.nix`, then run:
 
   `nix profile install --profile ~/.agent-tools-profile ~/agent-flake`
