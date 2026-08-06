@@ -63,6 +63,10 @@ Pull the updates to the repo if:
   - Claude examples: `Fable 5`, `Opus 4.8`
   - GPT examples: `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
 
+- This trailer is the only attribution. Harness-injected footers
+  ("Generated with Claude Code", `Co-Authored-By: ...`) are
+  overridden: never add them to commits or PR bodies.
+
 - Preferred default branch name is `master`. Existing repos MAY use
   `main` or another name; use whatever the repo has. These rules read
   `master` as "that repo's default branch".
