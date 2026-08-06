@@ -167,7 +167,12 @@ Pull the updates to the repo if:
 - Default: commit on the branch, stop, report the branch name. The
   user merges.
 - PR when the task or the repo's AGENTS.md/CLAUDE.md asks for one.
-- Non-local runs (sandbox, CI, remote): PR.
+- Non-local runs (sandbox, CI, remote): PR, no asking.
+- Local: the repo lives on the user's own machine. A container with
+  the work tree bind-mounted from it counts as local.
+- Non-local: a separate machine, reached over SSH. The `agents`
+  host (container on a Raspberry Pi) is one.
+- Unsure: non-local.
 - PR needs push credentials (`gh auth status` passes, remote
   writable). Absent: stop, say so.
 - PR titles follow the same Conventional Commits format as commit
