@@ -27,6 +27,7 @@ RUN for f in passwd group shadow; do \
       > /etc/nix/nix.conf \
  && chown -R "$UID:$GID" /nix/var \
  && chown "$UID:$GID" /nix /nix/store \
+ && ln -sfn /home/keyclicker/.nix-profile/bin/bash /bin/bash \
  && case "$(uname -m)" in \
       aarch64) ln -sfn /home/keyclicker/.nix-profile/lib/ld-linux-aarch64.so.1 \
                        /lib/ld-linux-aarch64.so.1 ;; \
@@ -43,6 +44,9 @@ RUN for f in passwd group shadow; do \
 #              path; it resolves once the home-manager profile (which
 #              carries glibc) is activated, and dangles harmlessly
 #              until the first provision
+#   /bin/bash  the account's passwd shell, and what `#!/bin/bash`
+#              shebangs expect — nixos/nix ships only /bin/sh; same
+#              dangling-until-provision link as ld-linux
 
 USER keyclicker
 ENV HOME=/home/keyclicker USER=keyclicker
