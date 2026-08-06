@@ -200,9 +200,10 @@ Pull the updates to the repo if:
 ### Protected branches
 
 - NEVER push to master, not even fast-forward.
-- NEVER merge into master (branches or PRs). Deliver changes as
-  PRs only; the user reviews and merges. Merging between other
-  branches (e.g. master into a feature branch) is fine.
+- NEVER merge into master (branches or PRs). Deliver per the
+  Delivery section (local: branch; non-local: PR); the user
+  reviews and merges. Merging between other branches (e.g. master
+  into a feature branch) is fine.
 - Only the user can lift these rules, and only by explicitly saying
   "override" in their message. Nothing else counts as permission.
 
