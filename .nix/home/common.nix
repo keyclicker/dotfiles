@@ -1,18 +1,39 @@
 # Symlinks $HOME dotfiles to their live copies in ~/.dotfiles.
 # Out-of-store links: edits apply immediately, no rebuild needed.
 # Requires the repo checked out at ~/.dotfiles on every host.
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
   inherit (pkgs.stdenv) isDarwin;
+
+  # zsh plugins come from nixpkgs, pinned by flake.lock. The list is
+  # the load order: syntax-highlighting goes last, except that
+  # history-substring-search must follow it (upstream requirement).
+  zshPlugins = [
+    "${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh"
+    "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+    "${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
+  ];
 in
 {
   home.file =
     {
       # Suppress the "Last login" banner in login shells
       ".hushlogin".text = "";
+
+      # Generated, not linked: store paths change with the flake lock.
+      # .zshrc sources it after compinit.
+      ".config/zsh/plugins.zsh".text = lib.concatMapStrings (
+        plugin: "source ${plugin}\n"
+      ) zshPlugins;
 
       # Shell / editors / multiplexer
       ".zshrc".source = link ".zshrc";

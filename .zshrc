@@ -195,21 +195,21 @@ zle -N fancy-ctrl-z
 bindkey '^Z' fancy-ctrl-z
 
 # =========================================================
-#                  Plugins (submodules)
+#                        Plugins
 # =========================================================
 
-ZSH_PLUGIN_DIR=~/.dotfiles/submodules
+# plugins.zsh sources the plugins from the nix store; it is generated
+# by home-manager (.nix/home/common.nix). Absent until the first
+# switch, so keep the widget bindings inside the guard.
+if [[ -r ~/.config/zsh/plugins.zsh ]]; then
+  source ~/.config/zsh/plugins.zsh
 
-source $ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh
-source $ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source $ZSH_PLUGIN_DIR/zsh-history-substring-search/zsh-history-substring-search.zsh
-
-bindkey '^[[A' history-substring-search-up   # or '\eOA'
-bindkey '^[[B' history-substring-search-down # or '\eOB'
-HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
-HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='standout'
-HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
+  bindkey '^[[A' history-substring-search-up   # or '\eOA'
+  bindkey '^[[B' history-substring-search-down # or '\eOB'
+  HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+  HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='standout'
+  HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
+fi
 
 # opencode
 export PATH=/Users/keyclicker/.opencode/bin:$PATH
