@@ -70,6 +70,7 @@
     tokei
     mc
     vifm
+    yazi
     htop
     btop
 
