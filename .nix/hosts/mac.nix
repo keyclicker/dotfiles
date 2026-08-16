@@ -62,6 +62,7 @@
       "raspberry-pi-imager"
       "t3-code"
       "handy"
+      "cmux"
     ];
   };
 
