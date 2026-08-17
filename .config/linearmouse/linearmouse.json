@@ -1,107 +1,121 @@
 {
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0",
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.11.4",
   "schemes" : [
     {
-      "pointer" : {
-        "acceleration" : 0.6875,
-        "speed" : 0.0689655172413792768,
-        "disableAcceleration" : false
-      },
       "if" : {
         "device" : {
-          "productName" : "SteelSeries Sensei Ten",
-          "vendorID" : "0x1038",
+          "category" : "mouse",
           "productID" : "0x1832",
-          "category" : "mouse"
+          "productName" : "SteelSeries Sensei Ten",
+          "vendorID" : "0x1038"
         }
       },
+      "pointer" : {
+        "acceleration" : 0.6875,
+        "disableAcceleration" : false,
+        "speed" : 0.0689655172413792768
+      },
       "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
+        },
+        "distance" : {
+          "vertical" : 6
+        },
         "reverse" : {
           "vertical" : true
         },
         "speed" : {
           "vertical" : 0
-        },
-        "distance" : {
-          "vertical" : 6
-        },
-        "acceleration" : {
-          "vertical" : 1
         }
       }
     },
     {
-      "pointer" : {
-        "disableAcceleration" : false,
-        "speed" : 0.0689655172413792768,
-        "acceleration" : 0.6875
-      },
       "if" : {
         "device" : {
-          "productID" : "0x343",
           "category" : "trackpad",
+          "productID" : "0x343",
           "productName" : "Apple Internal Keyboard \/ Trackpad",
           "vendorID" : "0x5ac"
         }
       },
+      "pointer" : {
+        "acceleration" : "unset",
+        "disableAcceleration" : false,
+        "redirectsToScroll" : false,
+        "speed" : "unset"
+      },
       "scrolling" : {
         "acceleration" : {
           "vertical" : 1
-        },
-        "speed" : {
-          "vertical" : 0
         },
         "distance" : {
           "vertical" : "auto"
         },
         "reverse" : {
           "vertical" : false
+        },
+        "speed" : {
+          "vertical" : 0
         }
       }
     },
     {
       "if" : {
         "device" : {
-          "productID" : "0x323",
-          "vendorID" : "0x4c",
-          "serialNumber" : "D0:C0:50:BA:8C:3C",
           "category" : "trackpad",
-          "productName" : "Nick’s Magic Mouse"
+          "productID" : "0x323",
+          "productName" : "Nick’s Magic Mouse",
+          "serialNumber" : "D0:C0:50:BA:8C:3C",
+          "vendorID" : "0x4c"
         }
-      },
-      "scrolling" : {
-        "distance" : "auto",
-        "speed" : 0,
-        "acceleration" : 1
       },
       "pointer" : {
-        "speed" : 0,
+        "acceleration" : "unset",
         "disableAcceleration" : false,
-        "acceleration" : 0.6875
+        "redirectsToScroll" : false,
+        "speed" : "unset"
+      },
+      "scrolling" : {
+        "acceleration" : 1,
+        "distance" : "auto",
+        "speed" : 0
       }
     },
     {
       "if" : {
         "device" : {
-          "productID" : "0xb034",
-          "serialNumber" : "41DEBBD3",
-          "productName" : "MX Master 3S",
           "category" : "mouse",
+          "productID" : "0xb034",
+          "productName" : "MX Master 3S",
+          "serialNumber" : "41DEBBD3",
           "vendorID" : "0x46d"
         }
       },
-      "scrolling" : {
-        "reverse" : {
-          "vertical" : false
-        },
-        "distance" : "auto",
-        "speed" : 0,
-        "acceleration" : 1
+      "logitech" : {
+        "highResolutionWheel" : false
       },
       "pointer" : {
-        "acceleration" : 0.6875,
-        "speed" : 0,
-        "disableAcceleration" : false
+        "acceleration" : "unset",
+        "disableAcceleration" : false,
+        "redirectsToScroll" : false,
+        "speed" : 0
+      },
+      "scrolling" : {
+        "acceleration" : 1,
+        "distance" : {
+          "horizontal" : "auto",
+          "vertical" : "74.6px"
+        },
+        "reverse" : {
+          "vertical" : true
+        },
+        "smoothed" : {
+          "vertical" : {
+            "enabled" : false
+          }
+        },
+        "speed" : 0
       }
     }
   ]

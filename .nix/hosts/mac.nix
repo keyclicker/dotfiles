@@ -62,19 +62,18 @@
       "tailscale-app"
       "raspberry-pi-imager"
 
-      "mactex-no-gui"
-
-      "puremac"
-
       "qbittorrent"
       "spotify"
       
       "obs"
       "xld"
       "blender"
+      "adobe-creative-cloud"
 
-      "discord"
       "obsidian"
+      "discord"
+      "puremac"
+      "mactex-no-gui"
 
       # To test:
       "cmux"
