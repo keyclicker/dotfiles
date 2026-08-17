@@ -39,29 +39,44 @@
   homebrew = {
     enable = true;
     casks = [
-      "blender"
       "brave-browser"
-      "chatgpt"
-      "claude"
-      "discord"
+      "google-chrome"
+
+      "handy"
+      "linearmouse"
+      "logi-options+"
+      "karabiner-elements"
+
       "ghostty"
       "github"
-      "google-chrome"
+      "visual-studio-code"
       "imhex"
-      "karabiner-elements"
-      "obs"
-      "obsidian"
+
+      "chatgpt"
+      "claude"
+      "t3-code"
+
       "postico"
+      "postman"
+
+      "tailscale-app"
+      "raspberry-pi-imager"
+
+      "mactex-no-gui"
+
       "puremac"
+
       "qbittorrent"
       "spotify"
-      "tailscale-app"
-      "visual-studio-code"
+      
+      "obs"
       "xld"
-      "mactex-no-gui"
-      "raspberry-pi-imager"
-      "t3-code"
-      "handy"
+      "blender"
+
+      "discord"
+      "obsidian"
+
+      # To test:
       "cmux"
     ];
   };
