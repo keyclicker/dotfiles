@@ -48,7 +48,8 @@ in
       ".config/git".source = link ".config/git";
       ".config/mc".source = link ".config/mc";
       ".config/yazi".source = link ".config/yazi";
-      ".config/opencode".source = link ".config/opencode";
+      # OpenCode writes package metadata and node_modules beside its config.
+      ".config/opencode/opencode.jsonc".source = link ".config/opencode/opencode.jsonc";
       ".config/caveman".source = link ".config/caveman";
 
       # AI agents: per-entry — settings.json, transcripts/, memory/

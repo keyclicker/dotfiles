@@ -47,6 +47,7 @@
           ./modules/dev.nix
           ./modules/desktop.nix
           ./modules/agents.nix
+          ./modules/ollama-darwin.nix
           ./hosts/mac.nix
           home-manager.darwinModules.home-manager
           {

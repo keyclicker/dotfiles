@@ -43,8 +43,10 @@
       "google-chrome"
 
       "handy"
+      "mos"
       "linearmouse"
       "logi-options+"
+      "monitorcontrol"
       "karabiner-elements"
 
       "ghostty"

@@ -55,6 +55,11 @@
         "reverse" : {
           "vertical" : false
         },
+        "smoothed" : {
+          "vertical" : {
+            "enabled" : false
+          }
+        },
         "speed" : {
           "vertical" : 0
         }
@@ -98,17 +103,15 @@
       "pointer" : {
         "acceleration" : "unset",
         "disableAcceleration" : false,
+        "hardwareDPI" : 400,
         "redirectsToScroll" : false,
-        "speed" : 0
+        "speed" : "unset"
       },
       "scrolling" : {
         "acceleration" : 1,
-        "distance" : {
-          "horizontal" : "auto",
-          "vertical" : "74.6px"
-        },
+        "distance" : "auto",
         "reverse" : {
-          "vertical" : true
+          "vertical" : false
         },
         "smoothed" : {
           "vertical" : {
