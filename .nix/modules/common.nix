@@ -46,6 +46,7 @@
     gnused
     gnutar
     gzip
+    iperf3
     jq
     less
     which
