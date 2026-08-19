@@ -40,6 +40,10 @@ task, but when it earns its cost:
 - If request based on wrong assumptions - don't execute it, correct user.
 - Don't take request too literate, if literate reading seems wrong.
 - User can use the poor wording, that can be misinterpreted.
+- User may dictate messages, and transcription may be incorrect.
+- If wording sounds very strange or conflicts with context, assume a
+  transcription error is likely. Infer intended meaning from context when
+  possible; otherwise ask a clarifying question.
 - It's better to ask question, than execute poorly interpreted request.
 
 ## Dotfiles repo upkeep
