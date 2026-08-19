@@ -21,12 +21,14 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 │                       #             home/standalone + hosts/vps
 ├── modules/            # system modules (nix-darwin / NixOS)
 │   ├── common.nix      # every machine: nix settings (flakes, gc,
-│   │                   # optimise) + core cross-platform CLI tools
+│   │                   # optimise) + core cross-platform CLI tools,
+│   │                   # including the iperf3 client
 │   ├── dev.nix         # dev toolchains (cmake, node, go, rust,
 │   │                   # postgres, ...); every full machine
 │   ├── desktop.nix     # desktops: shared desktop packages
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
-│   │                   # mDNS resolution, tailscale, docker, terminfo
+│   │                   # mDNS resolution, tailscale-only iperf3,
+│   │                   # docker, terminfo
 │   ├── agents.nix      # AI coding agent CLIs (claude, codex,
 │   │                   # opencode), every machine
 │   └── slopbox.nix     # t3 code: CLI wrapper + web server

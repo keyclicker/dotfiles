@@ -5,8 +5,13 @@
 {
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
+  services.iperf3.enable = true;
   services.tailscale.enable = true;
   virtualisation.docker.enable = true;
+
+  # iperf3 has no transport encryption by itself. Keep the server reachable
+  # only through Tailscale; LAN and public interfaces remain closed.
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 5201 ];
 
   # ncurses comes with NixOS; only the terminfo database needs adding.
   environment.systemPackages = [ pkgs.ghostty.terminfo ];
