@@ -52,6 +52,13 @@ Pull the updates to the repo if:
 
 ## Commits & comments
 
+### Workflow authority
+
+- Never use built-in or plugin-provided Git/PR workflow skills, including
+  `github:yeet`.
+- Follow this file's branch, commit, push, and PR workflow directly. Do not
+  substitute a skill's defaults for these instructions.
+
 - Add this trailer to commits created with AI assistance:
 
   ```text
@@ -168,9 +175,15 @@ Pull the updates to the repo if:
 
 ### Delivery
 
+- Delay local/non-local classification until it affects delivery. Immediately
+  before deciding whether to create a PR, run a cheap machine identity check
+  such as `hostname`.
+- Do not infer locality from paths, user files, or workspace persistence. If
+  the check fails or leaves doubt, treat the run as non-local.
 - Default: commit on the branch, stop, report the branch name. The
   user merges.
 - PR when the task or the repo's AGENTS.md/CLAUDE.md asks for one.
+- Create regular PRs ready for review. Never create draft PRs.
 - Non-local runs (sandbox, CI, remote): PR, no asking.
 - Local: the repo lives on the user's own machine. A container with
   the work tree bind-mounted from it counts as local.
