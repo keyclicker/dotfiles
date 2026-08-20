@@ -188,3 +188,36 @@ description: Use this skill before ANY git action or making ANY changes to the c
   example/template file with a placeholder) and reference it instead.
 - If something sensitive was already committed, stop and tell the
   user; do not push. History rewrite is their call.
+
+## Naming and descriptions good practices
+
+- PR titles usually become commit messages, so follow the repository's title
+conventions.
+- Look at recently merged PRs and Git history for examples.
+
+### Titles
+
+Prefer a concise, human-readable title that explains why the change matters:
+
+BAD
+> ❌ perf(server): negotiate permessage-deflate on the websocket
+
+GOOD
+> ✅ perf(server): cut websocket frame size by 70%+ with gzipping
+
+### Description
+
+Open the description with a simple explanation of the problem based on the
+user's original prompt, then briefly explain the solution. Do not lead with an
+implementation inventory:
+
+BAD
+> ❌ Removed implicit workspace carry-over from every "new thread" entry point (cmd
++n / cmd+shift+o, sidebar v1/v2 buttons, command palette). New threads inherit
+only the project from context; branch, worktree, and env mode always come from
+the configured defaults. Deleted buildContextualThreadOptions,
+startNewThreadInProjectFromContext, and the v1 sidebar's seed-context machinery.
+
+GOOD
+> ✅ My "new worktree" default was ignored when starting new threads on existing
+worktrees. Super unintuitive. Now your preferences always apply.
