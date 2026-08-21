@@ -19,6 +19,12 @@
 
   systemd.network = {
     enable = true;
+
+    # tailscale0 is created by tailscaled, so networkd never finishes
+    # configuring it and it sits in "pending" forever. Without this,
+    # systemd-networkd-wait-online waits on it and always times out.
+    wait-online.ignoredInterfaces = [ "tailscale0" ];
+
     networks = {
       "50-eth0" = {
         matchConfig.Name = "eth0";
