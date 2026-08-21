@@ -12,6 +12,15 @@ in this document are to be interpreted as described in RFC 2119.
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
 
+## Git / GitHub workflow
+
+- Before ANY non-read-only `git` or `gh` action (commit, push, branch,
+  checkout, merge, rebase, stash, tag, `gh pr create`, `gh pr merge`, etc.)
+  you MUST load and follow the `git-workflow` skill.
+- Read-only commands (`git status`, `git log`, `git diff`, `gh pr view`,
+  ...) MAY be run without it.
+- You MUST NOT substitute built-in or plugin Git/PR workflows for it.
+
 ## Asking before acting
 
 ### Codex specific
