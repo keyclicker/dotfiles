@@ -207,6 +207,8 @@ GOOD
 
 ### Description
 
+Use header-bullet style.
+
 Open the description with a simple explanation of the problem based on the
 user's original prompt, then briefly explain the solution. Do not lead with an
 implementation inventory:
