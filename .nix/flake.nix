@@ -90,6 +90,24 @@
         ];
       };
 
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#nas-shell
+      nixosConfigurations."nas-shell" = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./modules/common.nix
+          ./hosts/nas-shell.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [ ./home/common.nix ];
+            };
+          }
+        ];
+      };
+
       homeConfigurations = {
         # Ubuntu pi: apt system, nix user environment.
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
