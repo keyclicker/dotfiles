@@ -66,9 +66,10 @@
 
       "qbittorrent"
       "spotify"
-      
+
       "obs"
       "xld"
+      "grandperspective"
       "blender"
       "adobe-creative-cloud"
 
