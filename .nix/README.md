@@ -97,8 +97,8 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 # optional second arg sets the login shell from the nix profile
 ~/.dotfiles/install.sh vps zsh
 
-# any machine (wraps the right rebuild command)
-nix-rebuild
+# any machine (wraps the right rebuild command; `dots help` for more)
+dots rebuild
 
 # mac
 sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac

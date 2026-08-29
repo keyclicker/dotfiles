@@ -1,0 +1,197 @@
+#!/bin/sh
+# dots — manage the ~/.dotfiles machine: status, pull, update, rebuild.
+#
+# Each cmd_* body below doubles as documentation: the commands run
+# exactly as you would type them by hand.
+set -eu
+
+repo="$HOME/.dotfiles"
+flake="$repo/.nix"
+config="${XDG_CONFIG_HOME:-$HOME/.config}/dots/config.json"
+cache="${XDG_CACHE_HOME:-$HOME/.cache}/dots.json"
+
+check_ttl_hours=6    # `warn` refreshes the cache when older than this
+nixpkgs_warn_days=14 # `warn` nags when the nixpkgs pin is older than this
+
+usage() {
+  cat <<EOF
+dots — dotfiles machine manager
+
+usage: dots [command] [args]
+
+  status                 (default) host, repo drift, nixpkgs age; cached, offline
+  list                   flake targets; * marks this machine's
+  check                  fetch repo + upstream nixpkgs, refresh the status cache
+  warn                   one-line drift warning for shell login (self-refreshing)
+  pull                   fast-forward ~/.dotfiles from origin
+  update [input]         bump flake.lock (all inputs, or one)
+  rebuild [host] [args]  build + switch this machine (darwin/nixos/home auto)
+  up      [host] [args]  pull, then rebuild
+  upgrade [host] [args]  pull, update, then rebuild
+  set [host]             pin default host for rebuilds; bare \`set\` shows it
+  unset                  back to hostname autodetect
+  help                   this text
+
+host resolution: explicit arg > \`dots set\` pin > autodetect
+(mac on darwin, short hostname elsewhere).
+EOF
+}
+
+# --- helpers (the only three) ------------------------------------------------
+
+# darwin | nixos | home (Ubuntu and friends: user environment only)
+detect_mode() {
+  case "$(uname -s)" in
+    Darwin) echo darwin ;;
+    Linux) if [ -e /etc/NIXOS ]; then echo nixos; else echo home; fi ;;
+    *) echo "dots: unsupported OS: $(uname -s)" >&2; exit 1 ;;
+  esac
+}
+
+pinned_host() {
+  if [ -f "$config" ]; then jq -r '.host // empty' "$config"; fi
+}
+
+resolve_host() {
+  host="$(pinned_host)"
+  if [ -n "$host" ]; then
+    echo "$host"
+  elif [ "$(detect_mode)" = darwin ]; then
+    echo mac
+  else
+    hostname -s
+  fi
+}
+
+# --- commands ----------------------------------------------------------------
+
+cmd_status() { # where this machine stands; reads the cache, no network
+  mode="$(detect_mode)"
+  if [ -n "$(pinned_host)" ]; then src=pinned; else src=autodetect; fi
+  echo "host:    $(resolve_host) ($mode, $src)"
+  if [ -e /run/current-system ]; then
+    echo "system:  $(basename "$(readlink /run/current-system)" | sed 's/^[a-z0-9]*-//')"
+  fi
+  if [ ! -f "$cache" ]; then
+    echo "drift:   unknown — run: dots check"
+    return
+  fi
+  now="$(date +%s)"
+  behind="$(jq -r '.repo_behind' "$cache")"
+  ahead="$(jq -r '.repo_ahead' "$cache")"
+  nix_days="$(( (now - $(jq -r '.nixpkgs_locked' "$cache")) / 86400 ))"
+  checked_min="$(( (now - $(jq -r '.checked_at' "$cache")) / 60 ))"
+  echo "repo:    $behind behind, $ahead ahead of origin/master"
+  echo "nixpkgs: pinned ${nix_days}d ago"
+  echo "checked: ${checked_min}min ago"
+}
+
+cmd_list() { # every buildable target in the flake
+  current="$(resolve_host)"
+  for kind in nixosConfigurations darwinConfigurations homeConfigurations; do
+    echo "$kind:"
+    nix eval --json "$flake#$kind" --apply builtins.attrNames 2>/dev/null \
+      | jq -r '.[]' | while read -r name; do
+        if [ "$name" = "$current" ] || [ "$name" = "$USER@$current" ]; then
+          printf '  * %s\n' "$name"
+        else
+          printf '    %s\n' "$name"
+        fi
+      done
+  done
+}
+
+cmd_check() { # refresh the drift cache: repo vs origin + age of the nixpkgs pin
+  git -C "$repo" fetch origin --prune --quiet
+  behind="$(git -C "$repo" rev-list --count HEAD..origin/master)"
+  ahead="$(git -C "$repo" rev-list --count origin/master..HEAD)"
+  locked="$(jq -r '.nodes.nixpkgs.locked.lastModified' "$flake/flake.lock")"
+  mkdir -p "$(dirname "$cache")"
+  jq -n --argjson checked_at "$(date +%s)" \
+        --argjson repo_behind "$behind" --argjson repo_ahead "$ahead" \
+        --argjson nixpkgs_locked "$locked" \
+        '$ARGS.named' > "$cache"
+  cmd_status
+}
+
+cmd_warn() { # one-liner for shell login; never fails, never blocks on network
+  now="$(date +%s)"
+  age="$((check_ttl_hours * 3600 + 1))"
+  if [ -f "$cache" ]; then
+    age="$((now - $(jq -r '.checked_at' "$cache")))"
+    behind="$(jq -r '.repo_behind' "$cache")"
+    nix_days="$(( (now - $(jq -r '.nixpkgs_locked' "$cache")) / 86400 ))"
+    if [ "$behind" -gt 0 ]; then
+      echo "dots: repo $behind commit(s) behind — run: dots up"
+    elif [ "$nix_days" -ge "$nixpkgs_warn_days" ]; then
+      echo "dots: nixpkgs pin ${nix_days}d old — run: dots upgrade"
+    fi
+  fi
+  if [ "$age" -gt "$((check_ttl_hours * 3600))" ]; then
+    (cmd_check >/dev/null 2>&1 &) # next shell sees a fresh cache
+  fi
+}
+
+cmd_pull() { # bring the repo up to what is merged
+  git -C "$repo" pull --ff-only
+}
+
+cmd_update() { # bump flake.lock: all inputs, or just the named one
+  nix flake update ${1:+"$1"} --flake "$flake"
+}
+
+cmd_rebuild() { # build the flake target and switch this machine onto it
+  host="$(resolve_host)"
+  if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then host="$1"; shift; fi
+  case "$(detect_mode)" in
+    darwin) sudo darwin-rebuild switch --flake "$flake#$host" "$@" ;;
+    nixos)  sudo nixos-rebuild switch --flake "$flake#$host" "$@" ;;
+    home)
+      # -b: back up files home-manager wants to replace on first switch.
+      if command -v home-manager >/dev/null 2>&1; then
+        home-manager switch -b hm-bak --flake "$flake#$USER@$host" "$@"
+      else # fresh host: home-manager exists only after first activation
+        nix run home-manager -- switch -b hm-bak --flake "$flake#$USER@$host" "$@"
+      fi ;;
+  esac
+}
+
+cmd_up() { # the everyday command: apply whatever is merged
+  cmd_pull
+  cmd_rebuild "$@"
+}
+
+cmd_upgrade() { # also take new nixpkgs and friends
+  cmd_pull
+  cmd_update
+  cmd_rebuild "$@"
+}
+
+cmd_set() { # pin the flake host used by rebuild/up/upgrade
+  if [ "$#" -eq 0 ]; then
+    host="$(pinned_host)"
+    if [ -n "$host" ]; then echo "$host"; else echo "not pinned (autodetect)"; fi
+    return
+  fi
+  if ! cmd_list | sed 's/^[ *]*//' | grep -qx -e "$1" -e "$USER@$1"; then
+    echo "dots: no flake target '$1' (see: dots list)" >&2
+    exit 1
+  fi
+  mkdir -p "$(dirname "$config")"
+  jq -n --arg host "$1" '{host: $host}' > "$config"
+}
+
+cmd_unset() { # back to hostname autodetect
+  rm -f "$config"
+}
+
+# --- dispatch ----------------------------------------------------------------
+
+cmd="${1:-status}"
+if [ "$#" -gt 0 ]; then shift; fi
+case "$cmd" in
+  help|-h|--help) usage ;;
+  status|list|check|warn|pull|update|rebuild|up|upgrade|set|unset)
+    "cmd_$cmd" "$@" ;;
+  *) usage >&2; exit 1 ;;
+esac
