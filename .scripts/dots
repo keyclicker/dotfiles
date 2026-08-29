@@ -65,7 +65,8 @@ resolve_host() {
 
 # --- commands ----------------------------------------------------------------
 
-cmd_status() { # where this machine stands; reads the cache, no network
+# Where this machine stands; reads the cache, no network.
+cmd_status() {
   mode="$(detect_mode)"
   if [ -n "$(pinned_host)" ]; then src=pinned; else src=autodetect; fi
   echo "host:    $(resolve_host) ($mode, $src)"
@@ -86,7 +87,8 @@ cmd_status() { # where this machine stands; reads the cache, no network
   echo "checked: ${checked_min}min ago"
 }
 
-cmd_list() { # every buildable target in the flake
+# Every buildable target in the flake.
+cmd_list() {
   current="$(resolve_host)"
   for kind in nixosConfigurations darwinConfigurations homeConfigurations; do
     echo "$kind:"
@@ -101,7 +103,8 @@ cmd_list() { # every buildable target in the flake
   done
 }
 
-cmd_check() { # refresh the drift cache: repo vs origin + age of the nixpkgs pin
+# Refresh the drift cache: repo vs origin + age of the nixpkgs pin.
+cmd_check() {
   git -C "$repo" fetch origin --prune --quiet
   behind="$(git -C "$repo" rev-list --count HEAD..origin/master)"
   ahead="$(git -C "$repo" rev-list --count origin/master..HEAD)"
@@ -114,7 +117,8 @@ cmd_check() { # refresh the drift cache: repo vs origin + age of the nixpkgs pin
   cmd_status
 }
 
-cmd_warn() { # one-liner for shell login; never fails, never blocks on network
+# One-liner for shell login; never fails, never blocks on network.
+cmd_warn() {
   now="$(date +%s)"
   age="$((check_ttl_hours * 3600 + 1))"
   if [ -f "$cache" ]; then
@@ -132,15 +136,18 @@ cmd_warn() { # one-liner for shell login; never fails, never blocks on network
   fi
 }
 
-cmd_pull() { # bring the repo up to what is merged
+# Bring the repo up to what is merged.
+cmd_pull() {
   git -C "$repo" pull --ff-only
 }
 
-cmd_update() { # bump flake.lock: all inputs, or just the named one
+# Bump flake.lock: all inputs, or just the named one.
+cmd_update() {
   nix flake update ${1:+"$1"} --flake "$flake"
 }
 
-cmd_rebuild() { # build the flake target and switch this machine onto it
+# Build the flake target and switch this machine onto it.
+cmd_rebuild() {
   host="$(resolve_host)"
   if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then host="$1"; shift; fi
   case "$(detect_mode)" in
@@ -156,18 +163,21 @@ cmd_rebuild() { # build the flake target and switch this machine onto it
   esac
 }
 
-cmd_up() { # the everyday command: apply whatever is merged
+# The everyday command: apply whatever is merged.
+cmd_up() {
   cmd_pull
   cmd_rebuild "$@"
 }
 
-cmd_upgrade() { # also take new nixpkgs and friends
+# Also take new nixpkgs and friends.
+cmd_upgrade() {
   cmd_pull
   cmd_update
   cmd_rebuild "$@"
 }
 
-cmd_set() { # pin the flake host used by rebuild/up/upgrade
+# Pin the flake host used by rebuild/up/upgrade.
+cmd_set() {
   if [ "$#" -eq 0 ]; then
     host="$(pinned_host)"
     if [ -n "$host" ]; then echo "$host"; else echo "not pinned (autodetect)"; fi
@@ -181,7 +191,8 @@ cmd_set() { # pin the flake host used by rebuild/up/upgrade
   jq -n --arg host "$1" '{host: $host}' > "$config"
 }
 
-cmd_unset() { # back to hostname autodetect
+# Back to hostname autodetect.
+cmd_unset() {
   rm -f "$config"
 }
 
