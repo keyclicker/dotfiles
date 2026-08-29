@@ -1,5 +1,5 @@
 #!/bin/sh
-# dots — manage the ~/.dotfiles machine: status, pull, update, rebuild.
+# dots — manage the ~/.dotfiles machine: status, rebuild, upgrade.
 #
 # Each cmd_* body below doubles as documentation: the commands run
 # exactly as you would type them by hand.
@@ -17,20 +17,19 @@ usage() {
   cat <<EOF
 dots — dotfiles machine manager
 
-usage: dots [command] [args]
+usage: dots <command> [args]
 
-  status                 (default) host, repo drift, nixpkgs age; cached, offline
+  status                 host, repo drift, nixpkgs pin age (fetches origin)
   list                   flake targets; * marks this machine's
-  check                  fetch repo + upstream nixpkgs, refresh the status cache
-  warn                   one-line drift warning for shell login (self-refreshing)
-  pull                   fast-forward ~/.dotfiles from origin
-  update [input]         bump flake.lock (all inputs, or one)
   rebuild [host] [args]  build + switch this machine (darwin/nixos/home auto)
-  up      [host] [args]  pull, then rebuild
-  upgrade [host] [args]  pull, update, then rebuild
+  upgrade [host] [args]  pull repo, bump flake.lock, rebuild
   set [host]             pin default host for rebuilds; bare \`set\` shows it
   unset                  back to hostname autodetect
   help                   this text
+
+plumbing:
+  warn                   one-line drift warning; zshrc runs it at login and
+                         it refreshes the status cache in background if stale
 
 host resolution: explicit arg > \`dots set\` pin > autodetect
 (mac on darwin, short hostname elsewhere).
@@ -69,26 +68,26 @@ resolve_host() {
 #                          Commands
 # ==========================================================
 
-# Where this machine stands; reads the cache, no network.
+# Where this machine stands: fetch origin, recompute drift,
+# cache the result for `warn`.
 cmd_status() {
-  mode="$(detect_mode)"
+  git -C "$repo" fetch origin --prune --quiet
+  behind="$(git -C "$repo" rev-list --count HEAD..origin/master)"
+  ahead="$(git -C "$repo" rev-list --count origin/master..HEAD)"
+  locked="$(jq -r '.nodes.nixpkgs.locked.lastModified' "$flake/flake.lock")"
+  mkdir -p "$(dirname "$cache")"
+  jq -n --argjson checked_at "$(date +%s)" \
+        --argjson repo_behind "$behind" --argjson repo_ahead "$ahead" \
+        --argjson nixpkgs_locked "$locked" \
+        '$ARGS.named' > "$cache"
+
   if [ -n "$(pinned_host)" ]; then src=pinned; else src=autodetect; fi
-  echo "host:    $(resolve_host) ($mode, $src)"
+  echo "host:    $(resolve_host) ($(detect_mode), $src)"
   if [ -e /run/current-system ]; then
     echo "system:  $(basename "$(readlink /run/current-system)" | sed 's/^[a-z0-9]*-//')"
   fi
-  if [ ! -f "$cache" ]; then
-    echo "drift:   unknown — run: dots check"
-    return
-  fi
-  now="$(date +%s)"
-  behind="$(jq -r '.repo_behind' "$cache")"
-  ahead="$(jq -r '.repo_ahead' "$cache")"
-  nix_days="$(( (now - $(jq -r '.nixpkgs_locked' "$cache")) / 86400 ))"
-  checked_min="$(( (now - $(jq -r '.checked_at' "$cache")) / 60 ))"
   echo "repo:    $behind behind, $ahead ahead of origin/master"
-  echo "nixpkgs: pinned ${nix_days}d ago"
-  echo "checked: ${checked_min}min ago"
+  echo "nixpkgs: pinned $(( ($(date +%s) - locked) / 86400 ))d ago"
 }
 
 # Every buildable target in the flake.
@@ -107,21 +106,7 @@ cmd_list() {
   done
 }
 
-# Refresh the drift cache: repo vs origin + age of the nixpkgs pin.
-cmd_check() {
-  git -C "$repo" fetch origin --prune --quiet
-  behind="$(git -C "$repo" rev-list --count HEAD..origin/master)"
-  ahead="$(git -C "$repo" rev-list --count origin/master..HEAD)"
-  locked="$(jq -r '.nodes.nixpkgs.locked.lastModified' "$flake/flake.lock")"
-  mkdir -p "$(dirname "$cache")"
-  jq -n --argjson checked_at "$(date +%s)" \
-        --argjson repo_behind "$behind" --argjson repo_ahead "$ahead" \
-        --argjson nixpkgs_locked "$locked" \
-        '$ARGS.named' > "$cache"
-  cmd_status
-}
-
-# One-liner for shell login; never fails, never blocks on network.
+# One-liner for shell login; reads the cache, never blocks on network.
 cmd_warn() {
   now="$(date +%s)"
   age="$((check_ttl_hours * 3600 + 1))"
@@ -130,24 +115,14 @@ cmd_warn() {
     behind="$(jq -r '.repo_behind' "$cache")"
     nix_days="$(( (now - $(jq -r '.nixpkgs_locked' "$cache")) / 86400 ))"
     if [ "$behind" -gt 0 ]; then
-      echo "dots: repo $behind commit(s) behind — run: dots up"
+      echo "dots: repo $behind commit(s) behind — run: dots upgrade"
     elif [ "$nix_days" -ge "$nixpkgs_warn_days" ]; then
       echo "dots: nixpkgs pin ${nix_days}d old — run: dots upgrade"
     fi
   fi
   if [ "$age" -gt "$((check_ttl_hours * 3600))" ]; then
-    (cmd_check >/dev/null 2>&1 &) # next shell sees a fresh cache
+    (cmd_status >/dev/null 2>&1 &) # next shell sees a fresh cache
   fi
-}
-
-# Bring the repo up to what is merged.
-cmd_pull() {
-  git -C "$repo" pull --ff-only
-}
-
-# Bump flake.lock: all inputs, or just the named one.
-cmd_update() {
-  nix flake update ${1:+"$1"} --flake "$flake"
 }
 
 # Build the flake target and switch this machine onto it.
@@ -167,20 +142,14 @@ cmd_rebuild() {
   esac
 }
 
-# The everyday command: apply whatever is merged.
-cmd_up() {
-  cmd_pull
-  cmd_rebuild "$@"
-}
-
-# Also take new nixpkgs and friends.
+# Take everything new: merged commits + fresh inputs, then switch.
 cmd_upgrade() {
-  cmd_pull
-  cmd_update
+  git -C "$repo" pull --ff-only
+  nix flake update --flake "$flake"
   cmd_rebuild "$@"
 }
 
-# Pin the flake host used by rebuild/up/upgrade.
+# Pin the flake host used by rebuild/upgrade.
 cmd_set() {
   if [ "$#" -eq 0 ]; then
     host="$(pinned_host)"
@@ -204,11 +173,11 @@ cmd_unset() {
 #                          Dispatch
 # ==========================================================
 
-cmd="${1:-status}"
+cmd="${1:-help}"
 if [ "$#" -gt 0 ]; then shift; fi
 case "$cmd" in
   help|-h|--help) usage ;;
-  status|list|check|warn|pull|update|rebuild|up|upgrade|set|unset)
+  status|list|warn|rebuild|upgrade|set|unset)
     "cmd_$cmd" "$@" ;;
   *) usage >&2; exit 1 ;;
 esac
