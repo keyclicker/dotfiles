@@ -69,7 +69,7 @@
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
       nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
+        # Arch comes from nixpkgs.hostPlatform in hosts/agents-hardware.nix.
         modules = [
           ./modules/common.nix
           ./modules/dev.nix
@@ -77,6 +77,7 @@
           ./modules/agents.nix
           ./modules/browser.nix
           ./modules/slopbox.nix
+          ./modules/vm.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager
           {
