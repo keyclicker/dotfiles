@@ -5,7 +5,7 @@
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
-  inherit (pkgs.stdenv) isDarwin isLinux;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 in
 {
   home.file =
