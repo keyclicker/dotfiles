@@ -90,6 +90,20 @@
         ];
       };
 
+      # Generic container target for incus / Proxmox CTs: basic
+      # tooling, no pet identity. Spawned instances name themselves
+      # ct-<machine-id prefix>. Prebuilt images come later (#32);
+      # until then build/switch it like any other configuration.
+      nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./modules/common.nix
+          ./modules/server.nix
+          ./platform-container.nix
+          ./option-generic-hostname.nix
+          ./host-container.nix
+        ];
+      };
+
       homeConfigurations = {
         # Ubuntu pi: apt system, nix user environment.
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
