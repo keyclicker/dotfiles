@@ -8,13 +8,11 @@
   networking = {
     hostName = "agents";
     useNetworkd = true;
-
-    # 22 is opened by services.openssh; t3 web + mDNS stay LAN-only.
-    firewall.interfaces.ens18 = {
-      allowedTCPPorts = [ 3773 ];
-      allowedUDPPorts = [ 5353 ];
-    };
   };
+
+  # 22 is opened by services.openssh; the LAN-only ports (t3 web,
+  # mDNS) are opened on this NIC by the modules that own them.
+  local.lanInterface = "ens18";
 
   systemd.network = {
     # Interfaces networkd doesn't manage (tailscale0 today, any

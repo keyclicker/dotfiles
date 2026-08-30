@@ -1,7 +1,19 @@
 # T3 Code: CLI wrapper + web server.
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
+  imports = [ ./lan.nix ];
+
+  # The web UI stays LAN-only; the host names the NIC.
+  networking.firewall.interfaces = lib.optionalAttrs (config.local.lanInterface != null) {
+    ${config.local.lanInterface}.allowedTCPPorts = [ 3773 ];
+  };
+
   systemd.services.t3 = {
     description = "T3 Code server";
     wantedBy = [ "multi-user.target" ];
