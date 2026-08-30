@@ -4,7 +4,12 @@
 {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
+    ./generic-hostname.nix
   ];
+
+  # Clones from a generic VM image name themselves vm-<machine-id
+  # prefix>; pet hosts (agents) set networking.hostName and win.
+  local.genericHostname.prefix = lib.mkDefault "vm-";
 
   boot = {
     # All our Proxmox VMs use OVMF/UEFI.
