@@ -44,7 +44,6 @@
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
         modules = [
           ./modules/common.nix
-          ./modules/dev.nix
           ./modules/desktop.nix
           ./modules/agents.nix
           ./modules/ollama-darwin.nix
@@ -72,7 +71,6 @@
         # Arch comes from nixpkgs.hostPlatform in hosts/agents-hardware.nix.
         modules = [
           ./modules/common.nix
-          ./modules/dev.nix
           ./modules/server.nix
           ./modules/agents.nix
           ./modules/browser.nix
