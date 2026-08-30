@@ -6,3 +6,4 @@ nvim.*/
 .claude/transcripts/
 .claude/memory/
 .config/dots/
+.cache/
