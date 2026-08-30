@@ -79,7 +79,7 @@ alias rsc="rsync -avhn --delete --itemize-changes" # check: dry-run diff, no cha
 alias gw="git worktree"
 alias gs="git status"
 
-# dotfiles manager (status/pull/update/rebuild; see `dots help`)
+# dotfiles manager; see `dots help`
 alias nr="dots rebuild"
 
 alias em="emacsclient -c -a \"emacs\""
@@ -240,5 +240,5 @@ fi
 # opencode
 export PATH=/Users/keyclicker/.opencode/bin:$PATH
 
-# dotfiles drift warning: reads a cache, refreshes it in the background
-command -v dots >/dev/null && dots warn
+# dotfiles drift warning: local checks, fetches origin in the background
+if command -v dots >/dev/null; then dots warn; fi
