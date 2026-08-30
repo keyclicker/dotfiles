@@ -61,8 +61,10 @@
       "postico"
       "postman"
 
+      "wifiman"
       "tailscale-app"
       "raspberry-pi-imager"
+      "utm"
 
       "qbittorrent"
       "spotify"
