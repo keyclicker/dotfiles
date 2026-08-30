@@ -1,9 +1,9 @@
 #!/bin/sh
 # Bootstrap a machine from this repo: install nix if missing, enable
-# flakes, then build and switch via .scripts/nix-rebuild.
+# flakes, then build and switch via .scripts/dots.
 #
 # Usage: ./install.sh [host] [shell]
-#   host   flake host, passed to nix-rebuild (defaults: mac on darwin,
+#   host   flake host, passed to dots rebuild (defaults: mac on darwin,
 #          short hostname elsewhere)
 #   shell  optional: set login shell to this binary from the nix
 #          profile, e.g. zsh (requires host to be given too)
@@ -33,7 +33,7 @@ if ! grep -hs experimental-features "$conf" /etc/nix/nix.conf \
   printf 'experimental-features = nix-command flakes\n' >> "$conf"
 fi
 
-"$dir/.scripts/nix-rebuild" ${1:+"$1"}
+"$dir/.scripts/dots" rebuild ${1:+"$1"}
 
 if [ "$#" -ge 2 ]; then
   bin="$HOME/.nix-profile/bin/$2"

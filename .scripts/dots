@@ -1,0 +1,231 @@
+#!/bin/sh
+# dots — manage the ~/.dotfiles machine: status, rebuild, upgrade.
+set -eu
+
+repo="$HOME/.dotfiles"
+flake="$repo/.nix"
+config="${XDG_CONFIG_HOME:-$HOME/.config}/dots/host"
+stamp="${XDG_CACHE_HOME:-$HOME/.cache}/dots.fetched"
+
+check_ttl_hours=6    # `warn` refreshes origin refs when the last fetch is older
+nixpkgs_warn_days=14 # `warn` nags when the nixpkgs pin is older than this
+
+# darwin | nixos | home (Ubuntu and friends: user environment only)
+case "$(uname -s)" in
+  Darwin) mode=darwin ;;
+  Linux) if [ -e /etc/NIXOS ]; then mode=nixos; else mode=home; fi ;;
+  *) echo "dots: unsupported OS: $(uname -s)" >&2; exit 1 ;;
+esac
+
+usage() {
+  cat <<EOF
+dots — dotfiles machine manager
+
+usage: dots <command> [args]
+
+  status                 host, repo drift, nixpkgs pin age (fetches origin)
+  list                   flake targets; * marks this machine's
+  rebuild [host] [args]  build + switch this machine (darwin/nixos/home auto)
+  upgrade [host] [args]  pull repo, bump flake.lock, rebuild
+  set [host]             pin default host for rebuilds; bare \`set\` shows it
+  unset                  back to hostname autodetect
+  help                   this text
+
+plumbing:
+  warn                   one-line drift warning; zshrc runs it on shell start.
+                         Local checks only; kicks off a background fetch of
+                         origin when the last one is older than ${check_ttl_hours}h.
+
+host resolution: explicit arg > \`dots set\` pin > autodetect
+(mac on darwin, short hostname elsewhere). A pin of the form
+user@host names the flake attribute verbatim.
+EOF
+}
+
+# ==========================================================
+#                          Helpers
+# ==========================================================
+
+# pinned host from the config file, if any
+pinned_host() {
+  if [ -f "$config" ]; then cat "$config"; fi
+}
+
+# explicit pin, else mac on darwin, else short hostname
+resolve_host() {
+  host="$(pinned_host)"
+  if [ -n "$host" ]; then
+    echo "$host"
+  elif [ "$mode" = darwin ]; then
+    echo mac
+  else
+    hostname -s
+  fi
+}
+
+# flake attr name for a host in this machine's mode; pins that
+# already name a full attr (user@host) pass through verbatim
+flake_target() {
+  case "$1" in
+    *@*) echo "$1" ;;
+    *) if [ "$mode" = home ]; then echo "$USER@$1"; else echo "$1"; fi ;;
+  esac
+}
+
+# "<kind> <name>" for every buildable target in the flake
+flake_targets() {
+  for kind in nixosConfigurations darwinConfigurations homeConfigurations; do
+    nix eval --json "$flake#$kind" --apply builtins.attrNames \
+      | jq -r --arg kind "$kind" '.[] | "\($kind) \(.)"'
+  done
+}
+
+# upstream of the checked-out branch, empty if none
+upstream_ref() {
+  git -C "$repo" rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || true
+}
+
+# epoch of the nixpkgs pin this machine actually builds from
+# (darwin follows nixpkgs-darwin); 0 when unreadable
+pin_epoch() {
+  if [ "$mode" = darwin ]; then node=nixpkgs-darwin; else node=nixpkgs; fi
+  jq -r ".nodes.\"$node\".locked.lastModified // 0" "$flake/flake.lock" \
+    2>/dev/null || echo 0
+}
+
+# ==========================================================
+#                          Commands
+# ==========================================================
+
+# Where this machine stands: fetch origin, report drift.
+cmd_status() {
+  git -C "$repo" fetch origin --prune --quiet
+  mkdir -p "${stamp%/*}"
+  touch "$stamp"
+
+  host="$(pinned_host)" src=pinned
+  if [ -z "$host" ]; then host="$(resolve_host)" src=autodetect; fi
+  echo "host:    $host ($mode, $src)"
+  if [ -e /run/current-system ]; then
+    echo "system:  $(basename "$(readlink /run/current-system)" | sed 's/^[a-z0-9]*-//')"
+  fi
+  upstream="$(upstream_ref)"
+  if [ -n "$upstream" ]; then
+    set -- $(git -C "$repo" rev-list --left-right --count "$upstream...HEAD")
+    echo "repo:    $1 behind, $2 ahead of $upstream"
+  else
+    echo "repo:    no upstream branch"
+  fi
+  locked="$(pin_epoch)"
+  if [ "$locked" -gt 0 ]; then
+    echo "nixpkgs: pinned $(( ($(date +%s) - locked) / 86400 ))d ago"
+  fi
+}
+
+# Every buildable target in the flake.
+cmd_list() {
+  current="$(flake_target "$(resolve_host)")"
+  flake_targets | while read -r kind name; do
+    if [ "$kind" != "${last:-}" ]; then echo "$kind:"; last="$kind"; fi
+    if [ "$name" = "$current" ]; then
+      printf '  * %s\n' "$name"
+    else
+      printf '    %s\n' "$name"
+    fi
+  done
+}
+
+# One-liner for shell start; local checks only, never blocks on network.
+cmd_warn() {
+  behind=0
+  upstream="$(upstream_ref)"
+  if [ -n "$upstream" ]; then
+    behind="$(git -C "$repo" rev-list --count "HEAD..$upstream" 2>/dev/null \
+      || echo 0)"
+  fi
+  if [ "$behind" -gt 0 ]; then
+    echo "dots: repo $behind commit(s) behind — run: dots upgrade"
+  else
+    locked="$(pin_epoch)"
+    if [ "$locked" -gt 0 ]; then
+      nix_days="$(( ($(date +%s) - locked) / 86400 ))"
+      if [ "$nix_days" -ge "$nixpkgs_warn_days" ]; then
+        echo "dots: nixpkgs pin ${nix_days}d old — run: dots upgrade"
+      fi
+    fi
+  fi
+  # refresh origin refs at most once per TTL; touching the stamp before
+  # forking keeps concurrent shells from spawning duplicate fetches
+  if [ -z "$(find "$stamp" -mmin "-$((check_ttl_hours * 60))" 2>/dev/null)" ]; then
+    mkdir -p "${stamp%/*}"
+    touch "$stamp"
+    (git -C "$repo" fetch origin --prune --quiet 2>/dev/null &)
+  fi
+}
+
+# Build the flake target and switch this machine onto it.
+cmd_rebuild() {
+  host=""
+  if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then host="$1"; shift; fi
+  [ -n "$host" ] || host="$(resolve_host)"
+  target="$(flake_target "$host")"
+  case "$mode" in
+    darwin) exec sudo darwin-rebuild switch --flake "$flake#$target" "$@" ;;
+    nixos)  exec sudo nixos-rebuild switch --flake "$flake#$target" "$@" ;;
+    home)
+      # -b: back up files home-manager wants to replace on first switch.
+      if command -v home-manager >/dev/null 2>&1; then
+        exec home-manager switch -b hm-bak --flake "$flake#$target" "$@"
+      else # fresh host: home-manager exists only after first activation
+        exec nix run home-manager -- switch -b hm-bak --flake "$flake#$target" "$@"
+      fi ;;
+  esac
+}
+
+# Take everything new: merged commits + fresh inputs, then switch.
+cmd_upgrade() {
+  # flake.lock is regenerated below; drop the previous upgrade's dirty
+  # copy so it cannot block the fast-forward pull
+  git -C "$repo" checkout -- "$flake/flake.lock" 2>/dev/null || true
+  git -C "$repo" pull --ff-only
+  nix flake update --flake "$flake"
+  cmd_rebuild "$@"
+}
+
+# Pin the flake host used by rebuild/upgrade.
+cmd_set() {
+  if [ "$#" -eq 0 ]; then
+    host="$(pinned_host)"
+    if [ -n "$host" ]; then echo "$host"; else echo "not pinned (autodetect)"; fi
+    return
+  fi
+  targets="$(flake_targets | cut -d' ' -f2)"
+  if [ -z "$targets" ]; then
+    echo "dots: could not evaluate flake targets (see error above)" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$targets" | grep -Fqx -e "$1" -e "$(flake_target "$1")"; then
+    echo "dots: no flake target '$1' (see: dots list)" >&2
+    exit 1
+  fi
+  mkdir -p "${config%/*}"
+  printf '%s\n' "$1" > "$config"
+}
+
+# Back to hostname autodetect.
+cmd_unset() {
+  rm -f "$config"
+}
+
+# ==========================================================
+#                          Dispatch
+# ==========================================================
+
+cmd="${1:-help}"
+if [ "$#" -gt 0 ]; then shift; fi
+case "$cmd" in
+  help|-h|--help) usage ;;
+  status|list|warn|rebuild|upgrade|set|unset)
+    "cmd_$cmd" "$@" ;;
+  *) usage >&2; exit 1 ;;
+esac
