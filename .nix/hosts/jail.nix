@@ -21,15 +21,14 @@ in
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";
 
-  # Dev toolchains, agent CLIs, and the browser stack on top of
-  # standalone's common set (same import-as-function pattern as
-  # hosts/raspberry.nix). Only libc, locales, and certificates are
-  # jail-specific: a real host has a distro underneath, this has not.
-  # Per-project tools are not declared here — they come from the
-  # project's own lockfile, via `uvx` or `pnpm dlx`.
+  # Agent CLIs and the browser stack on top of standalone's common
+  # set (same import-as-function pattern as hosts/raspberry.nix).
+  # Only libc, locales, and certificates are jail-specific: a real
+  # host has a distro underneath, this has not. Per-project tools are
+  # not declared here — they come from the project's own lockfile,
+  # via `uvx` or `pnpm dlx`.
   home.packages =
-    (import ../modules/dev.nix { inherit pkgs; }).environment.systemPackages
-    ++ (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
+    (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ../modules/browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
       # Base system the image has no distro to provide. procps is here

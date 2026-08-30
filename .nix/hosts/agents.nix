@@ -36,8 +36,8 @@
     };
   };
 
-  # No host-specific packages: CLI tools come from modules/common.nix,
-  # toolchains from modules/dev.nix, server basics (zsh, terminfo,
+  # No host-specific packages: CLI tools and dev toolchains come from
+  # modules/common.nix, server basics (zsh, terminfo,
   # docker, tailscale) from modules/server.nix, AI coding agents from
   # modules/agents.nix, chromium and agent-browser from
   # modules/browser.nix, t3 web server from modules/slopbox.nix,

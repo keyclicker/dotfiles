@@ -9,10 +9,10 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 ```
 .nix/
 ├── flake.nix           # inputs + one output per machine:
-│                       # mac       = common + dev + desktop + agents
+│                       # mac       = common + desktop + agents
 │                       #             + hosts/mac + home/common
 │                       #             + home/desktop
-│                       # agents    = common + dev + server + agents +
+│                       # agents    = common + server + agents +
 │                       #             slopbox + hosts/agents
 │                       #             + home/common
 │                       # raspberry = standalone home-manager,
@@ -21,10 +21,10 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
 │                       #             home/standalone + hosts/vps
 ├── modules/            # system modules (nix-darwin / NixOS)
 │   ├── common.nix      # every machine: nix settings (flakes, gc,
-│   │                   # optimise) + core cross-platform CLI tools,
-│   │                   # including the iperf3 client
-│   ├── dev.nix         # dev toolchains (cmake, node, go, rust,
-│   │                   # postgres, ...); every full machine
+│   │                   # optimise) + core cross-platform CLI tools
+│   │                   # (including the iperf3 client) + dev
+│   │                   # toolchains (cmake, node, go, rust,
+│   │                   # postgres, ...)
 │   ├── desktop.nix     # desktops: shared desktop packages
 │   ├── server.nix      # servers: user + ssh keys, sshd hardening,
 │   │                   # mDNS resolution, tailscale-only iperf3,
@@ -76,7 +76,7 @@ Home-manager symlinks the dotfiles from the repo root into `$HOME`.
   This works while the imported modules stay plain `{ pkgs, ... }`
   functions; the moment one needs config/lib, extract the package list
   into shared data instead. Host leaves add their extra layers the
-  same way (raspberry: dev + agents, vps: dev) on top of identity
+  same way (raspberry: agents, vps: none) on top of identity
   (username, home directory).
 - **Layers**: `common` = everywhere. `desktop` = mac + future NixOS
   desktop. Role modules (`server`, `slopbox`) add only packages coupled

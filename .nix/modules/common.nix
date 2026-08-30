@@ -1,5 +1,6 @@
-# Shared by every machine (darwin + NixOS): nix settings + the
-# cross-platform CLI tools the dotfiles depend on.
+# Shared by every machine (darwin + NixOS): nix settings, the
+# cross-platform CLI tools the dotfiles depend on, and the dev
+# toolchains — every machine stacks both, so they live together.
 { pkgs, ... }:
 
 {
@@ -91,5 +92,28 @@
 
     # Dependencies
     tree-sitter # nvim
+
+    # Build
+    cmake
+    gnumake
+    pkg-config
+    binutils
+
+    # Languages
+    python3
+    nodejs
+    pnpm
+    uv
+    luarocks
+    go
+    rustup
+    postgresql
+    postgresql.pg_config
+
+    # C compilers (nvim-treesitter grammar builds and the like). Both
+    # wrappers provide cc/c++; hiPrio makes gcc win that collision,
+    # clang stays available under its own name.
+    (pkgs.lib.hiPrio gcc)
+    clang
   ];
 }
