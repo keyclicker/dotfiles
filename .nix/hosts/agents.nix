@@ -7,8 +7,7 @@
 
   networking = {
     hostName = "agents";
-    dhcpcd.enable = false;
-    useDHCP = false;
+    useNetworkd = true;
 
     # 22 is opened by services.openssh; t3 web + mDNS stay LAN-only.
     firewall.interfaces.ens18 = {
@@ -18,15 +17,15 @@
   };
 
   systemd.network = {
-    enable = true;
+    # Interfaces networkd doesn't manage (tailscale0 today, any
+    # docker/incus bridge tomorrow) sit in "pending" forever and
+    # would wedge systemd-networkd-wait-online; one routable
+    # interface is all "online" needs to mean here.
+    wait-online.anyInterface = true;
 
-    # tailscale0 is created by tailscaled, so networkd never finishes
-    # configuring it and it sits in "pending" forever. Without this,
-    # systemd-networkd-wait-online waits on it and always times out.
-    wait-online.ignoredInterfaces = [ "tailscale0" ];
-
-    networks."50-ens18" = {
-      matchConfig.Name = "ens18";
+    # en* keeps the unit valid across VMs whose NIC name differs.
+    networks."50-lan" = {
+      matchConfig.Name = "en*";
       networkConfig = {
         DHCP = "ipv4";
         IPv6AcceptRA = true;
