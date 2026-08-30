@@ -11,7 +11,7 @@
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
-  inherit (pkgs.stdenv) isDarwin;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
   # zsh plugins come from nixpkgs, pinned by flake.lock. The list is
   # the load order: syntax-highlighting goes last, except that
