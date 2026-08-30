@@ -40,7 +40,8 @@
   # docker, tailscale) from modules/server.nix, AI coding agents from
   # modules/agents.nix, chromium and agent-browser from
   # modules/browser.nix, t3 web server from modules/slopbox.nix,
-  # Proxmox/QEMU guest bits from modules/vm.nix.
+  # iperf3 server from modules/iperf.nix, Proxmox/QEMU guest bits
+  # from modules/vm.nix.
 
   system.stateVersion = "26.05";
 }

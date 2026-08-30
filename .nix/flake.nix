@@ -75,6 +75,7 @@
           ./modules/agents.nix
           ./modules/browser.nix
           ./modules/slopbox.nix
+          ./modules/iperf.nix
           ./modules/vm.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager
