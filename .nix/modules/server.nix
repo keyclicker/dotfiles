@@ -1,11 +1,6 @@
 # Shared by servers (NixOS only): user, ssh, mDNS resolution,
 # tailscale, docker, terminal niceties for remote sessions.
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 
 {
   imports = [ ./lan.nix ];
@@ -15,11 +10,8 @@
   services.tailscale.enable = true;
   virtualisation.docker.enable = true;
 
-  # mDNS (resolved below) answers on the LAN interface when the host
-  # names one.
-  networking.firewall.interfaces = lib.optionalAttrs (config.local.lanInterface != null) {
-    ${config.local.lanInterface}.allowedUDPPorts = [ 5353 ];
-  };
+  # mDNS responder (resolved below)
+  local.lan.allowedUDPPorts = [ 5353 ];
 
   # ncurses comes with NixOS; only the terminfo database needs adding.
   environment.systemPackages = [ pkgs.ghostty.terminfo ];

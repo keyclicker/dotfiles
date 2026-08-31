@@ -7,8 +7,9 @@
 
   networking.hostName = "agents";
 
-  # Networking (networkd, DHCP on eth0, LAN firewall interface)
-  # comes from modules/vm.nix; only the name is this host's own.
+  # Networking (networkd, DHCP on eth0) comes from modules/vm.nix,
+  # LAN-only firewall ports from modules/lan.nix and the modules
+  # that own the services; only the name is this host's own.
 
   # No host-specific packages: CLI tools and dev toolchains come from
   # modules/common.nix, server basics (zsh, terminfo,
