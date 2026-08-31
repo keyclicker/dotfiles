@@ -77,6 +77,7 @@
           ./modules/slopbox.nix
           ./modules/iperf.nix
           ./modules/vm.nix
+          ./option-lan.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager
           {

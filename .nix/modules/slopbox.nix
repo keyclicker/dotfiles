@@ -2,8 +2,6 @@
 { pkgs, ... }:
 
 {
-  imports = [ ./lan.nix ];
-
   # The web UI stays LAN-only.
   local.lan.allowedTCPPorts = [ 3773 ];
 
