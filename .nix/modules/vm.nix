@@ -4,7 +4,42 @@
 {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
+    ./lan.nix
   ];
+
+  networking = {
+    useNetworkd = true;
+
+    # One NIC name on every guest regardless of hypervisor PCI
+    # layout (Proxmox: ens18, incus: enp5s0, ...): net.ifnames=0
+    # restores kernel eth0 — the same name containers get for their
+    # veth. Sane for single-NIC guests only; with several NICs the
+    # kernel order is nondeterministic.
+    usePredictableInterfaceNames = false;
+  };
+
+  # LAN-only ports (lan.nix consumers: t3 web, mDNS) open here.
+  local.lanInterface = lib.mkDefault "eth0";
+
+  systemd.network = {
+    # Interfaces networkd doesn't manage (tailscale0 today, any
+    # docker/incus bridge tomorrow) sit in "pending" forever and
+    # would wedge systemd-networkd-wait-online; one routable
+    # interface is all "online" needs to mean here.
+    wait-online.anyInterface = true;
+
+    # eth* is the name after the rename; en* keeps the pre-reboot
+    # generation working, since net.ifnames=0 applies at boot.
+    networks."50-lan" = {
+      matchConfig.Name = "en* eth*";
+      networkConfig = {
+        DHCP = "ipv4";
+        IPv6AcceptRA = true;
+        MulticastDNS = true;
+      };
+      linkConfig.RequiredForOnline = "routable";
+    };
+  };
 
   boot = {
     # All our Proxmox VMs use OVMF/UEFI.

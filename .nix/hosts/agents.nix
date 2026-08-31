@@ -5,33 +5,10 @@
     ./agents-hardware.nix
   ];
 
-  networking = {
-    hostName = "agents";
-    useNetworkd = true;
-  };
+  networking.hostName = "agents";
 
-  # 22 is opened by services.openssh; the LAN-only ports (t3 web,
-  # mDNS) are opened on this NIC by the modules that own them.
-  local.lanInterface = "ens18";
-
-  systemd.network = {
-    # Interfaces networkd doesn't manage (tailscale0 today, any
-    # docker/incus bridge tomorrow) sit in "pending" forever and
-    # would wedge systemd-networkd-wait-online; one routable
-    # interface is all "online" needs to mean here.
-    wait-online.anyInterface = true;
-
-    # en* keeps the unit valid across VMs whose NIC name differs.
-    networks."50-lan" = {
-      matchConfig.Name = "en*";
-      networkConfig = {
-        DHCP = "ipv4";
-        IPv6AcceptRA = true;
-        MulticastDNS = true;
-      };
-      linkConfig.RequiredForOnline = "routable";
-    };
-  };
+  # Networking (networkd, DHCP on eth0, LAN firewall interface)
+  # comes from modules/vm.nix; only the name is this host's own.
 
   # No host-specific packages: CLI tools and dev toolchains come from
   # modules/common.nix, server basics (zsh, terminfo,
