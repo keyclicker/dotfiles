@@ -8,6 +8,9 @@
   services.tailscale.enable = true;
   virtualisation.docker.enable = true;
 
+  # mDNS responder (resolved below)
+  local.lan.allowedUDPPorts = [ 5353 ];
+
   # ncurses comes with NixOS; only the terminfo database needs adding.
   environment.systemPackages = [ pkgs.ghostty.terminfo ];
 

@@ -2,6 +2,9 @@
 { pkgs, ... }:
 
 {
+  # The web UI stays LAN-only.
+  local.lan.allowedTCPPorts = [ 3773 ];
+
   systemd.services.t3 = {
     description = "T3 Code server";
     wantedBy = [ "multi-user.target" ];
