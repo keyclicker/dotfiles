@@ -76,6 +76,7 @@
           ./modules/browser.nix
           ./modules/slopbox.nix
           ./modules/vm.nix
+          ./option-generic-hostname.nix
           ./hosts/agents.nix
           home-manager.nixosModules.home-manager
           {
