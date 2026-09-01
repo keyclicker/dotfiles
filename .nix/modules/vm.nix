@@ -56,6 +56,31 @@
     kernelParams = [
       "console=tty0"
       "console=ttyS0,115200n8"
+
+      # Proactively evict page cache that hasn't been touched for 2
+      # minutes so the guest's footprint shrinks back after IO bursts
+      # and the freed pages can go back to the host (needs virtio
+      # free-page-reporting or ballooning on the Proxmox side to
+      # actually land there). Anonymous memory is skipped: with no
+      # swap it is unreclaimable anyway.
+      "damon_reclaim.min_age=120000000"
+      "damon_reclaim.skip_anon=Y"
+
+      # At most 512 MiB reclaimed per 1 s window. The default time
+      # quota (10 ms/s) would throttle far below that, so raise it to
+      # 100 ms/s; the size quota is then the binding limit.
+      "damon_reclaim.quota_ms=100"
+      "damon_reclaim.quota_sz=536870912"
+      "damon_reclaim.quota_reset_interval_ms=1000"
+
+      # Watermarks are permille of *free* (not available) memory:
+      # start reclaiming below 80% free, stop above 90%, and back off
+      # below 10% free where kswapd/direct reclaim take over.
+      "damon_reclaim.wmarks_high=900"
+      "damon_reclaim.wmarks_mid=800"
+      "damon_reclaim.wmarks_low=100"
+
+      "damon_reclaim.enabled=Y"
     ];
   };
 
