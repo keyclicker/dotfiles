@@ -16,6 +16,7 @@
     "/" = {
       device = lib.mkDefault "/dev/disk/by-label/nixos";
       fsType = lib.mkDefault "ext4";
+      autoResize = true;
     };
 
     "/boot" = {
@@ -23,6 +24,10 @@
       fsType = lib.mkDefault "vfat";
     };
   };
+
+  # A clone given a bigger disk grows into it on first boot: the
+  # partition in the initrd, the filesystem via autoResize above.
+  boot.growPartition = true;
 
   system.stateVersion = "26.05";
 }
