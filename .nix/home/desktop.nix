@@ -12,7 +12,8 @@ in
     {
       ".doom.d".source = link ".doom.d";
       ".config/ghostty".source = link ".config/ghostty";
-      ".config/mpv".source = link ".config/mpv";
+      ".config/mpv/input.conf".source = link ".config/mpv/input.conf";
+      ".config/mpv/mpv.conf".source = link ".config/mpv/mpv.conf";
       ".config/qalculate".source = link ".config/qalculate";
       # mac-only tools, but the links are inert elsewhere
       ".config/karabiner".source = link ".config/karabiner";
