@@ -70,6 +70,7 @@
   # The user from server.nix drives incus without sudo.
   users.users.keyclicker.extraGroups = [ "incus-admin" ];
 
-  # Web UI, LAN only.
+  # Web UI on the LAN and over tailscale; client certs do the auth.
   local.lan.allowedTCPPorts = [ 8443 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8443 ];
 }

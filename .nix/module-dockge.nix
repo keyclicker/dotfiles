@@ -3,9 +3,10 @@
 # Stacks live in /opt/stacks (dockge's convention), its own state in
 # /var/lib/dockge.
 #
-# Docker publishes the port through its own nat rules, ahead of the
-# NixOS firewall, so 5001 is reachable on every interface (LAN,
-# tailscale); local.lan cannot gate it.
+# Host networking on purpose: a docker-published port is DNAT'ed
+# ahead of the NixOS firewall and would be open on every interface.
+# In the host namespace dockge is an ordinary listener on 5001 and
+# the firewall gates it like any other service (LAN + tailscale).
 { ... }:
 
 {
@@ -14,7 +15,7 @@
 
     containers.dockge = {
       image = "louislam/dockge:1";
-      ports = [ "5001:5001" ];
+      extraOptions = [ "--network=host" ];
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock"
         "/var/lib/dockge:/app/data"
@@ -23,4 +24,7 @@
       environment.DOCKGE_STACKS_DIR = "/opt/stacks";
     };
   };
+
+  local.lan.allowedTCPPorts = [ 5001 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 5001 ];
 }
