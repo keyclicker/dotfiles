@@ -105,6 +105,8 @@
           ./modules/common.nix
           ./modules/server.nix
           ./modules/vm.nix
+          ./module-incus.nix
+          ./module-dockge.nix
           ./option-lan.nix
           ./host-vm.nix
         ];
