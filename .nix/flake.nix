@@ -91,6 +91,36 @@
         ];
       };
 
+      # Generic guests: one configuration, spawned as many times as
+      # needed, no pet identity (hostname comes from the spawner or
+      # hostnamectl, see modules/vm.nix / platform-container.nix).
+      # Prebuilt images come later (#32); until then install the
+      # manual way and switch like any other configuration. No
+      # home-manager: a fresh guest has no ~/.dotfiles checkout for
+      # the symlinks to point at.
+
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
+      nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./modules/common.nix
+          ./modules/server.nix
+          ./modules/vm.nix
+          ./option-lan.nix
+          ./host-vm.nix
+        ];
+      };
+
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
+      nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./modules/common.nix
+          ./modules/server.nix
+          ./platform-container.nix
+          ./option-lan.nix
+          ./host-container.nix
+        ];
+      };
+
       homeConfigurations = {
         # Ubuntu pi: apt system, nix user environment.
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry

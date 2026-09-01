@@ -9,6 +9,15 @@
   networking = {
     useNetworkd = true;
 
+    # One image, many instances: the VM has no name of its own. ""
+    # hands the hostname to whoever knows it: incus sends the instance
+    # name in the DHCP lease (networkd applies it while no static name
+    # exists); Proxmox, UTM and plain libvirt send nothing, so the
+    # guest boots as localhost until `hostnamectl set-hostname` names
+    # it, which persists in /etc/hostname because NixOS leaves that
+    # file alone while this is "". Pet hosts set their name and win.
+    hostName = lib.mkDefault "";
+
     # One NIC name on every guest regardless of hypervisor PCI
     # layout (Proxmox: ens18, incus: enp5s0, ...): net.ifnames=0
     # restores kernel eth0 — the same name containers get for their
