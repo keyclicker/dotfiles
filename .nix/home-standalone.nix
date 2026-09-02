@@ -19,14 +19,24 @@
       pkgs.ghostty.terminfo
     ];
 
-  # User-level equivalent of the gc settings in module-common.nix
-  # (whose nix.* options are system-scoped and don't apply here). The
-  # distro manages its own system, but nothing there collects the nix
-  # store, so this timer is the only gc these hosts get.
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
+  # User-level equivalent of the nix settings in module-common.nix
+  # (whose nix.* options are system-scoped and don't apply here).
+  nix = {
+    # Only used to render and check ~/.config/nix/nix.conf, not
+    # installed: the daemon's nix stays the one on PATH.
+    package = pkgs.nix;
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+
+    # The distro manages its own system, but nothing there collects
+    # the nix store, so this timer is the only gc these hosts get.
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
   };
 
   # Standalone home-manager manages itself.
