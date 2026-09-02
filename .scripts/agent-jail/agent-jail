@@ -217,7 +217,8 @@ if [ ! -f "$HOST_CODEX_HOME/config.toml" ]; then
     cp "$SCRIPT_DIR/config-templates/config.toml" "$HOST_CODEX_HOME/config.toml"
 fi
 
-mounts=(
+# Shared by the provisioning run and the agent run.
+run_opts=(
     -v "$HOST_PROJECT:$CONTAINER_WORK"         # project, rw
     -v "$HOST_HOME:$CONTAINER_HOME"            # complete persistent agent home
     -v "$HOST_DOTFILES:$CONTAINER_DOTFILES:ro" # environment + instructions, ro
@@ -249,7 +250,7 @@ if [ "$(cat "$HOST_ENV_HASH" 2>/dev/null || true)" != "$env_hash" ]; then
         --cap-drop ALL --security-opt no-new-privileges \
         -e "JAIL_FLAKE=$JAIL_FLAKE" \
         -e "HOME_MANAGER_BACKUP_EXT=jail-bak" \
-        "${mounts[@]}" "$IMAGE" \
+        "${run_opts[@]}" "$IMAGE" \
         bash -eu -c '
             nix build --no-write-lock-file \
                 --out-link ~/.jail-activation "$JAIL_FLAKE"
@@ -298,7 +299,7 @@ docker run -it --rm \
     -e "TERM=${TERM:-xterm-256color}" \
     -e "COLORTERM=${COLORTERM:-truecolor}" \
     -e "CLAUDE_CODE_NO_FLICKER=1" \
-    "${mounts[@]}" \
+    "${run_opts[@]}" \
     "$IMAGE" \
     bash -c '. ~/.nix-profile/etc/profile.d/hm-session-vars.sh; exec "$@"' \
     agent-jail "${agent_command[@]}" "$@"
