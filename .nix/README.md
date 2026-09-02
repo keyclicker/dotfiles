@@ -151,9 +151,9 @@ leaves are instantiated per architecture and the caller (`dots`,
 ## Usage
 
 ```sh
-# fresh machine: install nix if missing, enable flakes, first switch;
-# optional second arg sets the login shell from the nix profile
-~/.dotfiles/install.sh standalone zsh
+# fresh machine: install nix if missing, first switch (mac | nixos <host>
+# | standalone); reads top to bottom as the per-platform manual
+~/.dotfiles/install.sh standalone
 
 # any machine (wraps the right rebuild command; `dots help` for more)
 dots rebuild
