@@ -107,4 +107,27 @@
   # scsi disks are configured with discard=on in Proxmox, so periodically
   # return deleted guest blocks to the thin-provisioned ZFS zvol.
   services.fstrim.enable = true;
+
+  # Docker containers are not root on the host: the daemon maps
+  # container ids onto dockremap's subordinate range (allocated by
+  # NixOS next to the normal users' ranges, so nothing overlaps), so
+  # a breakout lands as an unprivileged id and host files owned by
+  # real users are read-only at best. VMs have the whole id space;
+  # the container platform cannot do this (its own 65536 ids are all
+  # it has). Costs: --privileged needs --userns=host, bind-mounted
+  # host dirs must be world-readable to be read and are not writable,
+  # and images/volumes live under a per-mapping data root (existing
+  # ones are kept but not visible: re-pull on first run after the
+  # switch). no-new-privileges: no setuid escalation inside any
+  # container either.
+  virtualisation.docker.daemon.settings = {
+    userns-remap = "dockremap";
+    no-new-privileges = true;
+  };
+  users.users.dockremap = {
+    isSystemUser = true;
+    group = "dockremap";
+    autoSubUidGidRange = true;
+  };
+  users.groups.dockremap = { };
 }

@@ -216,6 +216,10 @@ mounts=(
     -v "$HOST_HOME:$CONTAINER_HOME"            # complete persistent agent home
     -v "$HOST_DOTFILES:$CONTAINER_DOTFILES:ro" # environment + instructions, ro
     -v "$NIX_VOLUME:$CONTAINER_NIX"            # case-sensitive Nix store
+    # The jail user must own those host dirs as the same uid it has
+    # inside, so no userns remapping (NixOS VMs remap by default; the
+    # flag is a no-op where the daemon does not).
+    --userns=host
 )
 
 # ============================================================
