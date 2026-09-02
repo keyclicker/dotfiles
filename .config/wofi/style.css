@@ -1,1 +1,44 @@
-#window { }
+/* TokyoNight Moon */
+window {
+  margin: 0;
+  border: 2px solid #82aaff;
+  border-radius: 8px;
+  background-color: #1e2030;
+  font-family: "JetBrains Mono";
+  font-size: 14px;
+}
+
+#input {
+  margin: 8px;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  color: #c8d3f5;
+  background-color: #2f334d;
+}
+
+#inner-box,
+#outer-box {
+  margin: 4px;
+  border: none;
+  background-color: transparent;
+}
+
+#scroll {
+  margin: 0;
+  border: none;
+}
+
+#text {
+  margin: 4px;
+  color: #c8d3f5;
+}
+
+#entry:selected {
+  border-radius: 6px;
+  background-color: #2f334d;
+}
+
+#entry:selected #text {
+  color: #82aaff;
+}
