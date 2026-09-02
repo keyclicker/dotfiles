@@ -37,8 +37,10 @@ plumbing:
                          origin when the last one is older than ${check_ttl_hours}h.
 
 host resolution: explicit arg > \`dots set\` pin > autodetect
-(mac on darwin, short hostname elsewhere). A pin of the form
-user@host names the flake attribute verbatim.
+(mac on darwin, short hostname on nixos, standalone elsewhere).
+Home targets are per architecture: host becomes
+\$USER@host-<system>. A pin of the form user@host names the flake
+attribute verbatim.
 EOF
 }
 
@@ -51,16 +53,28 @@ pinned_host() {
   if [ -f "$config" ]; then cat "$config"; fi
 }
 
-# explicit pin, else mac on darwin, else short hostname
+# explicit pin, else mac on darwin, standalone on foreign Linux,
+# else short hostname
 resolve_host() {
   host="$(pinned_host)"
   if [ -n "$host" ]; then
     echo "$host"
-  elif [ "$mode" = darwin ]; then
-    echo mac
   else
-    hostname -s
+    case "$mode" in
+      darwin) echo mac ;;
+      home) echo standalone ;;
+      *) hostname -s ;;
+    esac
   fi
+}
+
+# nix system double of this machine (home outputs are per architecture)
+nix_system() {
+  case "$(uname -m)" in
+    x86_64) echo x86_64-linux ;;
+    aarch64|arm64) echo aarch64-linux ;;
+    *) echo "dots: unsupported architecture $(uname -m)" >&2; exit 1 ;;
+  esac
 }
 
 # flake attr name for a host in this machine's mode; pins that
@@ -68,7 +82,7 @@ resolve_host() {
 flake_target() {
   case "$1" in
     *@*) echo "$1" ;;
-    *) if [ "$mode" = home ]; then echo "$USER@$1"; else echo "$1"; fi ;;
+    *) if [ "$mode" = home ]; then echo "$USER@$1-$(nix_system)"; else echo "$1"; fi ;;
   esac
 }
 
