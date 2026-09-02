@@ -6,7 +6,8 @@
 #   curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- <target>
 #
 #   mac               MacBook (nix-darwin)
-#   nixos <host>      NixOS: agents, vm, container
+#   iso <host>        fresh NixOS from the installer ISO: vm, agents
+#   nixos <host>      NixOS already running: agents, vm, container
 #   standalone        Ubuntu and friends (home-manager)
 #
 # The configs enable flakes themselves; only the commands that run
@@ -18,7 +19,7 @@ flake="$HOME/.dotfiles/.nix"
 
 usage() {
   cat >&2 <<'USAGE'
-usage: install.sh mac | nixos <host> | standalone
+usage: install.sh mac | iso <host> | nixos <host> | standalone
 USAGE
   exit 1
 }
@@ -61,11 +62,36 @@ mac() {
 }
 
 # ==========================================================
-#                 NixOS: agents, vm, container
+#           NixOS from the installer ISO: vm, agents
+# ==========================================================
+
+iso() {
+  # Booted from the NixOS installer ISO, target disk blank. Nothing is
+  # cloned: the flake is read from GitHub and brings the disk layout
+  # (hardware-vm.nix) with it. disko WIPES /dev/sda (and /dev/sdb on
+  # hosts with a swap disk), partitions, formats and mounts under
+  # /mnt; nixos-install does the rest. Then reboot.
+  remote="github:keyclicker/dotfiles?dir=.nix"
+  sudo nix --extra-experimental-features "nix-command flakes" \
+    run github:nix-community/disko/latest -- \
+    --mode destroy,format,mount --yes-wipe-all-disks --flake "$remote#$1"
+  sudo nixos-install --no-root-passwd --flake "$remote#$1"
+  # A pet with home-manager (agents) links into ~/.dotfiles; after the
+  # first boot `install.sh nixos agents` clones it there.
+}
+
+# The same install from another machine, over ssh, onto whatever the
+# target is booted into (ISO, cloud image, an old NixOS):
+#
+#   nix run github:nix-community/nixos-anywhere -- \
+#     --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
+
+# ==========================================================
+#            NixOS already running: agents, vm, container
 # ==========================================================
 
 nixos() {
-  # The machine is already NixOS (installer, image, or nixos-anywhere);
+  # The machine is already NixOS (iso above, image, or nixos-anywhere);
   # this only moves it onto this repo's configuration.
   clone
   sudo nixos-rebuild switch --flake "$flake#$1"
@@ -100,6 +126,9 @@ standalone() {
 
 case "${1:-}" in
   mac) mac ;;
+  iso)
+    if [ "$#" -ne 2 ]; then usage; fi
+    iso "$2" ;;
   nixos)
     if [ "$#" -ne 2 ]; then usage; fi
     nixos "$2" ;;
