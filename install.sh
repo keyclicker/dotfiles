@@ -3,38 +3,56 @@
 # is what you would type on that platform, nothing else. Later
 # switches: `dots rebuild`.
 #
-#   ./install.sh mac               MacBook (nix-darwin)
-#   ./install.sh nixos <host>      NixOS: agents, vm, container
-#   ./install.sh standalone        Ubuntu and friends (home-manager)
+#   curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- <target>
+#
+#   mac               MacBook (nix-darwin)
+#   nixos <host>      NixOS: agents, vm, container
+#   standalone        Ubuntu and friends (home-manager)
 #
 # The configs enable flakes themselves; only the commands that run
 # before the first switch ask for them by hand.
 set -eu
 
+repo="https://github.com/keyclicker/dotfiles.git"
 flake="$HOME/.dotfiles/.nix"
 
-# The indented lines of the header above.
 usage() {
-  sed -n '/^#   \.\/install/p' "$0" | cut -c3- >&2
+  cat >&2 <<'USAGE'
+usage: install.sh mac | nixos <host> | standalone
+USAGE
   exit 1
 }
 
-# Home-manager links point at ~/.dotfiles; refuse other checkouts.
-if [ "$(CDPATH= cd "$(dirname "$0")" && pwd)" != "$HOME/.dotfiles" ]; then
-  echo "install.sh: clone the repo to ~/.dotfiles first" >&2
-  exit 1
-fi
+# ==========================================================
+#                 Common: nix and the checkout
+# ==========================================================
+
+# Multi-user nix (on mac the installer also creates the /nix volume).
+# NixOS has it already.
+install_nix() {
+  if ! command -v nix >/dev/null; then
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
+  fi
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+}
+
+# Home-manager links point at ~/.dotfiles, so that is where the repo
+# goes. Cloned with nix's git: works before any distro package or
+# Xcode tools are installed.
+clone() {
+  if [ ! -d "$HOME/.dotfiles" ]; then
+    nix --extra-experimental-features "nix-command flakes" \
+      run nixpkgs#git -- clone "$repo" "$HOME/.dotfiles"
+  fi
+}
 
 # ==========================================================
 #                      macOS: nix-darwin
 # ==========================================================
 
 mac() {
-  # Multi-user nix; the installer creates the /nix volume.
-  if ! command -v nix >/dev/null; then
-    curl -L https://nixos.org/nix/install | sh -s -- --daemon
-  fi
-  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  install_nix
+  clone
 
   # darwin-rebuild is not installed yet, so run it from its flake once;
   # after the switch it is on PATH.
@@ -49,6 +67,7 @@ mac() {
 nixos() {
   # The machine is already NixOS (installer, image, or nixos-anywhere);
   # this only moves it onto this repo's configuration.
+  clone
   sudo nixos-rebuild switch --flake "$flake#$1"
 }
 
@@ -57,11 +76,8 @@ nixos() {
 # ==========================================================
 
 standalone() {
-  # Multi-user nix next to the distro's own package manager.
-  if ! command -v nix >/dev/null; then
-    curl -L https://nixos.org/nix/install | sh -s -- --daemon
-  fi
-  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  install_nix
+  clone
 
   # home-manager is not installed yet, so run it from its flake once;
   # after the switch it is in the profile. Outputs are per
@@ -71,10 +87,11 @@ standalone() {
     run home-manager -- switch -b hm-bak \
     --flake "$flake#keyclicker@standalone-$(uname -m)-linux"
 
-  # Login shell: the zsh from the nix profile.
+  # Login shell: the zsh from the nix profile. Via sudo so it works
+  # from a pipe, where chsh could not ask for a password.
   zsh="$HOME/.nix-profile/bin/zsh"
   grep -qx "$zsh" /etc/shells || echo "$zsh" | sudo tee -a /etc/shells
-  chsh -s "$zsh"
+  sudo chsh -s "$zsh" "$USER"
 }
 
 # ==========================================================
