@@ -5,7 +5,7 @@
 # shell environment.
 #
 # Bootstrap (installs nix, picks the architecture, first switch):
-#   $ ~/.dotfiles/install.sh standalone
+#   $ curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- standalone
 # Afterwards:
 #   $ dots rebuild
 { ... }:
