@@ -225,7 +225,7 @@ bindkey '^Z' fancy-ctrl-z
 # =========================================================
 
 # plugins.zsh sources the plugins from the nix store; it is generated
-# by home-manager (.nix/home/common.nix). Absent until the first
+# by home-manager (.nix/home-common.nix). Absent until the first
 # switch, so keep the widget bindings inside the guard.
 if [[ -r ~/.config/zsh/plugins.zsh ]]; then
   source ~/.config/zsh/plugins.zsh

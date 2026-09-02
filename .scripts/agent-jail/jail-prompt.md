@@ -20,7 +20,7 @@ You are inside a non-root Docker container with network access.
 ## Tools
 
 - Standard tools come from the jail leaf in the read-only dotfiles, so you
-  cannot add to them from here — ask the user to edit `.nix/hosts/jail.nix`.
+  cannot add to them from here — ask the user to edit `.nix/host-jail.nix`.
 - Use `nix run`, `pnpm dlx`, or `uvx` for one-off tools.
 - For persistent agent-managed tools, edit `~/agent-flake/flake.nix`, then run:
 

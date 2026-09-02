@@ -1,6 +1,14 @@
+# The MacBook: nix-darwin system layer, homebrew for the GUI apps.
 { pkgs, ... }:
 
 {
+  imports = [
+    ./module-common.nix
+    ./profile-desktop.nix
+    ./module-agents.nix
+    ./module-ollama-darwin.nix
+  ];
+
   system = {
     primaryUser = "keyclicker";
   };
@@ -85,7 +93,7 @@
     ];
   };
 
-  # Mac-only packages; cross-platform ones come from modules/{common,desktop}.
+  # Mac-only packages; cross-platform ones come from module-common / profile-desktop.
   environment.systemPackages = with pkgs; [
     # Containers
     docker

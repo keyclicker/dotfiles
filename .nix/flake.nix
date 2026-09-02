@@ -30,7 +30,7 @@
             name = "keyclicker@jail-${system}";
             value = home-manager.lib.homeManagerConfiguration {
               pkgs = nixpkgs.legacyPackages.${system};
-              modules = [ ./hosts/jail.nix ];
+              modules = [ ./host-jail.nix ];
             };
           })
           [
@@ -40,14 +40,14 @@
       );
     in
     {
+      # Wiring only: one output per machine, each pointing at its
+      # host-*.nix leaf, which is where the module stack is composed.
+      # Home-manager stays here because it needs the flake input.
+
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
         modules = [
-          ./modules/common.nix
-          ./modules/desktop.nix
-          ./modules/agents.nix
-          ./modules/ollama-darwin.nix
-          ./hosts/mac.nix
+          ./host-mac.nix
           home-manager.darwinModules.home-manager
           {
             # Required by the home-manager darwin module.
@@ -57,8 +57,8 @@
               useUserPackages = true;
               backupFileExtension = "hm-bak";
               users.keyclicker.imports = [
-                ./home/common.nix
-                ./home/desktop.nix
+                ./home-common.nix
+                ./home-desktop.nix
               ];
             };
           }
@@ -68,60 +68,31 @@
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
       nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
-        # Arch comes from nixpkgs.hostPlatform in hosts/agents-hardware.nix.
         modules = [
-          ./modules/common.nix
-          ./modules/server.nix
-          ./modules/agents.nix
-          ./modules/browser.nix
-          ./modules/slopbox.nix
-          ./modules/iperf.nix
-          ./modules/vm.nix
-          ./option-lan.nix
-          ./hosts/agents.nix
+          ./host-agents.nix
           home-manager.nixosModules.home-manager
           {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [ ./home/common.nix ];
+              users.keyclicker.imports = [ ./home-common.nix ];
             };
           }
         ];
       };
 
       # Generic guests: one configuration, spawned as many times as
-      # needed, no pet identity (hostname comes from the spawner or
-      # hostnamectl, see modules/vm.nix / platform-container.nix).
-      # Prebuilt images come later (#32); until then install the
-      # manual way and switch like any other configuration. No
-      # home-manager: a fresh guest has no ~/.dotfiles checkout for
-      # the symlinks to point at.
+      # needed, no pet identity (see the leaves).
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./modules/common.nix
-          ./modules/server.nix
-          ./modules/vm.nix
-          ./module-incus.nix
-          # module-dockge.nix exists but stays out: password-only web
-          # UI on the docker socket; lazydocker over ssh does for now.
-          ./option-lan.nix
-          ./host-vm.nix
-        ];
+        modules = [ ./host-vm.nix ];
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
       nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./modules/common.nix
-          ./modules/server.nix
-          ./platform-container.nix
-          ./option-lan.nix
-          ./host-container.nix
-        ];
+        modules = [ ./host-container.nix ];
       };
 
       homeConfigurations = {
@@ -129,14 +100,14 @@
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
         "keyclicker@raspberry" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.aarch64-linux;
-          modules = [ ./hosts/raspberry.nix ];
+          modules = [ ./host-raspberry.nix ];
         };
 
         # Ubuntu VPS: apt system, nix user environment, no agent CLIs.
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
         "keyclicker@vps" = home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          modules = [ ./hosts/vps.nix ];
+          modules = [ ./host-vps.nix ];
         };
       }
       # Docker jail: activated inside the container by

@@ -3,7 +3,7 @@
 #
 # No packages are baked here. The toolchain comes from the read-only
 # ~/.dotfiles mount, built and activated inside the container by the
-# launcher (see .nix/hosts/jail.nix), so the jail and the real hosts
+# launcher (see .nix/host-jail.nix), so the jail and the real hosts
 # share one definition. The account name must match that leaf's
 # home.username, hence no build arg for it.
 FROM nixos/nix:latest

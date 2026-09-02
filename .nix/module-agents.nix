@@ -1,6 +1,6 @@
 # AI coding agent CLIs (claude, codex, opencode), always latest via
 # npx. Shared by every machine except vps; not to be confused with
-# hosts/agents.nix (the sandbox host that merely imports this too).
+# host-agents.nix (the sandbox host that merely imports this too).
 { pkgs, ... }:
 
 {

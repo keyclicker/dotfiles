@@ -62,7 +62,7 @@ version control.
 ## The jail environment
 
 The image bakes no packages. The toolchain is a home-manager leaf in the
-dotfiles flake — `.nix/hosts/jail.nix`, exposed as
+dotfiles flake — `.nix/host-jail.nix`, exposed as
 `homeConfigurations."keyclicker@jail-<system>"` — built and activated **inside
 the container** from the read-only mount:
 
@@ -78,23 +78,23 @@ compare the hash and start immediately.
 
 Consequences worth knowing:
 
-- The jail and the real machines share one package definition. `hosts/jail.nix`
+- The jail and the real machines share one package definition. `host-jail.nix`
   stacks the same modules the other hosts do (`common`, `dev`, `agents`,
   `browser`); almost nothing is declared there directly, only what a bare
   container lacks — libc, locales, certificates — and `nginx`.
 - Per-project tooling (linters, formatters, test runners) is deliberately not
   in the package set: it belongs to the project's lockfile, and a second global
   copy only drifts from it. Reach for `uvx <tool>` or `pnpm dlx <tool>`.
-- `claude`, `codex`, and `opencode` come from `modules/agents.nix` as
+- `claude`, `codex`, and `opencode` come from `module-agents.nix` as
   `npx ...@latest` wrappers, so the jail always runs the current release and
   nothing needs updating by hand.
-- `home/common.nix` links your dotfiles into `$HOME`, so the agent gets your
+- `home-common.nix` links your dotfiles into `$HOME`, so the agent gets your
   nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
   It deliberately does **not** manage `.claude/settings.json`, which is why the
   jail's own settings survive the mount.
 - Those links point into a read-only mount: the agent can read your config and
   cannot edit it. Adding a tool to the jail is a host-side edit of
-  `hosts/jail.nix`.
+  `host-jail.nix`.
 
 Anything else is added **at runtime** (it can't `apt` — non-root — but these
 persist under `~/.agent-jail` and the Nix volume):
@@ -140,7 +140,7 @@ agent's prompt; the agent reads the image from there. macOS built-ins only
 | `config-templates/` | Initial Claude and Codex configuration templates.          |
 | `agent-flake/`      | Initial agent-owned flake for persistent tools.            |
 
-The package set lives in `~/.dotfiles/.nix/hosts/jail.nix`, not here.
+The package set lives in `~/.dotfiles/.nix/host-jail.nix`, not here.
 
 ## Install
 

@@ -9,7 +9,7 @@
 { ... }:
 
 {
-  imports = [ ../home/standalone.nix ];
+  imports = [ ./home-standalone.nix ];
 
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";

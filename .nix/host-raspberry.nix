@@ -8,7 +8,7 @@
 { pkgs, ... }:
 
 {
-  imports = [ ../home/standalone.nix ];
+  imports = [ ./home-standalone.nix ];
 
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";
@@ -16,5 +16,5 @@
   # AI agent CLIs on top of standalone's common set (same
   # import-as-function pattern).
   home.packages =
-    (import ../modules/agents.nix { inherit pkgs; }).environment.systemPackages;
+    (import ./module-agents.nix { inherit pkgs; }).environment.systemPackages;
 }

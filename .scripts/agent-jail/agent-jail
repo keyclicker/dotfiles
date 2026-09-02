@@ -6,7 +6,7 @@
 # and the Keychain are not. Container state persists under ~/.agent-jail.
 #
 # The jail's toolchain is not baked into the image: it is the flake's
-# jail leaf (.nix/hosts/jail.nix), built and activated inside the
+# jail leaf (.nix/host-jail.nix), built and activated inside the
 # container from the read-only ~/.dotfiles mount. One definition for the
 # jail and the real machines; editing .nix reprovisions on the next launch.
 #
@@ -147,8 +147,8 @@ fi
 PROJECT_NAME="$(basename "$HOST_PROJECT" | tr -cd '[:alnum:]._-')"
 PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | sha256sum | cut -c1-8)"
 CONTAINER_WORK="/work/$PROJECT_NAME-$PROJECT_HASH"
-CONTAINER_HOME="/home/keyclicker"              # matches hosts/jail.nix
-CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home/common.nix links here
+CONTAINER_HOME="/home/keyclicker"              # matches host-jail.nix
+CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home-common.nix links here
 CONTAINER_CLAUDE_HOME="$CONTAINER_HOME/.claude"
 CONTAINER_NIX="/nix"
 
@@ -202,7 +202,7 @@ docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1 ||
 # ============================================================
 
 # Seed the jail's own settings once. Host settings are never read, and
-# home/common.nix deliberately leaves these two files unmanaged, so the
+# home-common.nix deliberately leaves these two files unmanaged, so the
 # dotfiles mount cannot clobber them either.
 if [ ! -f "$HOST_CLAUDE_HOME/settings.json" ]; then
     cp "$SCRIPT_DIR/config-templates/settings.json" "$HOST_CLAUDE_HOME/settings.json"

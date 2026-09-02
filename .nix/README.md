@@ -1,94 +1,147 @@
 # Nix configurations
 
-One flake for every machine. Each machine is a stack of role modules
-plus a host leaf; every module owns its packages next to its config.
-Home-manager symlinks the dotfiles from the repo root into `$HOME`.
+One flake for every machine. A machine is a `host-*.nix` leaf that
+imports its stack: a platform, profiles, modules, options and (for
+pets) generated hardware. `flake.nix` is wiring only: one output per
+leaf plus the home-manager plumbing. Home-manager symlinks the
+dotfiles from the repo root into `$HOME`.
 
 ## Layout
 
+Flat files; the prefix is the layer. Prefixes match the directory
+names a later split would use (`option-` ↔ `options/`), so splitting
+a layer when it grows past ~5 files is a pure `git mv`.
+
 ```
 .nix/
-├── flake.nix           # inputs + one output per machine:
-│                       # mac       = common + desktop + agents
-│                       #             + hosts/mac + home/common
-│                       #             + home/desktop
-│                       # agents    = common + server + agents +
-│                       #             slopbox + hosts/agents
-│                       #             + home/common
-│                       # raspberry = standalone home-manager,
-│                       #             home/standalone + hosts/raspberry
-│                       # vps       = standalone home-manager,
-│                       #             home/standalone + hosts/vps
-├── modules/            # system modules (nix-darwin / NixOS)
-│   ├── common.nix      # every machine: nix settings (flakes, gc,
-│   │                   # optimise) + core cross-platform CLI tools
-│   │                   # (including the iperf3 client) + dev
-│   │                   # toolchains (cmake, node, go, rust,
-│   │                   # postgres, ...)
-│   ├── desktop.nix     # desktops: shared desktop packages
-│   ├── server.nix      # servers: user + ssh keys, sshd hardening,
-│   │                   # mDNS resolution, tailscale-only iperf3,
-│   │                   # docker, terminfo
-│   ├── agents.nix      # AI coding agent CLIs (claude, codex,
-│   │                   # opencode), every machine
-│   └── slopbox.nix     # t3 code: CLI wrapper + web server
-│                       # (port 3773)
-├── home/               # home-manager modules, mirror modules/ layers
-│   ├── common.nix      # core dotfile symlinks (shell, git, tmux,
-│   │                   # vim, nvim, scripts, ai)
-│   ├── desktop.nix     # GUI/desktop dotfile symlinks
-│   │                   # (.doom.d, ghostty, karabiner, sway, ...)
-│   └── standalone.nix  # foreign (non-NixOS) Linux: emulates the
-│                       # system layer at user level — common's
-│                       # packages as home.packages, user gc
-└── hosts/              # leaves: machine-specific config + packages
-    ├── mac.nix         # nix-darwin: homebrew casks, macOS defaults
-    ├── agents.nix      # NixOS LXC guest: networking, toolchains
-    ├── raspberry.nix   # Ubuntu pi: home-manager user env, apt system
-    └── vps.nix         # Ubuntu VPS: like raspberry, no agent CLIs
+├── flake.nix                # inputs + one output per host leaf
+│
+├── option-lan.nix           # local.lan.* vocabulary: modules list LAN-only
+│                            # ports here; the one firewall write lives
+│                            # inside and stays inert until a port is set
+│
+├── module-common.nix        # every machine: nix settings (flakes, gc,
+│                            # optimise), core CLI tools, dev toolchains
+├── module-agents.nix        # AI coding agent CLIs (claude, codex, opencode)
+├── module-browser.nix       # headless chromium + agent-browser for agents
+├── module-slopbox.nix       # t3 code: CLI wrapper + web server (3773, LAN)
+├── module-iperf.nix         # iperf3 server (5201, all interfaces)
+├── module-incus.nix         # incus + web UI (8443, LAN + tailscale),
+│                            # nftables, docker/incus forwarding truce
+├── module-dockge.nix        # dockge on the docker socket; written, not
+│                            # composed anywhere (password-only web UI)
+├── module-ollama-darwin.nix # ollama as a launchd user agent (mac)
+│
+├── profile-server.nix       # servers: user + ssh keys, sshd hardening,
+│                            # mDNS, tailscale, docker, terminfo
+├── profile-desktop.nix      # desktops: shared desktop packages
+│
+├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
+│                            # DHCP on eth0, systemd-boot, serial console,
+│                            # hostname from DHCP / hostnamectl
+├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
+│                            # from lxc, no build sandbox
+│
+├── hardware-agents.nix      # nixos-generate-config output for agents
+│
+├── home-common.nix          # core dotfile symlinks (shell, git, tmux,
+│                            # vim, nvim, scripts, ai)
+├── home-desktop.nix         # GUI dotfile symlinks (.doom.d, ghostty,
+│                            # karabiner, sway, ...)
+├── home-standalone.nix      # foreign (non-NixOS) Linux: emulates the
+│                            # system layer at user level
+│
+├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
+├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
+├── host-vm.nix              # generic VM, spawned N times, no identity
+├── host-container.nix       # generic container, same idea
+├── host-raspberry.nix       # Ubuntu pi: standalone home-manager
+├── host-vps.nix             # Ubuntu VPS: like raspberry, no agent CLIs
+└── host-jail.nix            # Docker jail (.scripts/agent-jail), one
+                             # output per architecture
 ```
+
+## Layers
+
+Imports point downward only. Hosts compose; everything below them is
+a self-contained piece that imports nothing from the repo.
+
+| prefix      | role                                                          |
+|-------------|---------------------------------------------------------------|
+| `option-`   | `local.*` vocabulary and the central write it gates. Modules **set** the options, never import the file; the host pulls it in. |
+| `module-`   | one software area each, finest slice, imports nothing         |
+| `profile-`  | machine role: what every server / desktop gets                |
+| `platform-` | substrate glue (VM, container); imports only nixpkgs profiles |
+| `hardware-` | generated pet hardware config                                 |
+| `home-`     | home-manager mirror of the layers above                       |
+| `host-`     | identity leaf, the only place repo files compose               |
+
+Outputs by leaf:
+
+| output                           | leaf                 | stack                                                                 |
+|----------------------------------|----------------------|-----------------------------------------------------------------------|
+| `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-darwin; home common + desktop      |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + lan + hardware; home common |
+| `vm`                             | `host-vm.nix`        | common + server + incus + vm + lan                                    |
+| `container`                      | `host-container.nix` | common + server + container + lan                                     |
+| `keyclicker@raspberry`           | `host-raspberry.nix` | home standalone + agents                                              |
+| `keyclicker@vps`                 | `host-vps.nix`       | home standalone                                                       |
+| `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
 
 ## Design
 
-- **Home-manager owns the dotfile symlinks**: `home/common.nix` (plus
-  `home/desktop.nix` for GUI hosts) maps each repo file (`~/.dotfiles/.zshrc`,
-  `.config/nvim`, ...) to its `$HOME` target with `mkOutOfStoreSymlink`,
-  pointing at the live checkout — edits apply immediately, no rebuild.
-  stow and link.sh are retired. The repo must be checked out at
-  `~/.dotfiles` on every host.
-- **`modules/` vs `home/`**: same layer names, different module systems.
-  `modules/*` evaluate in the system module system (nix-darwin/NixOS),
-  `home/*` in home-manager's — they cannot share files, so each layer
-  gets a pair: `modules/common.nix` ↔ `home/common.nix`,
-  `modules/desktop.nix` ↔ `home/desktop.nix`.
+- **Home-manager owns the dotfile symlinks**: `home-common.nix` (plus
+  `home-desktop.nix` for GUI hosts) maps each repo file
+  (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to its `$HOME` target
+  with `mkOutOfStoreSymlink`, pointing at the live checkout — edits
+  apply immediately, no rebuild. The repo must be checked out at
+  `~/.dotfiles` on every host. Generic guests (`vm`, `container`) skip
+  home-manager: a fresh guest has no checkout to point at.
+- **System vs home**: same layer names, different module systems.
+  `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
+  home-manager's — they cannot share files, so a layer that needs both
+  gets a pair: `module-common.nix` ↔ `home-common.nix`,
+  `profile-desktop.nix` ↔ `home-desktop.nix`.
+- **Home-manager stays in `flake.nix`**: the leaf owns the system
+  stack, but the hm NixOS/darwin module and the `home-*` list need
+  the `home-manager` flake input, so that block lives next to the
+  output.
 - **Per-entry links for shared dirs**: `~/.config`, `~/.claude`,
   `~/.codex`, `~/.gnupg` are never owned wholesale — machine-local
   state (claude settings/transcripts, gpg keys, other apps' config)
   lives next to the linked entries.
 - **Modules own their packages**: a machine's package set is the merge
-  of its modules' `environment.systemPackages` — read the module list
-  in `flake.nix`, then each module is self-contained. No separate
+  of its modules' `environment.systemPackages` — read the imports in
+  the host leaf, then each module is self-contained. No separate
   package data file to cross-reference.
-- **Reuse on non-NixOS hosts**: `home/standalone.nix` is the role
-  module for machines where the distro owns the system layer — it
-  feeds `common`'s `environment.systemPackages` into `home.packages`
-  by importing the module directly and re-declares user-level gc.
-  This works while the imported modules stay plain `{ pkgs, ... }`
-  functions; the moment one needs config/lib, extract the package list
-  into shared data instead. Host leaves add their extra layers the
-  same way (raspberry: agents, vps: none) on top of identity
-  (username, home directory).
-- **Layers**: `common` = everywhere. `desktop` = mac + future NixOS
-  desktop. Role modules (`server`, `slopbox`) add only packages coupled
-  to the services they configure. Host-only packages stay in the host
-  leaf.
+- **Options over firewall pokes**: modules that serve on the LAN set
+  `local.lan.allowed*Ports`; `option-lan.nix` turns the list into the
+  one `networking.firewall.interfaces.<lan>` write. Every guest's NIC
+  is `eth0` (`platform-vm.nix` disables predictable names; container
+  veths are `eth0` natively), so the default fits all guests.
+- **Generic guests have no name**: `platform-vm.nix` and
+  `platform-container.nix` set `networking.hostName = ""`, so the
+  spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
+  `hostnamectl set-hostname` persists in `/etc/hostname`. Pet hosts
+  set their name and win.
+- **Reuse on non-NixOS hosts**: `home-standalone.nix` feeds
+  `module-common.nix`'s `environment.systemPackages` into
+  `home.packages` by importing the module as a plain function and
+  re-declares user-level gc. This works while the imported modules
+  stay plain `{ pkgs, ... }` functions; the moment one needs
+  config/lib, extract the package list into shared data instead. Host
+  leaves add their extra layers the same way (raspberry: agents, jail:
+  agents + browser, vps: none).
 - **Pins**: Linux hosts follow `nixos-unstable` (`nixpkgs`); mac follows
   `nixpkgs-unstable` (`nixpkgs-darwin`), matching the original
   standalone darwin flake.
 
-## Planned hosts
+## Planned
 
-- `desktop` — NixOS desktop (`common` + `desktop` + `home/*` + leaf)
+- `desktop` — NixOS desktop (#35): `host-desktop.nix` on
+  `platform-vm.nix` + `profile-desktop.nix` + `home-desktop.nix`
+- prebuilt images for `vm` / `container` (#32), disko + nixos-anywhere
+  (#33)
 
 ## Usage
 
@@ -103,14 +156,18 @@ dots rebuild
 # mac
 sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 
-# agents container
+# agents VM
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
-# raspberry (Ubuntu, user environment only; see hosts/raspberry.nix
+# generic guests (install the manual way first, then switch)
+sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
+sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
+
+# raspberry (Ubuntu, user environment only; see host-raspberry.nix
 # for first-time bootstrap)
 home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
 
-# vps (Ubuntu, user environment only, no agent CLIs; see hosts/vps.nix)
+# vps (Ubuntu, user environment only, no agent CLIs; see host-vps.nix)
 home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
 ```
 
