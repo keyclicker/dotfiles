@@ -6,7 +6,7 @@
     ./module-common.nix
     ./profile-desktop.nix
     ./module-agents.nix
-    ./module-ollama-darwin.nix
+    ./module-ollama-desktop.nix
   ];
 
   system = {

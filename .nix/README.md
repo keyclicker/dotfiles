@@ -30,8 +30,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # nftables, docker/incus forwarding truce
 ├── module-dockge.nix        # dockge on the docker socket; written, not
 │                            # composed anywhere (password-only web UI)
-├── module-ollama-darwin.nix # ollama as a launchd user agent (mac)
-├── module-ollama.nix        # ollama as a NixOS service, same tuning
+├── module-ollama-desktop.nix # ollama on loopback: launchd user agent on
+│                             # the mac, services.ollama on NixOS, one tuning
 ├── module-sway.nix          # the Wayland session: sway + bar/launcher/
 │                            # notifications/lock/screenshots, greetd
 │                            # autologin, keyd remaps, pipewire, portals,
@@ -98,9 +98,9 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-darwin; home common + desktop      |
+| `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-desktop; home common + desktop     |
 | `agents`                         | `host-agents.nix`    | common + user + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
-| `desktop`                        | `host-desktop.nix`   | common + user + desktop + agents + incus + sway + apps + flatpak + ollama + bluetooth + vm + hardware + lan; home common + desktop |
+| `desktop`                        | `host-desktop.nix`   | common + user + desktop + agents + incus + sway + apps + flatpak + ollama-desktop + bluetooth + vm + hardware + lan; home common + desktop |
 | `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + user + server + incus + vm + hardware + lan                  |
 | `container`                      | `host-container.nix` | common + user + server + container + lan                              |

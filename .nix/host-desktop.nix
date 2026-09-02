@@ -20,7 +20,7 @@
     ./module-sway.nix
     ./module-apps.nix
     ./module-flatpak.nix
-    ./module-ollama.nix
+    ./module-ollama-desktop.nix
     ./module-bluetooth.nix
     ./platform-vm.nix
     ./hardware-vm.nix
