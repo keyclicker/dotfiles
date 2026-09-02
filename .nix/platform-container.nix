@@ -16,6 +16,11 @@
   # server.nix — the CT does its own name resolution.
   networking.useHostResolvConf = false;
 
+  # No docker userns-remap here, unlike platform-vm.nix: an
+  # unprivileged CT owns 65536 ids and they are all in use, there is
+  # no spare range to map container roots onto. The CT's own mapping
+  # on the hypervisor already keeps its root off the host.
+
   # The nix build sandbox needs namespaces an unprivileged CT can't
   # create, so builds inside containers run unsandboxed. This is the
   # workaround dropped in #24 when agents moved to a VM — it returns

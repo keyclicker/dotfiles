@@ -180,10 +180,9 @@ fi
 
 # A rebuild needs a fresh volume so Docker seeds it from the new image.
 # That drops the store the jail environment lives in, so drop the
-# profiles pointing into it too and reprovision below.
+# profiles pointing into it too; the fresh volume below reprovisions.
 if [ "$FORCE_REBUILD" = 1 ]; then
     docker volume rm "$NIX_VOLUME" >/dev/null 2>&1 || true
-    rm -f "$HOST_ENV_HASH"
     rm -f "$HOST_HOME/.nix-profile" "$HOST_HOME/.jail-activation"
     rm -rf "$HOST_HOME/.local/state/nix/profiles"
     rm -f "$HOST_HOME/.agent-tools-profile" "$HOST_HOME/.agent-tools-profile"-*-link
@@ -194,8 +193,15 @@ fi
 if [ ! -d "$HOST_AGENT_FLAKE" ]; then
     cp -R "$SCRIPT_DIR/agent-flake" "$HOST_AGENT_FLAKE"
 fi
-docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1 ||
+# A fresh volume holds only the image's seed, never the jail
+# environment, whatever the hash file says: the profile links in the
+# jail home would dangle into an empty store. Happens on first use,
+# after `docker volume rm`, and when the daemon moves its data root
+# (userns-remap on NixOS VMs). Drop the hash so provisioning reruns.
+if ! docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1; then
     docker volume create "$NIX_VOLUME" >/dev/null
+    rm -f "$HOST_ENV_HASH"
+fi
 
 # ============================================================
 #                      Config & mounts
@@ -211,11 +217,16 @@ if [ ! -f "$HOST_CODEX_HOME/config.toml" ]; then
     cp "$SCRIPT_DIR/config-templates/config.toml" "$HOST_CODEX_HOME/config.toml"
 fi
 
-mounts=(
+# Shared by the provisioning run and the agent run.
+run_opts=(
     -v "$HOST_PROJECT:$CONTAINER_WORK"         # project, rw
     -v "$HOST_HOME:$CONTAINER_HOME"            # complete persistent agent home
     -v "$HOST_DOTFILES:$CONTAINER_DOTFILES:ro" # environment + instructions, ro
     -v "$NIX_VOLUME:$CONTAINER_NIX"            # case-sensitive Nix store
+    # The jail user must own those host dirs as the same uid it has
+    # inside, so no userns remapping (NixOS VMs remap by default; the
+    # flag is a no-op where the daemon does not).
+    --userns=host
 )
 
 # ============================================================
@@ -239,7 +250,7 @@ if [ "$(cat "$HOST_ENV_HASH" 2>/dev/null || true)" != "$env_hash" ]; then
         --cap-drop ALL --security-opt no-new-privileges \
         -e "JAIL_FLAKE=$JAIL_FLAKE" \
         -e "HOME_MANAGER_BACKUP_EXT=jail-bak" \
-        "${mounts[@]}" "$IMAGE" \
+        "${run_opts[@]}" "$IMAGE" \
         bash -eu -c '
             nix build --no-write-lock-file \
                 --out-link ~/.jail-activation "$JAIL_FLAKE"
@@ -288,7 +299,7 @@ docker run -it --rm \
     -e "TERM=${TERM:-xterm-256color}" \
     -e "COLORTERM=${COLORTERM:-truecolor}" \
     -e "CLAUDE_CODE_NO_FLICKER=1" \
-    "${mounts[@]}" \
+    "${run_opts[@]}" \
     "$IMAGE" \
     bash -c '. ~/.nix-profile/etc/profile.d/hm-session-vars.sh; exec "$@"' \
     agent-jail "${agent_command[@]}" "$@"
