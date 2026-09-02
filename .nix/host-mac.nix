@@ -1,6 +1,14 @@
+# The MacBook: nix-darwin system layer, homebrew for the GUI apps.
 { pkgs, ... }:
 
 {
+  imports = [
+    ./module-common.nix
+    ./profile-desktop.nix
+    ./module-agents.nix
+    ./module-ollama-darwin.nix
+  ];
+
   system = {
     primaryUser = "keyclicker";
   };

@@ -40,13 +40,13 @@
       );
     in
     {
+      # Wiring only: one output per machine, each pointing at its
+      # host-*.nix leaf, which is where the module stack is composed.
+      # Home-manager stays here because it needs the flake input.
+
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
         modules = [
-          ./module-common.nix
-          ./profile-desktop.nix
-          ./module-agents.nix
-          ./module-ollama-darwin.nix
           ./host-mac.nix
           home-manager.darwinModules.home-manager
           {
@@ -68,16 +68,7 @@
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
       nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
-        # Arch comes from nixpkgs.hostPlatform in hardware-agents.nix.
         modules = [
-          ./module-common.nix
-          ./profile-server.nix
-          ./module-agents.nix
-          ./module-browser.nix
-          ./module-slopbox.nix
-          ./module-iperf.nix
-          ./platform-vm.nix
-          ./option-lan.nix
           ./host-agents.nix
           home-manager.nixosModules.home-manager
           {
@@ -92,36 +83,16 @@
       };
 
       # Generic guests: one configuration, spawned as many times as
-      # needed, no pet identity (hostname comes from the spawner or
-      # hostnamectl, see platform-vm.nix / platform-container.nix).
-      # Prebuilt images come later (#32); until then install the
-      # manual way and switch like any other configuration. No
-      # home-manager: a fresh guest has no ~/.dotfiles checkout for
-      # the symlinks to point at.
+      # needed, no pet identity (see the leaves).
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./module-common.nix
-          ./profile-server.nix
-          ./platform-vm.nix
-          ./module-incus.nix
-          # module-dockge.nix exists but stays out: password-only web
-          # UI on the docker socket; lazydocker over ssh does for now.
-          ./option-lan.nix
-          ./host-vm.nix
-        ];
+        modules = [ ./host-vm.nix ];
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
       nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./module-common.nix
-          ./profile-server.nix
-          ./platform-container.nix
-          ./option-lan.nix
-          ./host-container.nix
-        ];
+        modules = [ ./host-container.nix ];
       };
 
       homeConfigurations = {
