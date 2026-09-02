@@ -106,7 +106,8 @@
           ./modules/server.nix
           ./modules/vm.nix
           ./module-incus.nix
-          ./module-dockge.nix
+          # module-dockge.nix exists but stays out: password-only web
+          # UI on the docker socket; lazydocker over ssh does for now.
           ./option-lan.nix
           ./host-vm.nix
         ];
