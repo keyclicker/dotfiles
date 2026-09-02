@@ -68,13 +68,15 @@ mac() {
 iso() {
   # Booted from the NixOS installer ISO, two blank disks attached
   # (system, swap). Nothing is cloned: the flake is read from GitHub
-  # and brings the disk layout (hardware-vm.nix) with it. disko WIPES
-  # /dev/sda and /dev/sdb, partitions, formats and mounts under /mnt;
+  # and brings the disk layout (hardware-vm.nix) with it. disko lists
+  # the disks it is about to WIPE (/dev/sda, /dev/sdb) and waits for
+  # "yes"; under `curl | sh` stdin is the script, so the prompt reads
+  # the terminal. Then partitions, formats, mounts under /mnt;
   # nixos-install does the rest. Then reboot.
   remote="github:keyclicker/dotfiles?dir=.nix"
   sudo nix --extra-experimental-features "nix-command flakes" \
     run github:nix-community/disko/latest -- \
-    --mode destroy,format,mount --yes-wipe-all-disks --flake "$remote#$1"
+    --mode destroy,format,mount --flake "$remote#$1" < /dev/tty
   sudo nixos-install --no-root-passwd --flake "$remote#$1"
   # A pet with home-manager (agents) links into ~/.dotfiles; after the
   # first boot `install.sh nixos agents` clones it there.
