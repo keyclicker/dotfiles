@@ -6,8 +6,8 @@
 #   curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- <target>
 #
 #   mac               MacBook (nix-darwin)
-#   iso <host>        fresh NixOS from the installer ISO: vm, agents
-#   nixos <host>      NixOS already running: agents, vm, container
+#   iso <host>        fresh NixOS from the installer ISO: vm, agents, desktop
+#   nixos <host>      NixOS already running: agents, desktop, vm, container
 #   standalone        Ubuntu and friends (home-manager)
 #
 # The configs enable flakes themselves; only the commands that run
@@ -62,7 +62,7 @@ mac() {
 }
 
 # ==========================================================
-#           NixOS from the installer ISO: vm, agents
+#       NixOS from the installer ISO: vm, agents, desktop
 # ==========================================================
 
 iso() {
@@ -80,8 +80,8 @@ iso() {
   # No root password: root stays locked, keyclicker logs in by key
   # (profile-user.nix).
   sudo nixos-install --no-root-passwd --flake "$remote#$1"
-  # A pet with home-manager (agents) links into ~/.dotfiles; after the
-  # first boot `install.sh nixos agents` clones it there.
+  # A host with home-manager (agents, desktop) links into ~/.dotfiles;
+  # after the first boot `install.sh nixos <host>` clones it there.
 }
 
 # The same install from another machine, over ssh, onto whatever the
@@ -91,7 +91,7 @@ iso() {
 #     --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
 
 # ==========================================================
-#            NixOS already running: agents, vm, container
+#        NixOS already running: agents, desktop, vm, container
 # ==========================================================
 
 nixos() {

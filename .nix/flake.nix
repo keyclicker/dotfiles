@@ -12,6 +12,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    # Declarative flathub apps for the desktop (module-flatpak.nix).
+    nix-flatpak.url = "github:gmodena/nix-flatpak/latest";
   };
 
   outputs =
@@ -22,6 +24,7 @@
       nix-darwin,
       home-manager,
       disko,
+      nix-flatpak,
     }:
     let
       # Standalone home-manager outputs carry no machine identity, but
@@ -44,12 +47,33 @@
               "x86_64-linux"
             ]
         );
+
+      # The desktop leaf with its flake-input plumbing, built twice:
+      # for Proxmox as is, for UTM on the mac with platform-utm.nix
+      # on top.
+      desktopModules = [
+        ./host-desktop.nix
+        disko.nixosModules.disko
+        nix-flatpak.nixosModules.nix-flatpak
+        home-manager.nixosModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = "hm-bak";
+            users.keyclicker.imports = [
+              ./home-common.nix
+              ./home-desktop.nix
+            ];
+          };
+        }
+      ];
     in
     {
       # Wiring only: one output per machine, each pointing at its
       # host-*.nix leaf, which is where the module stack is composed.
-      # Home-manager and disko stay here because they need the flake
-      # input; the leaves only set their options.
+      # Home-manager, disko and nix-flatpak stay here because they
+      # need the flake input; the leaves only set their options.
 
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
@@ -88,6 +112,19 @@
             };
           }
         ];
+      };
+
+      # Desktop VM (#35): generic like vm, but with home-manager, since
+      # the sway session is made of dotfiles.
+
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop
+      nixosConfigurations."desktop" = nixpkgs.lib.nixosSystem {
+        modules = desktopModules;
+      };
+
+      # $ dots set desktop-utm; dots rebuild
+      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem {
+        modules = desktopModules ++ [ ./platform-utm.nix ];
       };
 
       # Generic guests: one configuration, spawned as many times as

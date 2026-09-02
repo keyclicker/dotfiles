@@ -6,6 +6,10 @@
 {
   time.timeZone = "America/Vancouver";
 
+  # vscode, discord, spotify, ... on the desktop; the mac already
+  # takes them as casks.
+  nixpkgs.config.allowUnfree = true;
+
   nix = {
     # Necessary for using flakes on this system.
     settings.experimental-features = [
