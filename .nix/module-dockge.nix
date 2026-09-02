@@ -1,5 +1,5 @@
 # dockge: web UI for docker compose stacks. No nixpkgs package — it
-# runs as a docker container itself, on the docker from server.nix.
+# runs as a docker container itself, on the docker from profile-server.nix.
 # Stacks live in /opt/stacks (dockge's convention), its own state in
 # /var/lib/dockge.
 #

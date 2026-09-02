@@ -67,7 +67,7 @@
     "ip-forward-no-drop" = true;
   };
 
-  # The user from server.nix drives incus without sudo.
+  # The user from profile-user.nix drives incus without sudo.
   users.users.keyclicker.extraGroups = [ "incus-admin" ];
 
   # Web UI on the LAN and over tailscale; client certs do the auth.

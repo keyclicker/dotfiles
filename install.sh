@@ -78,7 +78,7 @@ iso() {
     run github:nix-community/disko/latest -- \
     --mode destroy,format,mount --flake "$remote#$1" < /dev/tty
   # No root password: root stays locked, keyclicker logs in by key
-  # (profile-server.nix).
+  # (profile-user.nix).
   sudo nixos-install --no-root-passwd --flake "$remote#$1"
   # A pet with home-manager (agents) links into ~/.dotfiles; after the
   # first boot `install.sh nixos agents` clones it there.

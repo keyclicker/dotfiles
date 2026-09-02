@@ -1,0 +1,74 @@
+# Shared by every NixOS machine a person logs into (servers and
+# desktops): the user with the yubikey ssh key and passwordless sudo,
+# hardened sshd, tailscale, mDNS resolution, zsh, terminfo for
+# remote sessions. Servers add docker on top (profile-server.nix).
+#
+# Privilege is who a process is, never what it knows: no account has
+# a password. root is locked and unreachable over ssh; keyclicker is
+# the only login, by key, with sudo for free; the console (Proxmox,
+# incus) logs keyclicker in without asking, because reaching the
+# console already means owning the hypervisor. Services get their own
+# ids (DynamicUser or a dedicated user) unless they are the agents'
+# own tools and run as keyclicker on purpose (module-slopbox.nix), and
+# docker containers are remapped off host root where the platform
+# allows (platform-vm.nix).
+{ pkgs, ... }:
+
+{
+  programs.zsh.enable = true;
+  services.tailscale.enable = true;
+
+  # mDNS responder (resolved below)
+  local.lan.allowedUDPPorts = [ 5353 ];
+
+  # ncurses comes with NixOS; only the terminfo database needs adding.
+  environment.systemPackages = [ pkgs.ghostty.terminfo ];
+
+  # Accounts are exactly what this file says: no passwd/shadow drift,
+  # and no password can appear (nothing sets one here, so every
+  # account stays locked).
+  users.mutableUsers = false;
+
+  users.users.keyclicker = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    shell = pkgs.zsh;
+    openssh.authorizedKeys.keys = [
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIGovJeDnHrDiFm+8iu2ucNSBCifqQVycI93JRYeTyj0VAAAADXNzaDp5dWJpLW5hbm8= ssh:yubi-nano"
+    ];
+  };
+
+  security.sudo = {
+    # Key-only login already gates the account; a sudo password would
+    # protect nothing and would break --target-host rebuilds.
+    wheelNeedsPassword = false;
+    # sudo binary runnable by wheel only: one less setuid entry point
+    # for everything else on the box.
+    execWheelOnly = true;
+  };
+
+  # Console = hypervisor access; a login prompt there adds nothing
+  # and, with no passwords, would lock the console out. Covers the
+  # serial/VGA getty of VMs and the console getty of containers.
+  services.getty.autologinUser = "keyclicker";
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      # root is locked; nothing needs it over ssh either (installs
+      # talk to the installer's root, rebuilds go through keyclicker
+      # + sudo).
+      PermitRootLogin = "no";
+    };
+  };
+
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      MulticastDNS = true;
+      LLMNR = false;
+    };
+  };
+}
