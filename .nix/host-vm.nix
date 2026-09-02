@@ -1,5 +1,5 @@
 # Generic VM instance: no identity of its own — the name comes from
-# DHCP or `hostnamectl` (modules/vm.nix), the tooling from the module
+# DHCP or `hostnamectl` (platform-vm.nix), the tooling from the module
 # stack in flake.nix. Spawn it on Proxmox, incus, UTM, ... as many
 # times as needed.
 { lib, ... }:

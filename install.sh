@@ -24,7 +24,7 @@ if ! command -v nix >/dev/null 2>&1; then
 fi
 
 # Enable flakes at user scope if no config enables them yet. NixOS and
-# nix-darwin set this system-wide (modules/common.nix), but on a fresh
+# nix-darwin set this system-wide (module-common.nix), but on a fresh
 # machine the first switch itself already needs it.
 conf="${XDG_CONFIG_HOME:-$HOME/.config}/nix/nix.conf"
 if ! grep -hs experimental-features "$conf" /etc/nix/nix.conf \
