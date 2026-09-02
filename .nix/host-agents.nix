@@ -1,6 +1,6 @@
-# Pet VM on the Proxmox box: the AI agent sandbox. Its own name and a
-# swap disk on top of the generic VM stack.
-{ lib, ... }:
+# Pet VM on the Proxmox box: the AI agent sandbox. Its own name on
+# top of the generic VM stack.
+{ ... }:
 
 {
   imports = [
@@ -17,30 +17,6 @@
 
   networking.hostName = "agents";
   nixpkgs.hostPlatform = "x86_64-linux";
-
-  # Second Proxmox disk (scsi1, backup=0), all swap. Cold anonymous
-  # pages leave the guest through it (see the damon_reclaim and zswap
-  # parameters in platform-vm.nix). Encrypted with a fresh random key
-  # on every boot: nothing to hibernate to, so nothing to keep.
-  # `nofail`: a boot without the disk attached still comes up.
-  disko.devices.disk.swap = {
-    type = "disk";
-    device = lib.mkDefault "/dev/sdb";
-    content = {
-      type = "gpt";
-      partitions.swap = {
-        label = "swap";
-        size = "100%";
-        content = {
-          type = "swap";
-          randomEncryption = true;
-          # Thin zvol underneath: hand freed blocks back at swapon.
-          discardPolicy = "once";
-          mountOptions = [ "nofail" ];
-        };
-      };
-    };
-  };
 
   # Networking (networkd, DHCP on eth0) comes from platform-vm.nix,
   # LAN-only firewall ports from option-lan.nix and the modules that

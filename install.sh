@@ -66,11 +66,11 @@ mac() {
 # ==========================================================
 
 iso() {
-  # Booted from the NixOS installer ISO, target disk blank. Nothing is
-  # cloned: the flake is read from GitHub and brings the disk layout
-  # (hardware-vm.nix) with it. disko WIPES /dev/sda (and /dev/sdb on
-  # hosts with a swap disk), partitions, formats and mounts under
-  # /mnt; nixos-install does the rest. Then reboot.
+  # Booted from the NixOS installer ISO, two blank disks attached
+  # (system, swap). Nothing is cloned: the flake is read from GitHub
+  # and brings the disk layout (hardware-vm.nix) with it. disko WIPES
+  # /dev/sda and /dev/sdb, partitions, formats and mounts under /mnt;
+  # nixos-install does the rest. Then reboot.
   remote="github:keyclicker/dotfiles?dir=.nix"
   sudo nix --extra-experimental-features "nix-command flakes" \
     run github:nix-community/disko/latest -- \

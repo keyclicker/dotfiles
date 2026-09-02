@@ -43,8 +43,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # from lxc, no build sandbox
 │
 ├── hardware-vm.nix          # disko layout of every QEMU guest: ESP + ext4
-│                            # root by GPT label; installs the disk and
-│                            # mounts it from the same attrset
+│                            # root on sda, encrypted swap on sdb, by GPT
+│                            # label; installs and mounts from one attrset
 │
 ├── home-common.nix          # core dotfile symlinks (shell, git, tmux,
 │                            # vim, nvim, scripts, ai)
@@ -82,7 +82,7 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-darwin; home common + desktop      |
-| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan (+ swap disk); home common |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
@@ -116,8 +116,8 @@ leaves are instantiated per architecture and the caller (`dots`,
   renders both the install script and the runtime `fileSystems` from
   it. No `nixos-generate-config`, no per-machine UUIDs, so a clone,
   an image or a `nixos-anywhere` reinstall all boot the same file.
-  Pets add disks on top (`agents`: an encrypted swap disk, `nofail`
-  so it boots without one).
+  Every guest gets two disks: system and an encrypted swap disk
+  (`nofail`, so a single-disk boot still comes up).
 - **Per-entry links for shared dirs**: `~/.config`, `~/.claude`,
   `~/.codex`, `~/.gnupg` are never owned wholesale — machine-local
   state (claude settings/transcripts, gpg keys, other apps' config)

@@ -70,8 +70,8 @@
       # minutes so the guest's footprint shrinks back after IO bursts
       # and the freed pages can go back to the host (needs virtio
       # free-page-reporting or ballooning on the Proxmox side to
-      # actually land there). Anonymous memory included: on a guest
-      # with swap it goes to zswap first, disk second; without swap
+      # actually land there). Anonymous memory included: it goes to
+      # zswap first, the swap disk second; booted without that disk
       # the kernel just skips it.
       "damon_reclaim.min_age=120000000"
 
@@ -91,9 +91,9 @@
 
       "damon_reclaim.enabled=Y"
 
-      # Compressed in-RAM cache in front of the swap device: evicted
+      # Compressed in-RAM cache in front of the swap disk: evicted
       # pages sit zstd-packed in up to 20% of RAM and spill to disk
-      # only when that fills. Inert on a guest without swap.
+      # only when that fills. Inert while there is no swap.
       "zswap.enabled=1"
       "zswap.compressor=zstd"
       "zswap.max_pool_percent=20"
