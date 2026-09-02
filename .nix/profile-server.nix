@@ -6,8 +6,10 @@
 # the only login, by key, with sudo for free; the console (Proxmox,
 # incus) logs keyclicker in without asking, because reaching the
 # console already means owning the hypervisor. Services get their own
-# ids (DynamicUser or a dedicated user), and docker containers are
-# remapped off host root where the platform allows (platform-vm.nix).
+# ids (DynamicUser or a dedicated user) unless they are the agents'
+# own tools and run as keyclicker on purpose (module-slopbox.nix), and
+# docker containers are remapped off host root where the platform
+# allows (platform-vm.nix).
 { pkgs, ... }:
 
 {
