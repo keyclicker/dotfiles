@@ -5,7 +5,7 @@
 # shell environment.
 #
 # Bootstrap (installs nix, picks the architecture, first switch):
-#   $ ~/.dotfiles/install.sh standalone zsh
+#   $ ~/.dotfiles/install.sh standalone
 # Afterwards:
 #   $ dots rebuild
 { ... }:

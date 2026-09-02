@@ -1,46 +1,91 @@
 #!/bin/sh
-# Bootstrap a machine from this repo: install nix if missing, enable
-# flakes, then build and switch via .scripts/dots.
+# First switch on a fresh machine. Reads as the manual: each section
+# is what you would type on that platform, nothing else. Later
+# switches: `dots rebuild`.
 #
-# Usage: ./install.sh [host] [shell]
-#   host   flake host, passed to dots rebuild (defaults: mac on darwin,
-#          short hostname on NixOS, standalone elsewhere)
-#   shell  optional: set login shell to this binary from the nix
-#          profile, e.g. zsh (requires host to be given too)
+#   ./install.sh mac               MacBook (nix-darwin)
+#   ./install.sh nixos <host>      NixOS: agents, vm, container
+#   ./install.sh standalone        Ubuntu and friends (home-manager)
+#
+# The configs enable flakes themselves; only the commands that run
+# before the first switch ask for them by hand.
 set -eu
 
-dir="$(CDPATH= cd "$(dirname "$0")" && pwd)"
+flake="$HOME/.dotfiles/.nix"
 
-# Home-manager symlinks point at ~/.dotfiles; refuse other checkouts.
-if [ "$dir" != "$HOME/.dotfiles" ]; then
-  echo "install.sh: repo must be checked out at ~/.dotfiles (got $dir)" >&2
+# The indented lines of the header above.
+usage() {
+  sed -n '/^#   \.\/install/p' "$0" | cut -c3- >&2
+  exit 1
+}
+
+# Home-manager links point at ~/.dotfiles; refuse other checkouts.
+if [ "$(CDPATH= cd "$(dirname "$0")" && pwd)" != "$HOME/.dotfiles" ]; then
+  echo "install.sh: clone the repo to ~/.dotfiles first" >&2
   exit 1
 fi
 
-if ! command -v nix >/dev/null 2>&1; then
-  curl -L https://nixos.org/nix/install | sh -s -- --daemon
-  # Put nix on PATH for the rest of this script.
-  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-fi
+# ==========================================================
+#                      macOS: nix-darwin
+# ==========================================================
 
-# Enable flakes at user scope if no config enables them yet. NixOS and
-# nix-darwin set this system-wide (module-common.nix), but on a fresh
-# machine the first switch itself already needs it.
-conf="${XDG_CONFIG_HOME:-$HOME/.config}/nix/nix.conf"
-if ! grep -hs experimental-features "$conf" /etc/nix/nix.conf \
-    | grep -q flakes; then
-  mkdir -p "$(dirname "$conf")"
-  printf 'experimental-features = nix-command flakes\n' >> "$conf"
-fi
-
-"$dir/.scripts/dots" rebuild ${1:+"$1"}
-
-if [ "$#" -ge 2 ]; then
-  bin="$HOME/.nix-profile/bin/$2"
-  if [ ! -x "$bin" ]; then
-    echo "install.sh: $bin not found or not executable" >&2
-    exit 1
+mac() {
+  # Multi-user nix; the installer creates the /nix volume.
+  if ! command -v nix >/dev/null; then
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon
   fi
-  grep -qx "$bin" /etc/shells || echo "$bin" | sudo tee -a /etc/shells >/dev/null
-  chsh -s "$bin"
-fi
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+  # darwin-rebuild is not installed yet, so run it from its flake once;
+  # after the switch it is on PATH.
+  sudo nix --extra-experimental-features "nix-command flakes" \
+    run nix-darwin/master#darwin-rebuild -- switch --flake "$flake#mac"
+}
+
+# ==========================================================
+#                 NixOS: agents, vm, container
+# ==========================================================
+
+nixos() {
+  # The machine is already NixOS (installer, image, or nixos-anywhere);
+  # this only moves it onto this repo's configuration.
+  sudo nixos-rebuild switch --flake "$flake#$1"
+}
+
+# ==========================================================
+#             Foreign Linux: standalone home-manager
+# ==========================================================
+
+standalone() {
+  # Multi-user nix next to the distro's own package manager.
+  if ! command -v nix >/dev/null; then
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon
+  fi
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+  # home-manager is not installed yet, so run it from its flake once;
+  # after the switch it is in the profile. Outputs are per
+  # architecture. -b renames the dotfiles it replaces instead of
+  # failing on them.
+  nix --extra-experimental-features "nix-command flakes" \
+    run home-manager -- switch -b hm-bak \
+    --flake "$flake#keyclicker@standalone-$(uname -m)-linux"
+
+  # Login shell: the zsh from the nix profile.
+  zsh="$HOME/.nix-profile/bin/zsh"
+  grep -qx "$zsh" /etc/shells || echo "$zsh" | sudo tee -a /etc/shells
+  chsh -s "$zsh"
+}
+
+# ==========================================================
+#                          Dispatch
+# ==========================================================
+
+case "${1:-}" in
+  mac) mac ;;
+  nixos)
+    if [ "$#" -ne 2 ]; then usage; fi
+    nixos "$2" ;;
+  standalone) standalone ;;
+  *) usage ;;
+esac
