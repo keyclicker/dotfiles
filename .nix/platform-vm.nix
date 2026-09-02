@@ -9,33 +9,34 @@
   networking = {
     useNetworkd = true;
 
-    # One image, many instances: the VM has no name of its own. ""
-    # hands the hostname to whoever knows it: incus sends the instance
-    # name in the DHCP lease (networkd applies it while no static name
-    # exists); Proxmox, UTM and plain libvirt send nothing, so the
+    # One image, many instances: the VM has no name of its own, so ""
+    # leaves the hostname to whoever knows it. incus sends the instance
+    # name in the DHCP lease, and networkd applies it while no static
+    # name exists. Proxmox, UTM and plain libvirt send nothing, so the
     # guest boots as localhost until `hostnamectl set-hostname` names
-    # it, which persists in /etc/hostname because NixOS leaves that
-    # file alone while this is "". Pet hosts set their name and win.
+    # it. That name persists in /etc/hostname, which NixOS leaves alone
+    # while this is "". Pet hosts set their name and win.
     hostName = lib.mkDefault "";
 
-    # One NIC name on every guest regardless of hypervisor PCI
-    # layout (Proxmox: ens18, incus: enp5s0, ...): net.ifnames=0
-    # restores kernel eth0 — the same name containers get for their
-    # veth, and the default lan.nix opens LAN-only ports on. Sane
-    # for single-NIC guests only; with several NICs the kernel
-    # order is nondeterministic.
+    # net.ifnames=0 gives every guest a NIC called eth0, whatever the
+    # hypervisor's PCI layout (Proxmox: ens18, incus: enp5s0, ...).
+    # Containers get the same name for their veth, and option-lan.nix
+    # opens LAN-only ports on it by default. Sane for single-NIC
+    # guests only: with several NICs the kernel order is
+    # nondeterministic.
     usePredictableInterfaceNames = false;
   };
 
   systemd.network = {
-    # Interfaces networkd doesn't manage (tailscale0 today, any
-    # docker/incus bridge tomorrow) sit in "pending" forever and
-    # would wedge systemd-networkd-wait-online; one routable
-    # interface is all "online" needs to mean here.
+    # Interfaces networkd does not manage (tailscale0 today, a docker
+    # or incus bridge tomorrow) sit in "pending" forever and would
+    # wedge systemd-networkd-wait-online. One routable interface is
+    # all "online" needs to mean here.
     wait-online.anyInterface = true;
 
-    # eth* is the name after the rename; en* keeps the pre-reboot
-    # generation working, since net.ifnames=0 applies at boot.
+    # eth* is the name after the rename. en* keeps the first switch
+    # working before the reboot, since net.ifnames=0 applies only at
+    # boot.
     networks."50-lan" = {
       matchConfig.Name = "en* eth*";
       networkConfig = {
@@ -66,13 +67,12 @@
       "console=tty0"
       "console=ttyS0,115200n8"
 
-      # Proactively evict pages that haven't been touched for 2
-      # minutes so the guest's footprint shrinks back after IO bursts
-      # and the freed pages can go back to the host (needs virtio
-      # free-page-reporting or ballooning on the Proxmox side to
-      # actually land there). Anonymous memory included: it goes to
-      # zswap first, the swap disk second; booted without that disk
-      # the kernel just skips it.
+      # Evict pages untouched for 2 minutes, so the guest's footprint
+      # shrinks back after IO bursts and the freed pages can return to
+      # the host. Landing there needs virtio free-page-reporting or
+      # ballooning on the Proxmox side. Anonymous pages are included:
+      # they go to zswap first, then the swap disk. Booted without
+      # that disk, the kernel skips them.
       "damon_reclaim.min_age=120000000"
 
       # At most 512 MiB reclaimed per 1 s window. The default time

@@ -13,9 +13,10 @@ let
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
-  # zsh plugins come from nixpkgs, pinned by flake.lock. The list is
-  # the load order: syntax-highlighting goes last, except that
-  # history-substring-search must follow it (upstream requirement).
+  # zsh plugins from nixpkgs, pinned by flake.lock. List order is load
+  # order. syntax-highlighting must load after the others, and
+  # history-substring-search must load after syntax-highlighting
+  # (upstream requirement).
   zshPlugins = [
     "${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh"
     "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -43,7 +44,7 @@ in
       ".vimrc".source = link ".vimrc";
       ".scripts".source = link ".scripts";
 
-      # ~/.config: per-subdir links — other apps own entries there too
+      # ~/.config is linked per subdir. Other apps own entries there too.
       ".config/nvim".source = link ".config/nvim";
       ".config/git".source = link ".config/git";
       ".config/mc".source = link ".config/mc";
@@ -52,8 +53,8 @@ in
       ".config/opencode/opencode.jsonc".source = link ".config/opencode/opencode.jsonc";
       ".config/caveman".source = link ".config/caveman";
 
-      # AI agents: per-entry — settings.json, transcripts/, memory/
-      # stay machine-local
+      # AI agents: per-entry links. settings.json, transcripts/ and
+      # memory/ stay machine-local.
       ".claude/CLAUDE.md".source = link ".claude/CLAUDE.md";
       ".claude/commands".source = link ".claude/commands";
       ".claude/agents".source = link ".claude/agents";
@@ -65,7 +66,7 @@ in
         {
           # brew shellenv
           ".zprofile".source = link ".zprofile";
-          # per-file: ~/.gnupg holds keys and must stay 700
+          # Per-file links: ~/.gnupg holds keys and must stay mode 700.
           ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
           # pinentry-mac path makes this darwin-only
           ".gnupg/gpg-agent.conf".source = link ".gnupg/gpg-agent.conf";

@@ -2,8 +2,8 @@
   description = "keyclicker's machines";
 
   inputs = {
-    # Linux hosts follow nixos-unstable; mac keeps nixpkgs-unstable
-    # (same pin the original standalone darwin flake used).
+    # Linux hosts follow nixos-unstable. The mac stays on
+    # nixpkgs-unstable, the pin its old standalone flake used.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
@@ -24,10 +24,10 @@
       disko,
     }:
     let
-      # Standalone home-manager outputs carry no machine identity, but
-      # home-manager needs pkgs for a fixed system, so each leaf is
-      # instantiated once per architecture as keyclicker@<name>-<system>
-      # and the caller (dots, agent-jail) picks the one matching its own.
+      # home-manager needs pkgs for one fixed system, and these leaves
+      # serve any machine. So each leaf gets one output per
+      # architecture, keyclicker@<name>-<system>. The caller (dots,
+      # agent-jail) picks the one matching its own.
       homePerSystem =
         name: leaf:
         nixpkgs.lib.listToAttrs (
@@ -46,10 +46,10 @@
         );
     in
     {
-      # Wiring only: one output per machine, each pointing at its
-      # host-*.nix leaf, which is where the module stack is composed.
-      # Home-manager and disko stay here because they need the flake
-      # input; the leaves only set their options.
+      # Wiring only. Each output points at its host-*.nix leaf, and the
+      # leaf composes the module stack. Home-manager and disko are
+      # wired here because they need the flake inputs. The leaves only
+      # set their options.
 
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {

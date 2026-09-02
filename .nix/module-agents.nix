@@ -1,7 +1,7 @@
 # AI coding agent CLIs (claude, codex, opencode), always latest via
-# npx. Every NixOS/darwin machine plus the jail; not the foreign
-# Linux hosts (host-standalone.nix). Not to be confused with
-# host-agents.nix (the sandbox host that merely imports this too).
+# npx. Used by every NixOS/darwin machine and the jail, not by the
+# foreign Linux hosts. Not to be confused with host-agents.nix, the
+# sandbox host, which merely imports this too.
 { pkgs, ... }:
 
 {

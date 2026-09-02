@@ -1,15 +1,15 @@
-# Docker jail (.scripts/agent-jail), one leaf per architecture.
+# Docker jail (.scripts/agent-jail), one output per architecture.
 #
-# Same split as the foreign Linux hosts: the image owns the system
-# layer (nix, a host-UID user, nothing else), this leaf owns the user
-# environment. The difference is where it activates — inside the
-# container, from the read-only ~/.dotfiles mount:
+# Same split as the foreign Linux hosts. The image owns the system
+# layer: nix, a user with the host's UID, nothing else. This leaf owns
+# the user environment. It activates inside the container, from the
+# read-only ~/.dotfiles mount:
 #
 #   $ nix build \
 #       "path:$HOME/.dotfiles/.nix#homeConfigurations.\"keyclicker@jail-aarch64-linux\".activationPackage"
 #   $ ./result/activate
 #
-# The launcher does this; nothing here is meant to be run by hand.
+# The launcher runs this. Nothing here is meant to be run by hand.
 { config, pkgs, ... }:
 
 let
@@ -21,19 +21,19 @@ in
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";
 
-  # Agent CLIs and the browser stack on top of standalone's common
-  # set (same import-as-function pattern as home-standalone.nix).
-  # Only libc, locales, and certificates are jail-specific: a real
-  # host has a distro underneath, this has not. Per-project tools are
-  # not declared here — they come from the project's own lockfile,
-  # via `uvx` or `pnpm dlx`.
+  # Agent CLIs and the browser stack, on top of the common set from
+  # home-standalone.nix and imported the same way. The jail-specific
+  # part is libc, locales and certificates: a real host has a distro
+  # underneath, this one has not. Per-project tools are not declared
+  # here. They come from the project's own lockfile via `uvx` or
+  # `pnpm dlx`.
   home.packages =
     (import ./module-agents.nix { inherit pkgs; }).environment.systemPackages
     ++ (import ./module-browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
-      # Base system the image has no distro to provide. procps is here
-      # rather than in common.nix because its ps reads /proc, so on
-      # darwin it would shadow the native tool with a broken one.
+      # Base system the image has no distro to provide. procps lives
+      # here, not in module-common.nix: its ps reads /proc, so on
+      # darwin it would shadow the native ps with a broken one.
       bashInteractive
       cacert
       glibcLocales
@@ -41,12 +41,12 @@ in
       shadow
 
       # The image links /lib/ld-linux-* into this profile, so prebuilt
-      # binaries (the agent CLIs ship some) find the loader. Explicitly
-      # the `out` output: glibc installs only `bin` by default, which
-      # is the half without the loader in it.
+      # binaries (the agent CLIs ship some) find the loader. The `out`
+      # output is named on purpose: by default only `bin` is installed,
+      # and the loader is not in `bin`.
       glibc.out
 
-      # Not a toolchain, and only the jail ever serves anything
+      # Not a toolchain. Only the jail ever serves anything.
       nginx
     ]);
 
@@ -54,7 +54,7 @@ in
   # launcher sources hm-session-vars.sh before exec'ing them.
   home.sessionVariables = {
     EDITOR = "nvim";
-    # Agents never source .zshrc, so UTF-8 must be set here, or the
+    # Agents never source .zshrc, so UTF-8 is set here. Without it the
     # locale archive goes unused and everything runs under POSIX C.
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";

@@ -1,6 +1,6 @@
 # Shared by every machine (darwin + NixOS): nix settings, the
 # cross-platform CLI tools the dotfiles depend on, and the dev
-# toolchains — every machine stacks both, so they live together.
+# toolchains. Every machine wants both, so they live in one file.
 { pkgs, ... }:
 
 {
@@ -19,7 +19,7 @@
       options = "--delete-older-than 30d";
     };
 
-    # Deduplicate identical files in the Nix store weekly.
+    # Deduplicate identical files in the Nix store on a timer.
     optimise.automatic = true;
   };
 
@@ -30,15 +30,15 @@
     git
     gh
 
-    # Shell (NixOS hosts also set programs.zsh.enable in server.nix;
-    # foreign hosts get the binary from here)
+    # Shell. NixOS hosts also set programs.zsh.enable in
+    # profile-server.nix; foreign hosts get the binary from here.
     zsh
 
-    # Userland the dotfiles assume. NixOS lists the same store paths in
-    # its required set, so the overlap there is free; nix-darwin ships
-    # none of it, Ubuntu defaults to mawk over gawk, and the jail has
-    # no platform at all. Declaring it here is what makes the four
-    # behave the same.
+    # Userland the dotfiles assume. NixOS already has these in its
+    # required set, so listing them again costs nothing there.
+    # nix-darwin ships none of them, Ubuntu picks mawk over gawk, and
+    # the jail has no distro at all. Declaring them here makes all
+    # four behave the same.
     curl
     diffutils
     findutils
@@ -110,9 +110,9 @@
     postgresql
     postgresql.pg_config
 
-    # C compilers (nvim-treesitter grammar builds and the like). Both
-    # wrappers provide cc/c++; hiPrio makes gcc win that collision,
-    # clang stays available under its own name.
+    # C compilers, for nvim-treesitter grammar builds and the like.
+    # Both wrappers provide cc and c++. hiPrio makes gcc win that
+    # collision; clang stays available under its own name.
     (pkgs.lib.hiPrio gcc)
     clang
   ];

@@ -8,8 +8,9 @@
     chromium
     playwright-test
 
-    # agent-browser drives its own Chromium; point it at the one from
-    # nixpkgs and drop the sandbox the container already provides.
+    # agent-browser wants its own Chromium; point it at the nixpkgs
+    # one instead. --no-sandbox because the container is the sandbox
+    # here, and Chromium's own cannot start without kernel namespaces.
     (writeShellScriptBin "agent-browser" ''
       export AGENT_BROWSER_EXECUTABLE_PATH="${pkgs.lib.getExe chromium}"
       export AGENT_BROWSER_ARGS="--no-sandbox"

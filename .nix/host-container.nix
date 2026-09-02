@@ -1,6 +1,6 @@
-# Generic container instance: no identity of its own — the name comes
-# from incus / Proxmox (platform-container.nix). Spawn it as many
-# times as needed. No home-manager, same reason as host-vm.nix.
+# Generic container instance, spawned as many times as needed. No
+# identity of its own: incus or Proxmox names it, see
+# platform-container.nix. No home-manager, same reason as host-vm.nix.
 { ... }:
 
 {

@@ -1,7 +1,7 @@
-# incus with its web UI: the machine hosts containers and VMs of its
-# own. Preseeded so a fresh instance works without `incus admin
-# init`: dir storage pool, NAT bridge incusbr0, default profile on
-# both, API on 8443 for the UI.
+# incus with its web UI, for machines that host containers and VMs of
+# their own. Preseeded so a fresh instance works without `incus admin
+# init`: a dir storage pool, the NAT bridge incusbr0, a default
+# profile using both, and the API on 8443 for the UI.
 { config, lib, ... }:
 
 {
@@ -55,19 +55,20 @@
   # The NixOS incus module refuses the iptables firewall backend.
   networking.nftables.enable = true;
 
-  # Guests get DHCP/DNS from dnsmasq on the bridge, which the input
-  # chain would otherwise drop. Forwarding is not filtered by NixOS
-  # (filterForward defaults to false); incus' own nft table does NAT.
+  # Guests get DHCP and DNS from dnsmasq on the bridge. Without this
+  # the input chain would drop those packets. Forwarding needs no
+  # rule: NixOS does not filter it (filterForward defaults to false),
+  # and incus' own nft table does the NAT.
   networking.firewall.trustedInterfaces = [ "incusbr0" ];
 
   # Docker flips the FORWARD policy to DROP, which cuts incus guests
-  # off from the outside; docker >= 28 can keep its own rules
+  # off from the outside. Docker 28 and later can keep its own rules
   # without the policy flip.
   virtualisation.docker.daemon.settings = lib.mkIf config.virtualisation.docker.enable {
     "ip-forward-no-drop" = true;
   };
 
-  # The user from server.nix drives incus without sudo.
+  # The user from profile-server.nix drives incus without sudo.
   users.users.keyclicker.extraGroups = [ "incus-admin" ];
 
   # Web UI on the LAN and over tailscale; client certs do the auth.

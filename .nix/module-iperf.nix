@@ -1,7 +1,8 @@
-# iperf3 throughput server (NixOS only). The payload is junk bytes and
-# the daemon runs sandboxed (DynamicUser, no capabilities), so the port
-# is open on all interfaces: clients may sit on another VLAN, and the
-# router decides who gets routed here.
+# iperf3 throughput server (NixOS only). The port is open on all
+# interfaces, not just the LAN: clients may sit on another VLAN, and
+# the router decides who gets routed here. Safe enough, since the
+# payload is junk bytes and the daemon runs sandboxed (DynamicUser,
+# no capabilities).
 { ... }:
 
 {

@@ -6,19 +6,17 @@
     (modulesPath + "/virtualisation/lxc-container.nix")
   ];
 
-  # incus and Proxmox both name the CT through lxc (lxc.uts.name)
-  # before init runs; "" keeps that name where the default "nixos"
-  # would overwrite it. A pet CT sets networking.hostName and wins.
+  # incus and Proxmox both set the CT's name through lxc.uts.name
+  # before init runs. "" keeps that name; the default "nixos" would
+  # overwrite it. A pet CT sets networking.hostName and wins.
   networking.hostName = lib.mkDefault "";
 
   # The lxc-container profile inherits the host's resolv.conf by
-  # default, which conflicts with the resolved (mDNS) setup in
-  # server.nix — the CT does its own name resolution.
+  # default. That conflicts with resolved and mDNS from
+  # profile-server.nix. The CT does its own name resolution.
   networking.useHostResolvConf = false;
 
-  # The nix build sandbox needs namespaces an unprivileged CT can't
-  # create, so builds inside containers run unsandboxed. This is the
-  # workaround dropped in #24 when agents moved to a VM — it returns
-  # here scoped to the one target that needs it.
+  # The nix build sandbox needs namespaces an unprivileged CT cannot
+  # create, so builds inside containers run unsandboxed. History in #24.
   nix.settings.sandbox = false;
 }

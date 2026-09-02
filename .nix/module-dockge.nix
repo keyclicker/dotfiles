@@ -1,11 +1,11 @@
-# dockge: web UI for docker compose stacks. No nixpkgs package — it
-# runs as a docker container itself, on the docker from server.nix.
-# Stacks live in /opt/stacks (dockge's convention), its own state in
-# /var/lib/dockge.
+# dockge: web UI for docker compose stacks. There is no nixpkgs
+# package, so it runs as a docker container on the docker from
+# profile-server.nix. Stacks live in /opt/stacks (dockge's
+# convention), its own state in /var/lib/dockge.
 #
-# Host networking on purpose: a docker-published port is DNAT'ed
+# Host networking on purpose. A docker-published port is DNAT'ed
 # ahead of the NixOS firewall and would be open on every interface.
-# In the host namespace dockge is an ordinary listener on 5001 and
+# In the host namespace dockge is an ordinary listener on 5001, and
 # the firewall gates it like any other service (LAN + tailscale).
 { ... }:
 
