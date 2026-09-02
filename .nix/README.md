@@ -48,17 +48,16 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # vim, nvim, scripts, ai)
 ├── home-desktop.nix         # GUI dotfile symlinks (.doom.d, ghostty,
 │                            # karabiner, sway, ...)
-├── home-standalone.nix      # foreign (non-NixOS) Linux: emulates the
-│                            # system layer at user level
+├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
+│                            # environment, nothing system-level
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
-├── host-raspberry.nix       # Ubuntu pi: standalone home-manager
-├── host-vps.nix             # Ubuntu VPS: like raspberry, no agent CLIs
-└── host-jail.nix            # Docker jail (.scripts/agent-jail), one
-                             # output per architecture
+├── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
+│                            # environment only, one output per arch
+└── host-jail.nix            # Docker jail (.scripts/agent-jail), same
 ```
 
 ## Layers
@@ -84,9 +83,13 @@ Outputs by leaf:
 | `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + lan + hardware; home common |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + lan                                    |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
-| `keyclicker@raspberry`           | `host-raspberry.nix` | home standalone + agents                                              |
-| `keyclicker@vps`                 | `host-vps.nix`       | home standalone                                                       |
+| `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
 | `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
+
+`<system>` is `x86_64-linux` or `aarch64-linux`: standalone
+home-manager needs `pkgs` for a fixed system, so identity-less home
+leaves are instantiated per architecture and the caller (`dots`,
+`agent-jail`) picks its own.
 
 ## Design
 
@@ -124,14 +127,15 @@ Outputs by leaf:
   spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
   `hostnamectl set-hostname` persists in `/etc/hostname`. Pet hosts
   set their name and win.
-- **Reuse on non-NixOS hosts**: `home-standalone.nix` feeds
-  `module-common.nix`'s `environment.systemPackages` into
-  `home.packages` by importing the module as a plain function and
-  re-declares user-level gc. This works while the imported modules
-  stay plain `{ pkgs, ... }` functions; the moment one needs
-  config/lib, extract the package list into shared data instead. Host
-  leaves add their extra layers the same way (raspberry: agents, jail:
-  agents + browser, vps: none).
+- **Foreign Linux gets the shell environment, 1:1**:
+  `home-standalone.nix` feeds `module-common.nix`'s
+  `environment.systemPackages` into `home.packages` by importing the
+  module as a plain function, so an Ubuntu shell has exactly the tools
+  a NixOS one has. Nothing system-level is emulated: hostname, nix
+  daemon, gc, services stay with the distro. This works while the
+  imported modules stay plain `{ pkgs, ... }` functions; the moment
+  one needs config/lib, extract the package list into shared data
+  instead. The jail adds agents + browser the same way.
 - **Pins**: Linux hosts follow `nixos-unstable` (`nixpkgs`); mac follows
   `nixpkgs-unstable` (`nixpkgs-darwin`), matching the original
   standalone darwin flake.
@@ -148,7 +152,7 @@ Outputs by leaf:
 ```sh
 # fresh machine: install nix if missing, enable flakes, first switch;
 # optional second arg sets the login shell from the nix profile
-~/.dotfiles/install.sh vps zsh
+~/.dotfiles/install.sh standalone zsh
 
 # any machine (wraps the right rebuild command; `dots help` for more)
 dots rebuild
@@ -163,12 +167,9 @@ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
 
-# raspberry (Ubuntu, user environment only; see host-raspberry.nix
-# for first-time bootstrap)
-home-manager switch --flake ~/.dotfiles/.nix#keyclicker@raspberry
-
-# vps (Ubuntu, user environment only, no agent CLIs; see host-vps.nix)
-home-manager switch --flake ~/.dotfiles/.nix#keyclicker@vps
+# foreign Linux (Ubuntu pi, VPS; user environment only). `dots rebuild`
+# appends this machine's architecture; by hand:
+home-manager switch --flake ~/.dotfiles/.nix#keyclicker@standalone-x86_64-linux
 ```
 
 The flake is addressed as `~/.dotfiles/.nix` directly; the old `~/.nix`

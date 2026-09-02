@@ -22,7 +22,7 @@ in
   home.homeDirectory = "/home/keyclicker";
 
   # Agent CLIs and the browser stack on top of standalone's common
-  # set (same import-as-function pattern as host-raspberry.nix).
+  # set (same import-as-function pattern as home-standalone.nix).
   # Only libc, locales, and certificates are jail-specific: a real
   # host has a distro underneath, this has not. Per-project tools are
   # not declared here — they come from the project's own lockfile,

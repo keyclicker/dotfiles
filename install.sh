@@ -4,7 +4,7 @@
 #
 # Usage: ./install.sh [host] [shell]
 #   host   flake host, passed to dots rebuild (defaults: mac on darwin,
-#          short hostname elsewhere)
+#          short hostname on NixOS, standalone elsewhere)
 #   shell  optional: set login shell to this binary from the nix
 #          profile, e.g. zsh (requires host to be given too)
 set -eu
