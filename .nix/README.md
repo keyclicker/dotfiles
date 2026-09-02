@@ -1,9 +1,9 @@
 # Nix configurations
 
 One flake for every machine. A machine is a `host-*.nix` leaf that
-imports its stack: a platform, profiles, modules, options and (for
-pets) generated hardware. `flake.nix` is wiring only: one output per
-leaf plus the home-manager plumbing. Home-manager symlinks the
+imports its stack: a platform, profiles, modules, options and a
+declared disk layout. `flake.nix` is wiring only: one output per
+leaf plus the home-manager and disko plumbing. Home-manager symlinks the
 dotfiles from the repo root into `$HOME`.
 
 ## Layout
@@ -42,7 +42,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
 │
-├── hardware-agents.nix      # nixos-generate-config output for agents
+├── hardware-vm.nix          # disko layout of every QEMU guest: ESP + ext4
+│                            # root on sda, encrypted swap on sdb, by GPT
+│                            # label; installs and mounts from one attrset
 │
 ├── home-common.nix          # core dotfile symlinks (shell, git, tmux,
 │                            # vim, nvim, scripts, ai)
@@ -71,7 +73,7 @@ a self-contained piece that imports nothing from the repo.
 | `module-`   | one software area each, finest slice, imports nothing         |
 | `profile-`  | machine role: what every server / desktop gets                |
 | `platform-` | substrate glue (VM, container); imports only nixpkgs profiles |
-| `hardware-` | generated pet hardware config                                 |
+| `hardware-` | declared disks (disko): one attrset formats at install and mounts at runtime |
 | `home-`     | home-manager mirror of the layers above                       |
 | `host-`     | identity leaf, the only place repo files compose               |
 
@@ -80,8 +82,8 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-darwin; home common + desktop      |
-| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + lan + hardware; home common |
-| `vm`                             | `host-vm.nix`        | common + server + incus + vm + lan                                    |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
+| `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
 | `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
@@ -105,10 +107,17 @@ leaves are instantiated per architecture and the caller (`dots`,
   home-manager's — they cannot share files, so a layer that needs both
   gets a pair: `module-common.nix` ↔ `home-common.nix`,
   `profile-desktop.nix` ↔ `home-desktop.nix`.
-- **Home-manager stays in `flake.nix`**: the leaf owns the system
-  stack, but the hm NixOS/darwin module and the `home-*` list need
-  the `home-manager` flake input, so that block lives next to the
-  output.
+- **Home-manager and disko stay in `flake.nix`**: the leaf owns the
+  system stack, but the hm NixOS/darwin module, the `home-*` list and
+  the disko module need their flake inputs, so those lines live next
+  to the output; the leaves only set the options.
+- **Disks are declared, not probed**: `hardware-vm.nix` states the
+  layout (GPT, `ESP` + `root` partitions found by label) and disko
+  renders both the install script and the runtime `fileSystems` from
+  it. No `nixos-generate-config`, no per-machine UUIDs, so a clone,
+  an image or a `nixos-anywhere` reinstall all boot the same file.
+  Every guest gets two disks: system and an encrypted swap disk
+  (`nofail`, so a single-disk boot still comes up).
 - **Per-entry links for shared dirs**: `~/.config`, `~/.claude`,
   `~/.codex`, `~/.gnupg` are never owned wholesale — machine-local
   state (claude settings/transcripts, gpg keys, other apps' config)
@@ -145,15 +154,22 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 - `desktop` — NixOS desktop (#35): `host-desktop.nix` on
   `platform-vm.nix` + `profile-desktop.nix` + `home-desktop.nix`
-- prebuilt images for `vm` / `container` (#32), disko + nixos-anywhere
-  (#33)
+- prebuilt images for `vm` / `container` (#32)
 
 ## Usage
 
 ```sh
-# fresh machine: install nix if missing, clone, first switch (mac | nixos <host>
-# | standalone); reads top to bottom as the per-platform manual
+# fresh machine: install nix if missing, clone, first switch (mac | iso <host>
+# | nixos <host> | standalone); reads top to bottom as the per-platform manual
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- standalone
+
+# fresh NixOS guest from the installer ISO: disko wipes and formats the
+# disk as hardware-vm.nix says, nixos-install, reboot
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- iso vm
+
+# the same from another machine, onto whatever the target booted (ISO,
+# cloud image, old NixOS)
+nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
 
 # any machine (wraps the right rebuild command; `dots help` for more)
 dots rebuild
@@ -164,7 +180,7 @@ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 # agents VM
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
-# generic guests (install the manual way first, then switch)
+# generic guests (`iso vm` above first, then switch)
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
 

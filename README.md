@@ -9,7 +9,10 @@ First switch on a fresh machine, one line per platform:
 # MacBook (nix-darwin)
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- mac
 
-# NixOS (agents, vm, container)
+# fresh NixOS guest, from the installer ISO (wipes the disk)
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- iso vm
+
+# NixOS already running (agents, vm, container)
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- nixos agents
 
 # Ubuntu and friends (standalone home-manager)

@@ -1,5 +1,5 @@
-# Pet VM on the Proxmox box: the AI agent sandbox. Its own name and
-# generated hardware config on top of the generic VM stack.
+# Pet VM on the Proxmox box: the AI agent sandbox. Its own name on
+# top of the generic VM stack.
 { ... }:
 
 {
@@ -11,11 +11,12 @@
     ./module-slopbox.nix
     ./module-iperf.nix
     ./platform-vm.nix
+    ./hardware-vm.nix
     ./option-lan.nix
-    ./hardware-agents.nix
   ];
 
   networking.hostName = "agents";
+  nixpkgs.hostPlatform = "x86_64-linux";
 
   # Networking (networkd, DHCP on eth0) comes from platform-vm.nix,
   # LAN-only firewall ports from option-lan.nix and the modules that

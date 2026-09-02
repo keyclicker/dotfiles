@@ -10,6 +10,8 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -19,6 +21,7 @@
       nixpkgs-darwin,
       nix-darwin,
       home-manager,
+      disko,
     }:
     let
       # Standalone home-manager outputs carry no machine identity, but
@@ -45,7 +48,8 @@
     {
       # Wiring only: one output per machine, each pointing at its
       # host-*.nix leaf, which is where the module stack is composed.
-      # Home-manager stays here because it needs the flake input.
+      # Home-manager and disko stay here because they need the flake
+      # input; the leaves only set their options.
 
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
@@ -73,6 +77,7 @@
       nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
         modules = [
           ./host-agents.nix
+          disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -90,7 +95,10 @@
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
-        modules = [ ./host-vm.nix ];
+        modules = [
+          ./host-vm.nix
+          disko.nixosModules.disko
+        ];
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
