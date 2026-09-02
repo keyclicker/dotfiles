@@ -180,10 +180,9 @@ fi
 
 # A rebuild needs a fresh volume so Docker seeds it from the new image.
 # That drops the store the jail environment lives in, so drop the
-# profiles pointing into it too and reprovision below.
+# profiles pointing into it too; the fresh volume below reprovisions.
 if [ "$FORCE_REBUILD" = 1 ]; then
     docker volume rm "$NIX_VOLUME" >/dev/null 2>&1 || true
-    rm -f "$HOST_ENV_HASH"
     rm -f "$HOST_HOME/.nix-profile" "$HOST_HOME/.jail-activation"
     rm -rf "$HOST_HOME/.local/state/nix/profiles"
     rm -f "$HOST_HOME/.agent-tools-profile" "$HOST_HOME/.agent-tools-profile"-*-link
@@ -194,8 +193,15 @@ fi
 if [ ! -d "$HOST_AGENT_FLAKE" ]; then
     cp -R "$SCRIPT_DIR/agent-flake" "$HOST_AGENT_FLAKE"
 fi
-docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1 ||
+# A fresh volume holds only the image's seed, never the jail
+# environment, whatever the hash file says: the profile links in the
+# jail home would dangle into an empty store. Happens on first use,
+# after `docker volume rm`, and when the daemon moves its data root
+# (userns-remap on NixOS VMs). Drop the hash so provisioning reruns.
+if ! docker volume inspect "$NIX_VOLUME" >/dev/null 2>&1; then
     docker volume create "$NIX_VOLUME" >/dev/null
+    rm -f "$HOST_ENV_HASH"
+fi
 
 # ============================================================
 #                      Config & mounts
