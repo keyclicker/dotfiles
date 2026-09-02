@@ -7,6 +7,12 @@
 # ahead of the NixOS firewall and would be open on every interface.
 # In the host namespace dockge is an ordinary listener on 5001 and
 # the firewall gates it like any other service (LAN + tailscale).
+#
+# Not composable with platform-vm.nix as is: its docker remaps
+# container root to dockremap's range, which can neither open the
+# root:docker socket nor write /var/lib/dockge. Add --userns=host to
+# extraOptions there (dockge holds the socket anyway, remapping it
+# protects nothing), or keep it to the container platform.
 { ... }:
 
 {
