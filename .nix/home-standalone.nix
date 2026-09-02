@@ -1,5 +1,5 @@
 # Foreign (non-NixOS) Linux hosts: the system stays with the distro
-# (apt, systemd, nix daemon, gc), nix provides only the user
+# (apt, systemd, nix daemon), nix provides only the user
 # environment via standalone home-manager: the dotfile links plus the
 # same shell tools every NixOS/darwin machine has.
 { pkgs, ... }:
@@ -18,6 +18,16 @@
       # picked up via TERMINFO_DIRS exported in .zshenv.
       pkgs.ghostty.terminfo
     ];
+
+  # User-level equivalent of the gc settings in module-common.nix
+  # (whose nix.* options are system-scoped and don't apply here). The
+  # distro manages its own system, but nothing there collects the nix
+  # store, so this timer is the only gc these hosts get.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
   # Standalone home-manager manages itself.
   programs.home-manager.enable = true;

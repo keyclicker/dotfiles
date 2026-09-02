@@ -132,7 +132,8 @@ leaves are instantiated per architecture and the caller (`dots`,
   `environment.systemPackages` into `home.packages` by importing the
   module as a plain function, so an Ubuntu shell has exactly the tools
   a NixOS one has. Nothing system-level is emulated: hostname, nix
-  daemon, gc, services stay with the distro. This works while the
+  daemon, services stay with the distro; only the nix store gc is
+  ours, as a user timer. This works while the
   imported modules stay plain `{ pkgs, ... }` functions; the moment
   one needs config/lib, extract the package list into shared data
   instead. The jail adds agents + browser the same way.
