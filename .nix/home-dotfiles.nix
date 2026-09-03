@@ -24,6 +24,15 @@ let
     "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
     "${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
   ];
+
+  # tmux plugins likewise, replacing tpm: no clone, no prefix+I, pinned
+  # by flake.lock. `rtp` is the plugin's entry script.
+  tmuxPlugins = with pkgs.tmuxPlugins; [
+    sensible
+    vim-tmux-navigator
+    resurrect
+    continuum
+  ];
 in
 {
   home.file = {
@@ -33,6 +42,7 @@ in
     # Generated, not linked: store paths change with the flake lock.
     # .zshrc sources it after compinit.
     ".config/zsh/plugins.zsh".text = lib.concatMapStrings (plugin: "source ${plugin}\n") zshPlugins;
+    ".config/tmux/plugins.conf".text = lib.concatMapStrings (plugin: "run-shell ${plugin.rtp}\n") tmuxPlugins;
 
     # Shell / editors / multiplexer
     ".zshrc".source = link ".zshrc";
