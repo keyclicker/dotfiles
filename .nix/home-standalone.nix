@@ -2,22 +2,32 @@
 # (apt, systemd, nix daemon), nix provides only the user
 # environment via standalone home-manager: the dotfile links plus the
 # same shell tools every NixOS/darwin machine has.
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
-{
-  imports = [ ./home-dotfiles.nix ];
-
+let
   # System packages become user packages. The imported modules must
   # stay plain { pkgs, ... } functions for this to keep working; the
   # moment one needs config/lib, extract its list into shared data.
-  # Extras (agent CLIs, browser) are added by the jail leaf.
-  home.packages = (import ./module-common.nix { inherit pkgs; }).environment.systemPackages ++ [
-    # Terminfo for terminals the distro's ncurses doesn't know yet;
-    # picked up via TERMINFO_DIRS exported in .zshenv.
-    pkgs.ghostty.terminfo
-  ];
+  packagesOf = module: (import module { inherit pkgs; }).environment.systemPackages;
+in
+{
+  imports = [ ./home-dotfiles.nix ];
 
-  # User-level equivalent of the nix settings in module-common.nix
+  # The full stack a NixOS/darwin machine gets, not the guest floor.
+  # Extras (agent CLIs, browser) are added by the jail leaf.
+  home.packages =
+    lib.concatMap packagesOf [
+      ./module-core.nix
+      ./module-common.nix
+      ./module-dev.nix
+    ]
+    ++ [
+      # Terminfo for terminals the distro's ncurses doesn't know yet;
+      # picked up via TERMINFO_DIRS exported in .zshenv.
+      pkgs.ghostty.terminfo
+    ];
+
+  # User-level equivalent of the nix settings in module-core.nix
   # (whose nix.* options are system-scoped and don't apply here).
   nix = {
     # Only used to render and check ~/.config/nix/nix.conf, not

@@ -8,7 +8,7 @@
 
 {
   imports = [
-    ./module-common.nix
+    ./module-core.nix
     ./profile-server.nix
     ./module-incus.nix
     # module-dockge.nix exists but stays out: password-only web UI on

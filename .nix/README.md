@@ -20,8 +20,13 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # ports here; the one firewall write lives
 │                            # inside and stays inert until a port is set
 │
-├── module-common.nix        # every machine: nix settings (flakes, gc,
-│                            # optimise), core CLI tools, dev toolchains
+├── module-core.nix          # every machine: nix settings (flakes, gc,
+│                            # optimise), the CLI floor a box is administered
+│                            # with; generic guests stop here
+├── module-common.nix        # every machine somebody works in: the
+│                            # interactive tool set (yazi, ffmpeg, gh, ...)
+├── module-dev.nix           # dev toolchains: build tools, languages,
+│                            # C compilers; stacked wherever common is
 ├── module-agents.nix        # AI coding agent CLIs (claude, codex, opencode)
 ├── module-browser.nix       # headless chromium + agent-browser for agents
 ├── module-slopbox.nix       # t3 code: CLI wrapper + web server (3773, LAN)
@@ -100,12 +105,12 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
-| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
-| `desktop-vm`                     | `host-desktop-vm.nix`| common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
+| `mac`                            | `host-mac.nix`       | core + common + dev + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
+| `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
 | `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
-| `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
-| `container`                      | `host-container.nix` | common + server + container + lan                                     |
+| `vm`                             | `host-vm.nix`        | core + server + incus + vm + hardware + lan                         |
+| `container`                      | `host-container.nix` | core + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
 | `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
 
@@ -169,16 +174,24 @@ leaves are instantiated per architecture and the caller (`dots`,
   spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
   `hostnamectl set-hostname` persists in `/etc/hostname`. Pet hosts
   set their name and win.
+- **Generic guests stay small**: `vm` and `container` compose
+  `module-core.nix` alone, the floor a box is administered with over
+  ssh (git, tmux, neovim, mc, htop, compose). Every host somebody works
+  in stacks `module-common.nix` (interactive tools) and
+  `module-dev.nix` (toolchains) on top; those two are most of a
+  machine's store, and a guest spawned N times would pay for them N
+  times.
 - **Foreign Linux gets the shell environment, 1:1**:
-  `home-standalone.nix` feeds `module-common.nix`'s
-  `environment.systemPackages` into `home.packages` by importing the
-  module as a plain function, so an Ubuntu shell has exactly the tools
-  a NixOS one has. Nothing system-level is emulated: hostname, nix
-  daemon, services stay with the distro; only the nix store gc is
-  ours, as a user timer. This works while the
-  imported modules stay plain `{ pkgs, ... }` functions; the moment
-  one needs config/lib, extract the package list into shared data
-  instead. The jail adds agents + browser the same way.
+  `home-standalone.nix` feeds the `environment.systemPackages` of
+  `module-core.nix`, `module-common.nix` and `module-dev.nix` into
+  `home.packages` by importing each module as a plain function, so an
+  Ubuntu shell has exactly the tools a NixOS one has. Nothing
+  system-level is emulated: hostname, nix daemon, services stay with
+  the distro; only the nix store gc is ours, as a user timer. This
+  works while the imported modules stay plain `{ pkgs, ... }`
+  functions; the moment one needs config/lib, extract the package
+  list into shared data instead. The jail adds agents + browser the
+  same way.
 - **Pins**: Linux hosts follow `nixos-unstable` (`nixpkgs`); mac follows
   `nixpkgs-unstable` (`nixpkgs-darwin`), matching the original
   standalone darwin flake.

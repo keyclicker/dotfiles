@@ -12,7 +12,9 @@
 
 {
   imports = [
+    ./module-core.nix
     ./module-common.nix
+    ./module-dev.nix
     ./profile-server.nix
     ./profile-desktop.nix
     ./module-agents.nix

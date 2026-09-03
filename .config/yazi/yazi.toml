@@ -30,7 +30,7 @@ ueberzug_scale  = 1
 ueberzug_offset = [ 0, 0, 0, 0 ]
 
 [opener]
-# neovim is installed by .nix/module-common.nix, so name it directly
+# neovim is installed by .nix/module-core.nix, so name it directly
 # instead of going through $EDITOR: yazi is also started from places
 # that never source .zshrc, where the fallback would drop us into vi.
 edit = [
