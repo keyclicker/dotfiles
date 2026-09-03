@@ -46,7 +46,7 @@ client.urgent           $red    $red    $bg      $red      $red
 
 ### Session
 
-# Session half of the SPICE guest agent (platform-vm.nix runs the
+# Session half of the SPICE guest agent (host-desktop-vm.nix runs the
 # system half): clipboard and display resize. Exits at once where
 # there is no SPICE device.
 exec spice-vdagent
