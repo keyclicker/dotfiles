@@ -68,6 +68,8 @@ return {
 
   {
     'f-person/auto-dark-mode.nvim',
+    -- Polls the OS theme; a guest reached over ssh has none.
+    enabled = not vim.g.minimal,
     opts = {
       update_interval = 1000,
       fallback = 'dark',

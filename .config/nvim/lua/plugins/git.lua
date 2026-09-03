@@ -33,6 +33,7 @@ return {
     -- VSCode-style diff: side-by-side + inline, line + char-level highlight.
     -- Replaces diffview; gitsigns still owns signcolumn + staging.
     'esmuellert/codediff.nvim',
+    enabled = not vim.g.minimal,
     cmd = 'CodeDiff',
     opts = {
       explorer = {
@@ -67,6 +68,7 @@ return {
   },
   {
     'NeogitOrg/neogit',
+    enabled = not vim.g.minimal,
     dependencies = {
       'nvim-lua/plenary.nvim', -- required
       -- Only one of these is needed, not both.
@@ -88,6 +90,7 @@ return {
   {
     -- Maintained v2 fork of ThePrimeagen/git-worktree.nvim
     'polarmutex/git-worktree.nvim',
+    enabled = not vim.g.minimal,
     version = '^2',
     dependencies = {
       'nvim-lua/plenary.nvim',

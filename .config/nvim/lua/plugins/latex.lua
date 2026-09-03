@@ -1,5 +1,6 @@
 return {
   'lervag/vimtex',
+  enabled = not vim.g.minimal,
   lazy = false, -- lazy-loading will disable inverse search
   config = function()
     vim.g.vimtex_compiler_latexmk = {

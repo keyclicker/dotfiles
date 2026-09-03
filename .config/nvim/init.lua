@@ -26,6 +26,12 @@ require 'options'
 require 'keymaps'
 require 'autocommands'
 
+-- Minimal profile: editing, navigation and git basics only. Everything
+-- that pulls a toolchain (LSP servers, formatters, linters, latex, ...)
+-- is `enabled = not vim.g.minimal` in its spec and never gets cloned.
+-- Guests set NVIM_MINIMAL (.nix/module-nvim-minimal.nix).
+vim.g.minimal = (vim.env.NVIM_MINIMAL or '') ~= ''
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -59,6 +65,9 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   { import = 'plugins' },
 }, {
+  -- Guests get this directory as a read-only nix store copy; lazy still
+  -- needs somewhere to write its lockfile after installs.
+  lockfile = vim.fn.filewritable(vim.fn.stdpath 'config') ~= 2 and vim.fn.stdpath 'state' .. '/lazy-lock.json' or nil,
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
