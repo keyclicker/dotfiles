@@ -1,9 +1,8 @@
 # Generic VM instance: no identity of its own — the name comes from
 # DHCP or `hostnamectl` (platform-vm.nix). Spawn it on Proxmox, incus,
 # UTM, ... as many times as needed. Prebuilt images come later (#32);
-# until then `install.sh iso vm` from the installer ISO. No dotfile
-# links: a fresh guest has no ~/.dotfiles checkout for them to point
-# at; nvim alone comes as a store copy (flake.nix, guestModules).
+# until then `install.sh iso vm` from the installer ISO, then
+# `install.sh nixos vm` for the checkout home-manager links into.
 { ... }:
 
 {

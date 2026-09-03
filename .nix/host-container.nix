@@ -1,6 +1,6 @@
 # Generic container instance: no identity of its own — the name comes
 # from incus / Proxmox (platform-container.nix). Spawn it as many
-# times as needed. Dotfiles as in host-vm.nix: nvim only, from the store.
+# times as needed.
 { ... }:
 
 {

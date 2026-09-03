@@ -2,7 +2,7 @@
 # everywhere else, told to skip everything that needs a toolchain
 # (NVIM_MINIMAL, see .config/nvim/init.lua), with tree-sitter parsers
 # prebuilt by nixpkgs instead of compiled on the guest. The config
-# itself comes from home-nvim-minimal.nix.
+# itself is the usual home-dotfiles.nix link.
 { pkgs, lib, ... }:
 
 let
@@ -48,7 +48,9 @@ let
   # queries that inherit from another language (typescript from ecma)
   # carry that one as a dependency, hence the closure.
   closure = plugins: lib.concatMap (p: [ p ] ++ closure (p.dependencies or [ ])) plugins;
-  plugins = closure (treesitter.withPlugins (grammars: map (l: grammars.${l}) languages)).dependencies;
+  plugins =
+    closure
+      (treesitter.withPlugins (grammars: map (l: grammars.${l}) languages)).dependencies;
 
   # One directory shaped like nvim-treesitter's own install dir
   # (parser/<lang>.so, queries/<lang>/), so the plugin lists them as

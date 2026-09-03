@@ -68,15 +68,17 @@
         }
       ];
 
-      # Generic guests (vm, container): home-manager with the store copy
-      # of the nvim config, the one dotfile they get.
-      guestModules = [
+      # Home-manager with the dotfile links, for every NixOS host that
+      # is not a desktop (those add home-desktop-linux.nix above). The
+      # checkout it links into comes from `install.sh nixos <host>`.
+      homeModules = [
         home-manager.nixosModules.home-manager
         {
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
-            users.keyclicker.imports = [ ./home-nvim-minimal.nix ];
+            backupFileExtension = "hm-bak";
+            users.keyclicker.imports = [ ./home-dotfiles.nix ];
           };
         }
       ];
@@ -114,16 +116,8 @@
         modules = [
           ./host-agents.nix
           disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [ ./home-dotfiles.nix ];
-            };
-          }
-        ];
+        ]
+        ++ homeModules;
       };
 
       # Desktop VM (#35): generic like vm, but with home-manager, since
@@ -146,8 +140,7 @@
       };
 
       # Generic guests: one configuration, spawned as many times as
-      # needed, no pet identity (see the leaves). Home-manager only for
-      # the nvim config, copied from the store: no checkout to link.
+      # needed, no pet identity (see the leaves).
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
@@ -155,12 +148,12 @@
           ./host-vm.nix
           disko.nixosModules.disko
         ]
-        ++ guestModules;
+        ++ homeModules;
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
       nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [ ./host-container.nix ] ++ guestModules;
+        modules = [ ./host-container.nix ] ++ homeModules;
       };
 
       homeConfigurations =
