@@ -11,7 +11,6 @@
 
     # Shell tools
     bat
-    tealdeer # Better-maintained replacement for tldr client
     stow
     p7zip
     carapace

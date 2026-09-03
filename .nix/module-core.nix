@@ -66,6 +66,7 @@
     watch
     tree
     htop
+    tealdeer # Better-maintained replacement for tldr client
 
     # Containers (docker itself is per-host: daemon on NixOS, colima on
     # mac). Generic guests run compose stacks and are watched with
