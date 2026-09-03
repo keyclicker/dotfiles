@@ -4,9 +4,9 @@
 # store and the Metal GPU; NixOS has services.ollama (CPU only in a
 # VM, bare metal sets services.ollama.acceleration). nix-darwin has
 # no services.ollama and NixOS no launchd, and mkIf cannot hide an
-# unknown option, so the branch is chosen up front on isDarwin, which
+# unknown option, so the branch is chosen up front on `os`, which
 # flake.nix passes as a special arg (pkgs is not available this early).
-{ pkgs, isDarwin, ... }:
+{ pkgs, os, ... }:
 
 let
   tuning = {
@@ -19,7 +19,7 @@ let
     OLLAMA_NUM_PARALLEL = "1";
   };
 in
-if isDarwin then
+if os == "darwin" then
   {
     # The CLI; services.ollama puts it on PATH itself on NixOS.
     environment.systemPackages = [ pkgs.ollama ];
