@@ -42,10 +42,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # (brave, discord, spotify, obsidian, telegram)
 ├── module-bluetooth.nix     # bluez + blueman, for the bare-metal desktop
 │
-├── profile-user.nix         # every NixOS box with a person on it: user +
-│                            # ssh keys, sshd hardening, mDNS, tailscale,
-│                            # zsh, terminfo
-├── profile-server.nix       # servers: docker, nix-ld
+├── profile-server.nix       # servers: user + ssh keys, sshd hardening,
+│                            # mDNS, tailscale, docker, terminfo
 ├── profile-desktop.nix      # desktops (mac + NixOS): shared packages
 │
 ├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
@@ -99,11 +97,11 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-desktop; home common + desktop     |
-| `agents`                         | `host-agents.nix`    | common + user + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
-| `desktop`                        | `host-desktop.nix`   | common + user + desktop + agents + incus + sway + apps + flatpak + ollama-desktop + bluetooth + vm + hardware + lan; home common + desktop |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
+| `desktop`                        | `host-desktop.nix`   | common + server + desktop + agents + incus + sway + apps + flatpak + ollama-desktop + bluetooth + vm + hardware + lan; home common + desktop |
 | `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
-| `vm`                             | `host-vm.nix`        | common + user + server + incus + vm + hardware + lan                  |
-| `container`                      | `host-container.nix` | common + user + server + container + lan                              |
+| `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
+| `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
 | `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
 

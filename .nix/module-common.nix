@@ -34,7 +34,7 @@
     git
     gh
 
-    # Shell (NixOS hosts also set programs.zsh.enable in profile-user.nix;
+    # Shell (NixOS hosts also set programs.zsh.enable in profile-server.nix;
     # foreign hosts get the binary from here)
     zsh
 

@@ -5,7 +5,6 @@
 {
   imports = [
     ./module-common.nix
-    ./profile-user.nix
     ./profile-server.nix
     ./module-agents.nix
     ./module-browser.nix
@@ -24,8 +23,8 @@
   # own the services; only the name is this host's own.
 
   # No host-specific packages: CLI tools and dev toolchains come from
-  # module-common.nix, the user, ssh, tailscale and zsh from
-  # profile-user.nix, docker from profile-server.nix, AI coding agents from
+  # module-common.nix, server basics (zsh, terminfo, docker,
+  # tailscale) from profile-server.nix, AI coding agents from
   # module-agents.nix, chromium and agent-browser from
   # module-browser.nix, t3 web server from module-slopbox.nix, iperf3
   # server from module-iperf.nix, Proxmox/QEMU guest bits from

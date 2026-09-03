@@ -13,7 +13,7 @@
 
   # The lxc-container profile inherits the host's resolv.conf by
   # default, which conflicts with the resolved (mDNS) setup in
-  # profile-user.nix — the CT does its own name resolution.
+  # profile-server.nix — the CT does its own name resolution.
   networking.useHostResolvConf = false;
 
   # No docker userns-remap here, unlike platform-vm.nix: an

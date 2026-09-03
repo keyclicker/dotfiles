@@ -6,7 +6,6 @@
 {
   imports = [
     ./module-common.nix
-    ./profile-user.nix
     ./profile-server.nix
     ./platform-container.nix
     ./option-lan.nix

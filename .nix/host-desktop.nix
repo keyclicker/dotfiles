@@ -13,7 +13,7 @@
 {
   imports = [
     ./module-common.nix
-    ./profile-user.nix
+    ./profile-server.nix
     ./profile-desktop.nix
     ./module-agents.nix
     ./module-incus.nix
