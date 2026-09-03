@@ -72,7 +72,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
-├── host-desktop.nix         # desktop VM (#35): the mac's stack on sway, no
+├── host-desktop-vm.nix      # desktop VM (#35): the mac's stack on sway, no
 │                            # identity; Proxmox as desktop-vm, UTM as
 │                            # desktop-utm (platform-utm on top)
 ├── host-vm.nix              # generic VM, spawned N times, no identity
@@ -103,8 +103,8 @@ Outputs by leaf:
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
 | `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
-| `desktop-vm`                     | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
-| `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
+| `desktop-vm`                     | `host-desktop-vm.nix`| common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
+| `desktop-utm`                    | `host-desktop-vm.nix`| the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
@@ -140,7 +140,7 @@ leaves are instantiated per architecture and the caller (`dots`,
   an image or a `nixos-anywhere` reinstall all boot the same file.
   Every guest gets two disks: system and an encrypted swap disk
   (`nofail`, so a single-disk boot still comes up).
-- **The desktop mirrors the mac**: `host-desktop.nix` composes what
+- **The desktop mirrors the mac**: `host-desktop-vm.nix` composes what
   `host-mac.nix` does (common, desktop, agents, ollama) plus incus,
   with `module-desktop-linux.nix` standing in for yabai/skhd/karabiner and
   `module-apps-linux.nix` for the casks of `module-apps-darwin.nix`:

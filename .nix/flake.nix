@@ -57,7 +57,7 @@
           os = "linux";
         };
         modules = [
-          ./host-desktop.nix
+          ./host-desktop-vm.nix
           disko.nixosModules.disko
           nix-flatpak.nixosModules.nix-flatpak
           home-manager.nixosModules.home-manager

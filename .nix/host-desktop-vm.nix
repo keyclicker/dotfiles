@@ -29,8 +29,11 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Proxmox: display=virtio (or virtio-gl), audio0
-  # device=ich9-intel-hda,driver=spice; the SPICE agent comes with
-  # platform-vm.nix.
+  # device=ich9-intel-hda,driver=spice. SPICE guest side: clipboard
+  # both ways and the display following the client window. This is
+  # the system half; the session half is `exec spice-vdagent` in the
+  # sway config.
+  services.spice-vdagentd.enable = true;
 
   system.stateVersion = "26.05";
 }
