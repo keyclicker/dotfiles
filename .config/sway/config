@@ -52,8 +52,9 @@ exec spice-vdagent
 exec mako
 
 # Screens off after ten idle minutes. No auto-lock: the user has no
-# password (keys only over ssh), so swaylock could never unlock.
-# `passwd` first if you want the $mod+Shift+p lock below.
+# password (keys only over ssh, users.mutableUsers = false), so
+# swaylock could never unlock. Set users.users.keyclicker.hashedPassword
+# in nix if you want the $mod+Shift+p lock below.
 exec swayidle -w \
     timeout 600 'swaymsg "output * power off"' \
     resume 'swaymsg "output * power on"'
