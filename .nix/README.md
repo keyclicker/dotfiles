@@ -139,9 +139,7 @@ leaves are instantiated per architecture and the caller (`dots`,
 - **Home-manager and disko stay in `flake.nix`**: the leaf owns the
   system stack, but the hm NixOS/darwin module, the `home-*` list and
   the disko module need their flake inputs, so those lines live next
-  to the output; the leaves only set the options. `homeModules` is
-  that block for the NixOS hosts with the plain dotfile links (agents,
-  vm, container); `desktopModules` adds the desktop home layer.
+  to the output; the leaves only set the options.
 - **Disks are declared, not probed**: `hardware-vm.nix` states the
   layout (GPT, `ESP` + `root` partitions found by label) and disko
   renders both the install script and the runtime `fileSystems` from
