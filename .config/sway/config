@@ -1,8 +1,9 @@
 # sway: what yabai + skhd do on the mac. $mod is Super; keyd
-# (module-sway.nix) puts it on the physical Alt key, where cmd sits
-# on a mac keyboard. Everything the bindings call is installed by
-# module-sway.nix; the bar is waybar, the launcher wofi, the
-# notifications mako, each with its own config next to this one.
+# (module-desktop-linux.nix) puts it on the physical Alt key, where
+# cmd sits on a mac keyboard. Everything the bindings call is
+# installed by module-desktop-linux.nix; the bar is waybar, the
+# launcher fuzzel, the notifications mako, each with its own config
+# next to this one.
 #
 # `man 5 sway` for the reference.
 
@@ -15,7 +16,7 @@ set $down j
 set $up k
 set $right l
 set $term ghostty
-set $menu wofi --show drun
+set $menu fuzzel
 # Bindings by keycode, so they survive a switch to ua or ru
 set $bind bindsym --to-code
 # app_id of the scratchpad terminal below
@@ -45,7 +46,7 @@ client.urgent           $red    $red    $bg      $red      $red
 
 ### Session
 
-# Session half of the SPICE guest agent (host-desktop.nix runs the
+# Session half of the SPICE guest agent (platform-vm.nix runs the
 # system half): clipboard and display resize. Exits at once where
 # there is no SPICE device.
 exec spice-vdagent
