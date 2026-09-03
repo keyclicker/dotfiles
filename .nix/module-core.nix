@@ -76,5 +76,6 @@
     # Workspace
     tmux
     neovim
+    mc
   ];
 }

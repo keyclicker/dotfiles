@@ -176,7 +176,7 @@ leaves are instantiated per architecture and the caller (`dots`,
   set their name and win.
 - **Generic guests stay small**: `vm` and `container` compose
   `module-core.nix` alone, the floor a box is administered with over
-  ssh (git, tmux, neovim, htop, compose). Every host somebody works
+  ssh (git, tmux, neovim, mc, htop, compose). Every host somebody works
   in stacks `module-common.nix` (interactive tools) and
   `module-dev.nix` (toolchains) on top; those two are most of a
   machine's store, and a guest spawned N times would pay for them N

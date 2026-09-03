@@ -19,7 +19,6 @@
 
     # User tools
     tokei
-    mc
     vifm
     yazi
     btop
