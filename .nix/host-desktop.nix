@@ -18,8 +18,7 @@
     ./module-agents.nix
     ./module-incus.nix
     ./module-sway.nix
-    ./module-apps.nix
-    ./module-flatpak.nix
+    ./module-apps-linux.nix
     ./module-ollama-desktop.nix
     ./module-bluetooth.nix
     ./platform-vm.nix

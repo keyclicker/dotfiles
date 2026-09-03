@@ -12,7 +12,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
-    # Declarative flathub apps for the desktop (module-flatpak.nix).
+    # Declarative flathub apps for the desktop (module-apps-linux.nix).
     nix-flatpak.url = "github:gmodena/nix-flatpak/latest";
   };
 
