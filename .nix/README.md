@@ -55,8 +55,6 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # (graphical.target only)
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
-├── platform-utm.nix         # UTM on the mac: aarch64, virtio-blk disk
-│                            # names, pl011 console; on top of a host leaf
 │
 ├── hardware-vm.nix          # disko layout of every QEMU guest: ESP + ext4
 │                            # root on sda, encrypted swap on sdb, by GPT
@@ -73,8 +71,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
 ├── host-desktop-vm.nix      # desktop VM (#35): the mac's stack on sway, no
-│                            # identity; Proxmox as desktop-vm, UTM as
-│                            # desktop-utm (platform-utm on top)
+│                            # identity; Proxmox on the x86 box
+├── host-desktop-utm.nix     # the same under UTM on the mac: aarch64,
+│                            # virtio-blk disk names, pl011 console
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
 ├── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
@@ -104,7 +103,7 @@ Outputs by leaf:
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
 | `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
 | `desktop-vm`                     | `host-desktop-vm.nix`| common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
-| `desktop-utm`                    | `host-desktop-vm.nix`| the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
+| `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
