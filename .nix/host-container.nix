@@ -5,7 +5,7 @@
 
 {
   imports = [
-    ./module-common.nix
+    ./module-core.nix
     ./profile-server.nix
     ./platform-container.nix
     ./option-lan.nix

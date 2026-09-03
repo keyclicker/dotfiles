@@ -32,7 +32,7 @@ in
     ++ (import ./module-browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
       # Base system the image has no distro to provide. procps is here
-      # rather than in common.nix because its ps reads /proc, so on
+      # rather than in module-core.nix because its ps reads /proc, so on
       # darwin it would shadow the native tool with a broken one.
       bashInteractive
       cacert
