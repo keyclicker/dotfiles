@@ -8,6 +8,7 @@
 return {
   { -- Autoformat
     'stevearc/conform.nvim',
+    enabled = not vim.g.minimal,
     event = { 'BufWritePre' }, -- arms format_on_save before the first save
     cmd = 'ConformInfo',
     keys = {
@@ -62,6 +63,7 @@ return {
   },
   { -- Linting
     'mfussenegger/nvim-lint',
+    enabled = not vim.g.minimal,
     event = 'LazyFile',
     opts = {
       events = { 'BufReadPost', 'BufWritePost' }, --'InsertLeave' },

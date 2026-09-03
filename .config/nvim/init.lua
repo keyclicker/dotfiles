@@ -26,6 +26,12 @@ require 'options'
 require 'keymaps'
 require 'autocommands'
 
+-- Minimal profile: editing, navigation and git basics only. Everything
+-- that pulls a toolchain (LSP servers, formatters, linters, latex, ...)
+-- is `enabled = not vim.g.minimal` in its spec and never gets cloned.
+-- Guests set NVIM_MINIMAL (.nix/module-nvim-minimal.nix).
+vim.g.minimal = (vim.env.NVIM_MINIMAL or '') ~= ''
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'

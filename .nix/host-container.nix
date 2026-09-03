@@ -1,11 +1,12 @@
 # Generic container instance: no identity of its own — the name comes
 # from incus / Proxmox (platform-container.nix). Spawn it as many
-# times as needed. No home-manager, same reason as host-vm.nix.
+# times as needed.
 { ... }:
 
 {
   imports = [
     ./module-core.nix
+    ./module-nvim-minimal.nix
     ./profile-server.nix
     ./platform-container.nix
     ./option-lan.nix

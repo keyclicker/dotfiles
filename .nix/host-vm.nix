@@ -1,14 +1,14 @@
 # Generic VM instance: no identity of its own — the name comes from
 # DHCP or `hostnamectl` (platform-vm.nix). Spawn it on Proxmox, incus,
 # UTM, ... as many times as needed. Prebuilt images come later (#32);
-# until then `install.sh iso vm` from the installer ISO. No
-# home-manager: a fresh guest has no ~/.dotfiles checkout for the
-# symlinks to point at.
+# until then `install.sh iso vm` from the installer ISO, then
+# `install.sh nixos vm` for the checkout home-manager links into.
 { ... }:
 
 {
   imports = [
     ./module-core.nix
+    ./module-nvim-minimal.nix
     ./profile-server.nix
     ./module-incus.nix
     # module-dockge.nix exists but stays out: password-only web UI on

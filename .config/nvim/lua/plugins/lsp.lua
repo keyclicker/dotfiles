@@ -1,5 +1,6 @@
 return { -- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
+  enabled = not vim.g.minimal,
   -- BufReadPre (not BufReadPost): loading lspconfig during the first file's
   -- BufReadPost makes Neovim skip native filetype detection (nested-autocmd
   -- quirk, lazy #25526) -> ft='' -> no LSP and no treesitter on the first file.

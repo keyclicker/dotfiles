@@ -140,12 +140,32 @@
         modules = [
           ./host-vm.nix
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [ ./home-dotfiles.nix ];
+            };
+          }
         ];
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
       nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [ ./host-container.nix ];
+        modules = [
+          ./host-container.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [ ./home-dotfiles.nix ];
+            };
+          }
+        ];
       };
 
       homeConfigurations =

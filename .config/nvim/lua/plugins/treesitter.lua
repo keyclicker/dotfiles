@@ -1,8 +1,13 @@
+-- Prebuilt parsers + queries (nix, see .nix/module-nvim-minimal.nix): the
+-- directory nvim-treesitter would otherwise compile into, read-only, so
+-- nothing gets installed or updated here when it is set.
+local prebuilt = vim.env.NVIM_TREESITTER
+
 return { -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
   branch = 'main',
   event = { 'LazyFile', 'VeryLazy' },
-  build = ':TSUpdate',
+  build = not prebuilt and ':TSUpdate' or nil,
   -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
   config = function()
     -- ensure basic parser are installed
@@ -41,7 +46,11 @@ return { -- Highlight, edit, and navigate code
       'css',
       'json',
     }
-    require('nvim-treesitter').install(parsers)
+    if prebuilt then
+      require('nvim-treesitter').setup { install_dir = prebuilt }
+    else
+      require('nvim-treesitter').install(parsers)
+    end
 
     ---@param buf integer
     ---@param language string
@@ -83,7 +92,7 @@ return { -- Highlight, edit, and navigate code
         if vim.tbl_contains(installed_parsers, language) then
           -- enable the parser if it is installed
           treesitter_try_attach(buf, language)
-        elseif vim.tbl_contains(available_parsers, language) then
+        elseif not prebuilt and vim.tbl_contains(available_parsers, language) then
           -- if a parser is available in `nvim-treesitter` auto install it, and enable it after the installation is done
           require('nvim-treesitter').install(language):await(function()
             treesitter_try_attach(buf, language)

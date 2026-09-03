@@ -76,6 +76,7 @@ return {
   },
   {
     'ThePrimeagen/refactoring.nvim',
+    enabled = not vim.g.minimal,
     event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
       'nvim-lua/plenary.nvim',
@@ -96,6 +97,7 @@ return {
   },
   {
     'ThePrimeagen/vim-be-good',
+    enabled = not vim.g.minimal,
     cmd = { 'VimBeGood' },
   },
 }
