@@ -8,9 +8,6 @@
     #gnuchess
     #lc0
 
-    # AI
-    ollama
-
     # Calculator
     libqalculate
 

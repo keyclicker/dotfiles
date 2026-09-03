@@ -4,9 +4,9 @@
 # store and the Metal GPU; NixOS has services.ollama (CPU only in a
 # VM, bare metal sets services.ollama.acceleration). nix-darwin has
 # no services.ollama and NixOS no launchd, and mkIf cannot hide an
-# unknown option, so the platform is picked by which option tree
-# exists.
-{ pkgs, options, ... }:
+# unknown option, so the branch is chosen up front on isDarwin, which
+# flake.nix passes as a special arg (pkgs is not available this early).
+{ pkgs, isDarwin, ... }:
 
 let
   tuning = {
@@ -19,30 +19,30 @@ let
     OLLAMA_NUM_PARALLEL = "1";
   };
 in
-{
-  config =
-    if options.services ? ollama then
-      {
-        services.ollama = {
-          enable = true;
-          host = "127.0.0.1";
-          environmentVariables = tuning;
-        };
-      }
-    else
-      {
-        launchd.user.agents.ollama = {
-          command = "${pkgs.ollama}/bin/ollama serve";
-          environment = tuning // {
-            OLLAMA_HOST = "127.0.0.1:11434";
-          };
+if isDarwin then
+  {
+    # The CLI; services.ollama puts it on PATH itself on NixOS.
+    environment.systemPackages = [ pkgs.ollama ];
 
-          serviceConfig = {
-            KeepAlive = true;
-            ProcessType = "Interactive";
-            RunAtLoad = true;
-            ThrottleInterval = 30;
-          };
-        };
+    launchd.user.agents.ollama = {
+      command = "${pkgs.ollama}/bin/ollama serve";
+      environment = tuning // {
+        OLLAMA_HOST = "127.0.0.1:11434";
       };
-}
+
+      serviceConfig = {
+        KeepAlive = true;
+        ProcessType = "Interactive";
+        RunAtLoad = true;
+        ThrottleInterval = 30;
+      };
+    };
+  }
+else
+  {
+    services.ollama = {
+      enable = true;
+      host = "127.0.0.1";
+      environmentVariables = tuning;
+    };
+  }

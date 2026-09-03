@@ -68,6 +68,19 @@
           };
         }
       ];
+
+      # NixOS outputs share one constructor so every leaf gets the
+      # platform as a special arg: module-ollama-desktop.nix has to
+      # pick launchd or services.ollama before config exists, and
+      # asking pkgs there is infinite recursion.
+      nixos =
+        modules:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            isDarwin = false;
+          };
+          inherit modules;
+        };
     in
     {
       # Wiring only: one output per machine, each pointing at its
@@ -77,6 +90,9 @@
 
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = {
+          isDarwin = true;
+        };
         modules = [
           ./host-mac.nix
           home-manager.darwinModules.home-manager
@@ -98,50 +114,40 @@
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
-      nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./host-agents.nix
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [ ./home-common.nix ];
-            };
-          }
-        ];
-      };
+      nixosConfigurations."agents" = nixos [
+        ./host-agents.nix
+        disko.nixosModules.disko
+        home-manager.nixosModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = "hm-bak";
+            users.keyclicker.imports = [ ./home-common.nix ];
+          };
+        }
+      ];
 
       # Desktop VM (#35): generic like vm, but with home-manager, since
       # the sway session is made of dotfiles.
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop
-      nixosConfigurations."desktop" = nixpkgs.lib.nixosSystem {
-        modules = desktopModules;
-      };
+      nixosConfigurations."desktop" = nixos desktopModules;
 
       # $ dots set desktop-utm; dots rebuild
-      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem {
-        modules = desktopModules ++ [ ./platform-utm.nix ];
-      };
+      nixosConfigurations."desktop-utm" = nixos (desktopModules ++ [ ./platform-utm.nix ]);
 
       # Generic guests: one configuration, spawned as many times as
       # needed, no pet identity (see the leaves).
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
-      nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./host-vm.nix
-          disko.nixosModules.disko
-        ];
-      };
+      nixosConfigurations."vm" = nixos [
+        ./host-vm.nix
+        disko.nixosModules.disko
+      ];
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
-      nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [ ./host-container.nix ];
-      };
+      nixosConfigurations."container" = nixos [ ./host-container.nix ];
 
       homeConfigurations =
         # Foreign Linux (Ubuntu pi, VPS, ...): distro system, nix user
