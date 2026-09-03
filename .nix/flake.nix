@@ -131,8 +131,8 @@
       # Desktop VM (#35): generic like vm, but with home-manager, since
       # the sway session is made of dotfiles.
 
-      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop
-      nixosConfigurations."desktop" = nixos desktopModules;
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
+      nixosConfigurations."desktop-vm" = nixos desktopModules;
 
       # $ dots set desktop-utm; dots rebuild
       nixosConfigurations."desktop-utm" = nixos (desktopModules ++ [ ./platform-utm.nix ]);

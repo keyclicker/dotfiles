@@ -51,7 +51,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
 │                            # DHCP on eth0, systemd-boot, serial console,
-│                            # hostname from DHCP / hostnamectl
+│                            # hostname from DHCP / hostnamectl, SPICE agent
+│                            # (graphical.target only)
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
 ├── platform-utm.nix         # UTM on the mac: aarch64, virtio-blk disk
@@ -71,8 +72,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
-├── host-desktop.nix         # desktop VM (#35): the mac's stack on sway,
-│                            # generic identity, SPICE; UTM via platform-utm
+├── host-desktop.nix         # desktop VM (#35): the mac's stack on sway, no
+│                            # identity; Proxmox as desktop-vm, UTM as
+│                            # desktop-utm (platform-utm on top)
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
 ├── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
@@ -101,7 +103,7 @@ Outputs by leaf:
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home common + desktop |
 | `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
-| `desktop`                        | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home common + desktop |
+| `desktop-vm`                     | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home common + desktop |
 | `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
@@ -212,9 +214,9 @@ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 # agents VM
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
-# desktop VM (`iso desktop` first, then `install.sh nixos desktop` for the
-# checkout home-manager links into); UTM on the mac: desktop-utm
-sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop
+# desktop VM (`iso desktop-vm` first, then `install.sh nixos desktop-vm` for
+# the checkout home-manager links into); UTM on the mac: desktop-utm
+sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 
 # generic guests (`iso vm` above first, then switch)
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm

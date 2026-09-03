@@ -104,6 +104,13 @@
   # backup freeze/thaw, etc.
   services.qemuGuest.enable = true;
 
+  # SPICE guest side (Proxmox with display=virtio, UTM): clipboard
+  # both ways and the display following the client window. This is
+  # the system half; the session half is `exec spice-vdagent` in the
+  # sway config. The unit is wanted by graphical.target only, so a
+  # headless guest (multi-user.target) never starts it.
+  services.spice-vdagentd.enable = true;
+
   # scsi disks are configured with discard=on in Proxmox, so periodically
   # return deleted guest blocks to the thin-provisioned ZFS zvol.
   services.fstrim.enable = true;

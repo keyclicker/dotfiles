@@ -12,7 +12,7 @@ curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh 
 # fresh NixOS guest, from the installer ISO (wipes the disk)
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- iso vm
 
-# NixOS already running (agents, desktop, vm, container)
+# NixOS already running (agents, desktop-vm, vm, container)
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- nixos agents
 
 # Ubuntu and friends (standalone home-manager)

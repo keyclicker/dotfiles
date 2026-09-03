@@ -1,13 +1,13 @@
 # Desktop VM (#35): the mac's stack on NixOS — sway where the mac has
 # yabai, flathub where it has homebrew casks — plus incus, which the
-# mac cannot host. Generic like host-vm.nix: no name of its own,
-# label-mounted disks, cloneable. Unlike it, home-manager links the
-# dotfiles (sway, waybar, ghostty, ...), so the repo must be checked
-# out at ~/.dotfiles: `install.sh iso desktop`, reboot,
-# `install.sh nixos desktop`. Reached over SPICE from the Proxmox
-# console; UTM on the mac builds the same leaf as desktop-utm
-# (platform-utm.nix). A bare-metal desktop later composes the same
-# modules on its own hardware.
+# mac cannot host. A VM leaf like host-vm.nix: no name of its own,
+# label-mounted disks, cloneable; Proxmox on the x86 box as
+# desktop-vm, UTM on the mac as desktop-utm (platform-utm.nix on
+# top). Unlike host-vm.nix, home-manager links the dotfiles (sway,
+# waybar, ghostty, ...), so the repo must be checked out at
+# ~/.dotfiles: `install.sh iso desktop-vm`, reboot, `install.sh nixos
+# desktop-vm`. A bare-metal desktop later is its own leaf composing
+# the same desktop modules on its own hardware.
 { lib, ... }:
 
 {
@@ -28,11 +28,9 @@
   # Proxmox on the x86 box; platform-utm.nix overrides for the mac.
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  # SPICE guest side: clipboard both ways and the display following
-  # the client window. Proxmox: display=virtio (or virtio-gl), audio0
-  # device=ich9-intel-hda,driver=spice. vdagentd is the system half;
-  # the session half is `exec spice-vdagent` in the sway config.
-  services.spice-vdagentd.enable = true;
+  # Proxmox: display=virtio (or virtio-gl), audio0
+  # device=ich9-intel-hda,driver=spice; the SPICE agent comes with
+  # platform-vm.nix.
 
   system.stateVersion = "26.05";
 }
