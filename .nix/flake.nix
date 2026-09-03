@@ -48,32 +48,25 @@
             ]
         );
 
-      # The desktop leaf with its flake-input plumbing, built twice:
-      # for Proxmox as is, for UTM on the mac with platform-utm.nix
-      # on top. `os` is a special arg (module-ollama-desktop.nix picks
-      # launchd or services.ollama on it before config exists).
-      desktop = {
-        specialArgs = {
-          os = "linux";
-        };
-        modules = [
-          ./host-desktop-vm.nix
-          disko.nixosModules.disko
-          nix-flatpak.nixosModules.nix-flatpak
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [
-                ./home-dotfiles.nix
-                ./home-desktop-linux.nix
-              ];
-            };
-          }
-        ];
-      };
+      # Flake-input plumbing shared by the desktop leaves (Proxmox and
+      # UTM): disko, nix-flatpak and home-manager with the desktop
+      # home layers.
+      desktopModules = [
+        disko.nixosModules.disko
+        nix-flatpak.nixosModules.nix-flatpak
+        home-manager.nixosModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = "hm-bak";
+            users.keyclicker.imports = [
+              ./home-dotfiles.nix
+              ./home-desktop-linux.nix
+            ];
+          };
+        }
+      ];
     in
     {
       # Wiring only: one output per machine, each pointing at its
@@ -124,12 +117,20 @@
       # the sway session is made of dotfiles.
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
-      nixosConfigurations."desktop-vm" = nixpkgs.lib.nixosSystem desktop;
+      nixosConfigurations."desktop-vm" = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          os = "linux";
+        };
+        modules = [ ./host-desktop-vm.nix ] ++ desktopModules;
+      };
 
       # $ dots set desktop-utm; dots rebuild
-      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem (
-        desktop // { modules = desktop.modules ++ [ ./platform-utm.nix ]; }
-      );
+      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          os = "linux";
+        };
+        modules = [ ./host-desktop-utm.nix ] ++ desktopModules;
+      };
 
       # Generic guests: one configuration, spawned as many times as
       # needed, no pet identity (see the leaves).
