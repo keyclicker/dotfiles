@@ -65,9 +65,6 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   { import = 'plugins' },
 }, {
-  -- Guests get this directory as a read-only nix store copy; lazy still
-  -- needs somewhere to write its lockfile after installs.
-  lockfile = vim.fn.filewritable(vim.fn.stdpath 'config') ~= 2 and vim.fn.stdpath 'state' .. '/lazy-lock.json' or nil,
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
