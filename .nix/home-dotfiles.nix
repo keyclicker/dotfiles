@@ -67,8 +67,11 @@ in
     ".claude/commands".source = link ".claude/commands";
     ".claude/agents".source = link ".claude/agents";
     ".claude/skills".source = link ".claude/skills";
-    ".agents/skills".source = link ".agents/skills";
     ".codex/AGENTS.md".source = link ".codex/AGENTS.md";
+    ".codex/skills" = {
+      source = link ".codex/skills";
+      force = true;
+    };
 
     # GUI tools that run on both platforms
     ".doom.d".source = link ".doom.d";
