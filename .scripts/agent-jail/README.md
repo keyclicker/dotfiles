@@ -88,7 +88,7 @@ Consequences worth knowing:
 - `claude`, `codex`, and `opencode` come from `module-agents.nix` as
   `npx ...@latest` wrappers, so the jail always runs the current release and
   nothing needs updating by hand.
-- `home-common.nix` links your dotfiles into `$HOME`, so the agent gets your
+- `home-dotfiles.nix` links your dotfiles into `$HOME`, so the agent gets your
   nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
   It deliberately does **not** manage `.claude/settings.json`, which is why the
   jail's own settings survive the mount.

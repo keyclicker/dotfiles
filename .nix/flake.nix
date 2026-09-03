@@ -12,6 +12,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    # Declarative flathub apps for the desktop (module-apps-linux.nix).
+    nix-flatpak.url = "github:gmodena/nix-flatpak/latest";
   };
 
   outputs =
@@ -22,6 +24,7 @@
       nix-darwin,
       home-manager,
       disko,
+      nix-flatpak,
     }:
     let
       # Standalone home-manager outputs carry no machine identity, but
@@ -44,15 +47,45 @@
               "x86_64-linux"
             ]
         );
+
+      # The desktop leaf with its flake-input plumbing, built twice:
+      # for Proxmox as is, for UTM on the mac with platform-utm.nix
+      # on top. `os` is a special arg (module-ollama-desktop.nix picks
+      # launchd or services.ollama on it before config exists).
+      desktop = {
+        specialArgs = {
+          os = "linux";
+        };
+        modules = [
+          ./host-desktop-vm.nix
+          disko.nixosModules.disko
+          nix-flatpak.nixosModules.nix-flatpak
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              users.keyclicker.imports = [
+                ./home-dotfiles.nix
+                ./home-desktop-linux.nix
+              ];
+            };
+          }
+        ];
+      };
     in
     {
       # Wiring only: one output per machine, each pointing at its
       # host-*.nix leaf, which is where the module stack is composed.
-      # Home-manager and disko stay here because they need the flake
-      # input; the leaves only set their options.
+      # Home-manager, disko and nix-flatpak stay here because they
+      # need the flake input; the leaves only set their options.
 
       # $ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = {
+          os = "darwin";
+        };
         modules = [
           ./host-mac.nix
           home-manager.darwinModules.home-manager
@@ -63,10 +96,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [
-                ./home-common.nix
-                ./home-desktop.nix
-              ];
+              users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
           { system.configurationRevision = self.rev or self.dirtyRev or null; }
@@ -84,11 +114,22 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [ ./home-common.nix ];
+              users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
         ];
       };
+
+      # Desktop VM (#35): generic like vm, but with home-manager, since
+      # the sway session is made of dotfiles.
+
+      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
+      nixosConfigurations."desktop-vm" = nixpkgs.lib.nixosSystem desktop;
+
+      # $ dots set desktop-utm; dots rebuild
+      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem (
+        desktop // { modules = desktop.modules ++ [ ./platform-utm.nix ]; }
+      );
 
       # Generic guests: one configuration, spawned as many times as
       # needed, no pet identity (see the leaves).

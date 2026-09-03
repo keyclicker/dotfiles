@@ -6,6 +6,10 @@
 {
   time.timeZone = "America/Vancouver";
 
+  # vscode, discord, spotify, ... on the desktop; the mac already
+  # takes them as casks.
+  nixpkgs.config.allowUnfree = true;
+
   nix = {
     # Necessary for using flakes on this system.
     settings.experimental-features = [
@@ -30,7 +34,7 @@
     git
     gh
 
-    # Shell (NixOS hosts also set programs.zsh.enable in server.nix;
+    # Shell (NixOS hosts also set programs.zsh.enable in profile-server.nix;
     # foreign hosts get the binary from here)
     zsh
 

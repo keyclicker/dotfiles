@@ -30,31 +30,51 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # nftables, docker/incus forwarding truce
 ├── module-dockge.nix        # dockge on the docker socket; written, not
 │                            # composed anywhere (password-only web UI)
-├── module-ollama-darwin.nix # ollama as a launchd user agent (mac)
+├── module-ollama-desktop.nix # ollama on loopback: launchd user agent on
+│                             # the mac, services.ollama on NixOS, one tuning
+├── module-desktop-darwin.nix # the mac desktop below the apps: system
+│                             # defaults, Touch ID for sudo
+├── module-desktop-linux.nix # the NixOS desktop below the apps: sway +
+│                            # bar/launcher/notifications/lock/screenshots,
+│                            # greetd autologin, keyd remaps, pipewire,
+│                            # bluetooth, portals, fonts (configs are
+│                            # dotfiles, see home-dotfiles)
+├── module-apps-darwin.nix   # GUI apps on the mac: homebrew casks, mac-only
+│                            # packages
+├── module-apps-linux.nix    # GUI apps on the NixOS desktop: nixpkgs for
+│                            # what must see the host (terminal, editors,
+│                            # media), flathub for the self-updating rest
 │
 ├── profile-server.nix       # servers: user + ssh keys, sshd hardening,
 │                            # mDNS, tailscale, docker, terminfo
-├── profile-desktop.nix      # desktops: shared desktop packages
+├── profile-desktop.nix      # desktops (mac + NixOS): shared packages
 │
 ├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
 │                            # DHCP on eth0, systemd-boot, serial console,
-│                            # hostname from DHCP / hostnamectl
+│                            # hostname from DHCP / hostnamectl, SPICE agent
+│                            # (graphical.target only)
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
+├── platform-utm.nix         # UTM on the mac: aarch64, virtio-blk disk
+│                            # names, pl011 console; on top of a host leaf
 │
 ├── hardware-vm.nix          # disko layout of every QEMU guest: ESP + ext4
 │                            # root on sda, encrypted swap on sdb, by GPT
 │                            # label; installs and mounts from one attrset
 │
-├── home-common.nix          # core dotfile symlinks (shell, git, tmux,
-│                            # vim, nvim, scripts, ai)
-├── home-desktop.nix         # GUI dotfile symlinks (.doom.d, ghostty,
-│                            # karabiner, sway, ...)
+├── home-dotfiles.nix        # every dotfile symlink (shell, git, tmux, vim,
+│                            # nvim, scripts, ai, ghostty, sway, karabiner,
+│                            # ...); OS-bound entries check the platform
+├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
+│                            # settings.ini, cursor), xdg user dirs
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
 │                            # environment, nothing system-level
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
+├── host-desktop-vm.nix      # desktop VM (#35): the mac's stack on sway, no
+│                            # identity; Proxmox as desktop-vm, UTM as
+│                            # desktop-utm (platform-utm on top)
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
 ├── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
@@ -81,8 +101,10 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-darwin; home common + desktop      |
-| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
+| `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
+| `desktop-vm`                     | `host-desktop-vm.nix`| common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
+| `desktop-utm`                    | `host-desktop-vm.nix`| the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
@@ -95,18 +117,18 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 ## Design
 
-- **Home-manager owns the dotfile symlinks**: `home-common.nix` (plus
-  `home-desktop.nix` for GUI hosts) maps each repo file
-  (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to its `$HOME` target
-  with `mkOutOfStoreSymlink`, pointing at the live checkout — edits
-  apply immediately, no rebuild. The repo must be checked out at
+- **Home-manager owns the dotfile symlinks**: `home-dotfiles.nix`
+  maps each repo file (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to
+  its `$HOME` target with `mkOutOfStoreSymlink`, pointing at the live
+  checkout — edits apply immediately, no rebuild. Every host links
+  everything; only entries bound to one OS (macOS preferences, the
+  sway session) check the platform. The repo must be checked out at
   `~/.dotfiles` on every host. Generic guests (`vm`, `container`) skip
   home-manager: a fresh guest has no checkout to point at.
 - **System vs home**: same layer names, different module systems.
   `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
   home-manager's — they cannot share files, so a layer that needs both
-  gets a pair: `module-common.nix` ↔ `home-common.nix`,
-  `profile-desktop.nix` ↔ `home-desktop.nix`.
+  gets a pair: `module-desktop-linux.nix` ↔ `home-desktop-linux.nix`.
 - **Home-manager and disko stay in `flake.nix`**: the leaf owns the
   system stack, but the hm NixOS/darwin module, the `home-*` list and
   the disko module need their flake inputs, so those lines live next
@@ -118,6 +140,18 @@ leaves are instantiated per architecture and the caller (`dots`,
   an image or a `nixos-anywhere` reinstall all boot the same file.
   Every guest gets two disks: system and an encrypted swap disk
   (`nofail`, so a single-disk boot still comes up).
+- **The desktop mirrors the mac**: `host-desktop-vm.nix` composes what
+  `host-mac.nix` does (common, desktop, agents, ollama) plus incus,
+  with `module-desktop-linux.nix` standing in for yabai/skhd/karabiner and
+  `module-apps-linux.nix` for the casks of `module-apps-darwin.nix`:
+  self-updating consumer apps (browser, chat, music, notes) come from
+  flathub via nix-flatpak so they track upstream between rebuilds,
+  like casks do; anything that must see the host's PATH and dotfiles
+  (terminal, editors, media tools) comes from nixpkgs. The session is dotfiles (`.config/sway`,
+  `waybar`, `fuzzel`, `mako`), linked by `home-dotfiles.nix`; nix only
+  installs what they call. keyd remaps the keyboards plugged into
+  the machine and skips QEMU's virtual ones: keys arriving over
+  SPICE were remapped by the client already (karabiner on the mac).
 - **Per-entry links for shared dirs**: `~/.config`, `~/.claude`,
   `~/.codex`, `~/.gnupg` are never owned wholesale — machine-local
   state (claude settings/transcripts, gpg keys, other apps' config)
@@ -152,8 +186,8 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 ## Planned
 
-- `desktop` — NixOS desktop (#35): `host-desktop.nix` on
-  `platform-vm.nix` + `profile-desktop.nix` + `home-desktop.nix`
+- a bare-metal NixOS desktop: `host-<name>.nix` composing the
+  desktop modules on its own `hardware-<name>.nix`
 - prebuilt images for `vm` / `container` (#32)
 
 ## Usage
@@ -179,6 +213,10 @@ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 
 # agents VM
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
+
+# desktop VM (`iso desktop-vm` first, then `install.sh nixos desktop-vm` for
+# the checkout home-manager links into); UTM on the mac: desktop-utm
+sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 
 # generic guests (`iso vm` above first, then switch)
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
