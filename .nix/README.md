@@ -32,16 +32,18 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # composed anywhere (password-only web UI)
 ├── module-ollama-desktop.nix # ollama on loopback: launchd user agent on
 │                             # the mac, services.ollama on NixOS, one tuning
-├── module-sway.nix          # the Wayland session: sway + bar/launcher/
-│                            # notifications/lock/screenshots, greetd
-│                            # autologin, keyd remaps, pipewire, portals,
-│                            # fonts (configs are dotfiles, see home-desktop)
+├── module-desktop-darwin.nix # the mac desktop below the apps: system
+│                             # defaults, Touch ID for sudo
+├── module-desktop-linux.nix # the NixOS desktop below the apps: sway +
+│                            # bar/launcher/notifications/lock/screenshots,
+│                            # greetd autologin, keyd remaps, pipewire,
+│                            # bluetooth, portals, fonts (configs are
+│                            # dotfiles, see home-desktop)
 ├── module-apps-darwin.nix   # GUI apps on the mac: homebrew casks, mac-only
 │                            # packages
 ├── module-apps-linux.nix    # GUI apps on the NixOS desktop: nixpkgs for
 │                            # what must see the host (terminal, editors,
 │                            # media), flathub for the self-updating rest
-├── module-bluetooth.nix     # bluez + blueman, for the bare-metal desktop
 │
 ├── profile-server.nix       # servers: user + ssh keys, sshd hardening,
 │                            # mDNS, tailscale, docker, terminfo
@@ -97,9 +99,9 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | common + desktop + agents + ollama-desktop + apps-darwin; home common + desktop |
+| `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home common + desktop |
 | `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
-| `desktop`                        | `host-desktop.nix`   | common + server + desktop + agents + incus + sway + apps-linux + ollama-desktop + bluetooth + vm + hardware + lan; home common + desktop |
+| `desktop`                        | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home common + desktop |
 | `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
@@ -138,13 +140,13 @@ leaves are instantiated per architecture and the caller (`dots`,
   (`nofail`, so a single-disk boot still comes up).
 - **The desktop mirrors the mac**: `host-desktop.nix` composes what
   `host-mac.nix` does (common, desktop, agents, ollama) plus incus,
-  with `module-sway.nix` standing in for yabai/skhd/karabiner and
+  with `module-desktop-linux.nix` standing in for yabai/skhd/karabiner and
   `module-apps-linux.nix` for the casks of `module-apps-darwin.nix`:
   self-updating consumer apps (browser, chat, music, notes) come from
   flathub via nix-flatpak so they track upstream between rebuilds,
   like casks do; anything that must see the host's PATH and dotfiles
   (terminal, editors, media tools) comes from nixpkgs. The session is dotfiles (`.config/sway`,
-  `waybar`, `wofi`, `mako`), linked by `home-desktop.nix`; nix only
+  `waybar`, `fuzzel`, `mako`), linked by `home-desktop.nix`; nix only
   installs what they call. keyd remaps the keyboards plugged into
   the machine and skips QEMU's virtual ones: keys arriving over
   SPICE were remapped by the client already (karabiner on the mac).

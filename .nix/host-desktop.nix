@@ -17,10 +17,9 @@
     ./profile-desktop.nix
     ./module-agents.nix
     ./module-incus.nix
-    ./module-sway.nix
+    ./module-desktop-linux.nix
     ./module-apps-linux.nix
     ./module-ollama-desktop.nix
-    ./module-bluetooth.nix
     ./platform-vm.nix
     ./hardware-vm.nix
     ./option-lan.nix

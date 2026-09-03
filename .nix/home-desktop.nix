@@ -35,11 +35,11 @@ lib.mkMerge [
   })
 
   (lib.mkIf isLinux {
-    # The sway session (module-sway.nix installs what these call).
+    # The sway session (module-desktop-linux.nix installs what these call).
     home.file = {
       ".config/sway".source = link ".config/sway";
       ".config/waybar".source = link ".config/waybar";
-      ".config/wofi".source = link ".config/wofi";
+      ".config/fuzzel".source = link ".config/fuzzel";
       ".config/mako".source = link ".config/mako";
       ".config/pavucontrol.ini".source = link ".config/pavucontrol.ini";
     };
@@ -51,7 +51,7 @@ lib.mkMerge [
     };
 
     # GTK apps (nautilus, and the flatpaks through the settings
-    # portal) follow these; sway, waybar, wofi, mako and ghostty
+    # portal) follow these; sway, waybar, fuzzel, mako and ghostty
     # carry their own TokyoNight colors.
     dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
 

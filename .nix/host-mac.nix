@@ -7,6 +7,7 @@
     ./module-common.nix
     ./profile-desktop.nix
     ./module-agents.nix
+    ./module-desktop-darwin.nix
     ./module-ollama-desktop.nix
     ./module-apps-darwin.nix
   ];
@@ -21,19 +22,6 @@
     hostName = "mac";
     localHostName = "mac";
     computerName = "mac";
-  };
-
-  system.defaults.NSGlobalDomain = {
-    # Move windows by holding Control+Command and dragging anywhere.
-    NSWindowShouldDragOnGesture = true;
-    # No alternative characters on hold.
-    ApplePressAndHoldEnabled = false;
-  };
-
-  # Keep Touch ID available inside long-running tmux sessions.
-  security.pam.services.sudo_local = {
-    touchIdAuth = true;
-    reattach = true;
   };
 
   # Enable alternative shell support in nix-darwin.

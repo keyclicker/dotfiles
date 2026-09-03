@@ -1,9 +1,11 @@
-# The Wayland session: sway and the tools its config calls (bar,
-# launcher, notifications, lock, screenshots, clipboard), started by
-# greetd straight into the user's session; keyd for the key remaps,
-# pipewire for audio, portals so GTK and flatpak apps get file
-# pickers and screen sharing, fonts. The configs themselves are
-# dotfiles: home-desktop.nix links .config/sway, waybar, wofi, mako.
+# The NixOS desktop below the apps, what macOS plus
+# module-desktop-darwin.nix are on the mac: the Wayland session (sway
+# and the tools its config calls: bar, launcher, notifications, lock,
+# screenshots, clipboard) started by greetd straight into the user's
+# session; keyd for the key remaps, pipewire for audio, bluetooth,
+# portals so GTK and flatpak apps get file pickers and screen
+# sharing, fonts. The configs themselves are dotfiles:
+# home-desktop.nix links .config/sway, waybar, fuzzel, mako.
 {
   config,
   lib,
@@ -20,7 +22,7 @@
       swaylock
       swayidle
       waybar
-      wofi
+      fuzzel
       mako
       grim
       slurp
@@ -94,6 +96,15 @@
   programs.dconf.enable = true;
 
   hardware.graphics.enable = true;
+
+  # Bluetooth with blueman's tray applet. Inert in a VM with no
+  # adapter; here for the bare-metal desktop that composes the same
+  # stack.
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+  services.blueman.enable = true;
 
   # Electron apps (vscode, discord, obsidian) run on Wayland natively
   # instead of through Xwayland.
