@@ -69,6 +69,12 @@ input type:touchpad {
     scroll_factor 0.2
 }
 
+# yabai's focus_follows_mouse off / mouse_follows_focus on: focus
+# moves only by key or click, the pointer jumps to the window that
+# got it.
+focus_follows_mouse no
+mouse_warping container
+
 # Same three layouts as the mac, on the same keys as skhd's
 # hyper+u/i/o.
 input type:keyboard {
@@ -195,8 +201,10 @@ $bind --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -
 $bind --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
 $bind --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
 $bind --locked XF86AudioPlay exec playerctl play-pause
+$bind --locked XF86AudioPause exec playerctl play-pause
 $bind --locked XF86AudioNext exec playerctl next
 $bind --locked XF86AudioPrev exec playerctl previous
+$bind --locked XF86AudioStop exec playerctl stop
 $bind --locked XF86MonBrightnessDown exec brightnessctl set 5%-
 $bind --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
