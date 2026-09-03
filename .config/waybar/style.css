@@ -1,7 +1,8 @@
 * {
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 13px;
+    /* font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif; */
+    font-family: JetBrains Mono, Siji;
+    font-size: 16px;
 }
 
 window#waybar {
@@ -10,6 +11,7 @@ window#waybar {
     color: #ffffff;
     transition-property: background-color;
     transition-duration: .5s;
+    opacity: 0.65;
 }
 
 window#waybar.hidden {
@@ -89,6 +91,7 @@ button:hover {
 #wireplumber,
 #custom-media,
 #tray,
+#language,
 #mode,
 #idle_inhibitor,
 #scratchpad,
@@ -96,6 +99,7 @@ button:hover {
 #mpd {
     padding: 0 10px;
     color: #ffffff;
+    border-radius: 5px;
 }
 
 #window,
