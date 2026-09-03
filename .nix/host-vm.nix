@@ -1,14 +1,15 @@
 # Generic VM instance: no identity of its own — the name comes from
 # DHCP or `hostnamectl` (platform-vm.nix). Spawn it on Proxmox, incus,
 # UTM, ... as many times as needed. Prebuilt images come later (#32);
-# until then `install.sh iso vm` from the installer ISO. No
-# home-manager: a fresh guest has no ~/.dotfiles checkout for the
-# symlinks to point at.
+# until then `install.sh iso vm` from the installer ISO. No dotfile
+# links: a fresh guest has no ~/.dotfiles checkout for them to point
+# at; nvim alone comes as a store copy (flake.nix, guestModules).
 { ... }:
 
 {
   imports = [
     ./module-core.nix
+    ./module-nvim-minimal.nix
     ./profile-server.nix
     ./module-incus.nix
     # module-dockge.nix exists but stays out: password-only web UI on

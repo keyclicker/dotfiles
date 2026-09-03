@@ -27,6 +27,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # interactive tool set (yazi, ffmpeg, gh, ...)
 ├── module-dev.nix           # dev toolchains: build tools, languages,
 │                            # C compilers; stacked wherever common is
+├── module-nvim-minimal.nix  # generic guests: nvim flagged minimal (no LSP,
+│                            # formatters, latex), tree-sitter parsers
+│                            # prebuilt by nixpkgs instead of compiled
 ├── module-agents.nix        # AI coding agent CLIs (claude, codex, opencode)
 ├── module-browser.nix       # headless chromium + agent-browser for agents
 ├── module-slopbox.nix       # t3 code: CLI wrapper + web server (3773, LAN)
@@ -70,6 +73,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # ...); OS-bound entries check the platform
 ├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
 │                            # settings.ini, cursor), xdg user dirs
+├── home-nvim-minimal.nix    # generic guests: the nvim config as a store
+│                            # copy, no checkout to link
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
 │                            # environment, nothing system-level
 │
@@ -109,8 +114,8 @@ Outputs by leaf:
 | `agents`                         | `host-agents.nix`    | core + common + dev + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
 | `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
-| `vm`                             | `host-vm.nix`        | core + server + incus + vm + hardware + lan                         |
-| `container`                      | `host-container.nix` | core + server + container + lan                                     |
+| `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware + lan; home nvim-minimal |
+| `container`                      | `host-container.nix` | core + nvim-minimal + server + container + lan; home nvim-minimal   |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
 | `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
 
@@ -127,8 +132,12 @@ leaves are instantiated per architecture and the caller (`dots`,
   checkout — edits apply immediately, no rebuild. Every host links
   everything; only entries bound to one OS (macOS preferences, the
   sway session) check the platform. The repo must be checked out at
-  `~/.dotfiles` on every host. Generic guests (`vm`, `container`) skip
-  home-manager: a fresh guest has no checkout to point at.
+  `~/.dotfiles` on every host. Generic guests (`vm`, `container`) have
+  no checkout to point at, so they link nothing; `home-nvim-minimal.nix`
+  gives them the one dotfile worth having over ssh, nvim, as a store
+  copy (`../.config/nvim`, so the flake must be reached through the
+  repo: `~/.dotfiles/.nix` or `github:...?dir=.nix`, not a bare
+  `path:` to `.nix`).
 - **System vs home**: same layer names, different module systems.
   `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
   home-manager's — they cannot share files, so a layer that needs both
@@ -181,6 +190,15 @@ leaves are instantiated per architecture and the caller (`dots`,
   `module-dev.nix` (toolchains) on top; those two are most of a
   machine's store, and a guest spawned N times would pay for them N
   times.
+- **One nvim config, a minimal profile for guests**: the same
+  `.config/nvim` runs everywhere; `module-nvim-minimal.nix` exports
+  `NVIM_MINIMAL`, which turns off every spec that pulls a toolchain
+  (LSP servers via mason, formatters, linters, latex, refactoring,
+  neogit, codediff) before lazy clones it, and `NVIM_TREESITTER`, a
+  store directory shaped like nvim-treesitter's install dir with
+  parsers and queries prebuilt by nixpkgs, so a guest never compiles a
+  grammar. What remains is git-clone only: a first start is seconds,
+  not the minutes a slow VM spends in gcc.
 - **Foreign Linux gets the shell environment, 1:1**:
   `home-standalone.nix` feeds the `environment.systemPackages` of
   `module-core.nix`, `module-common.nix` and `module-dev.nix` into

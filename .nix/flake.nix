@@ -67,6 +67,19 @@
           };
         }
       ];
+
+      # Generic guests (vm, container): home-manager with the store copy
+      # of the nvim config, the one dotfile they get.
+      guestModules = [
+        home-manager.nixosModules.home-manager
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.keyclicker.imports = [ ./home-nvim-minimal.nix ];
+          };
+        }
+      ];
     in
     {
       # Wiring only: one output per machine, each pointing at its
@@ -133,19 +146,21 @@
       };
 
       # Generic guests: one configuration, spawned as many times as
-      # needed, no pet identity (see the leaves).
+      # needed, no pet identity (see the leaves). Home-manager only for
+      # the nvim config, copied from the store: no checkout to link.
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
         modules = [
           ./host-vm.nix
           disko.nixosModules.disko
-        ];
+        ]
+        ++ guestModules;
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
       nixosConfigurations."container" = nixpkgs.lib.nixosSystem {
-        modules = [ ./host-container.nix ];
+        modules = [ ./host-container.nix ] ++ guestModules;
       };
 
       homeConfigurations =
