@@ -68,6 +68,10 @@ in
     ".claude/agents".source = link ".claude/agents";
     ".claude/skills".source = link ".claude/skills";
     ".codex/AGENTS.md".source = link ".codex/AGENTS.md";
+    # Keep Codex's machine-managed .system directory intact.
+    ".codex/skills/conventional-commits".source = link ".agents/skills/conventional-commits";
+    ".codex/skills/git-workflow".source = link ".agents/skills/git-workflow";
+    ".codex/skills/unslop".source = link ".agents/skills/unslop";
 
     # GUI tools that run on both platforms
     ".doom.d".source = link ".doom.d";
