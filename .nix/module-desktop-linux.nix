@@ -5,7 +5,7 @@
 # session; keyd for the key remaps, pipewire for audio, bluetooth,
 # portals so GTK and flatpak apps get file pickers and screen
 # sharing, fonts. The configs themselves are dotfiles:
-# home-desktop.nix links .config/sway, waybar, fuzzel, mako.
+# home-dotfiles.nix links .config/sway, waybar, fuzzel, mako.
 {
   config,
   lib,
@@ -91,8 +91,8 @@
   # sharing, gtk for file pickers and the settings (dark scheme).
   # That is all flatpak apps see of the desktop.
 
-  # GTK settings (dark scheme, theme, cursor) live in dconf; the Linux
-  # branch of home-desktop.nix writes them.
+  # GTK settings (dark scheme, theme, cursor) live in dconf;
+  # home-desktop-linux.nix writes them.
   programs.dconf.enable = true;
 
   hardware.graphics.enable = true;

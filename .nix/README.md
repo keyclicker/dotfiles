@@ -38,7 +38,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # bar/launcher/notifications/lock/screenshots,
 │                            # greetd autologin, keyd remaps, pipewire,
 │                            # bluetooth, portals, fonts (configs are
-│                            # dotfiles, see home-desktop)
+│                            # dotfiles, see home-dotfiles)
 ├── module-apps-darwin.nix   # GUI apps on the mac: homebrew casks, mac-only
 │                            # packages
 ├── module-apps-linux.nix    # GUI apps on the NixOS desktop: nixpkgs for
@@ -62,11 +62,11 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # root on sda, encrypted swap on sdb, by GPT
 │                            # label; installs and mounts from one attrset
 │
-├── home-common.nix          # core dotfile symlinks (shell, git, tmux,
-│                            # vim, nvim, scripts, ai)
-├── home-desktop.nix         # GUI dotfile symlinks (.doom.d, ghostty,
-│                            # karabiner, sway, waybar, mako, ...) and,
-│                            # on Linux, the GTK look (dconf, settings.ini)
+├── home-dotfiles.nix        # every dotfile symlink (shell, git, tmux, vim,
+│                            # nvim, scripts, ai, ghostty, sway, karabiner,
+│                            # ...); OS-bound entries check the platform
+├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
+│                            # settings.ini, cursor), xdg user dirs
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
 │                            # environment, nothing system-level
 │
@@ -101,9 +101,9 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home common + desktop |
-| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home common |
-| `desktop-vm`                     | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home common + desktop |
+| `mac`                            | `host-mac.nix`       | common + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
+| `agents`                         | `host-agents.nix`    | common + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
+| `desktop-vm`                     | `host-desktop.nix`   | common + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
 | `desktop-utm`                    | `host-desktop.nix`   | the same + `platform-utm.nix` (aarch64, UTM on the mac)              |
 | `vm`                             | `host-vm.nix`        | common + server + incus + vm + hardware + lan                         |
 | `container`                      | `host-container.nix` | common + server + container + lan                                     |
@@ -117,18 +117,18 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 ## Design
 
-- **Home-manager owns the dotfile symlinks**: `home-common.nix` (plus
-  `home-desktop.nix` for GUI hosts) maps each repo file
-  (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to its `$HOME` target
-  with `mkOutOfStoreSymlink`, pointing at the live checkout — edits
-  apply immediately, no rebuild. The repo must be checked out at
+- **Home-manager owns the dotfile symlinks**: `home-dotfiles.nix`
+  maps each repo file (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to
+  its `$HOME` target with `mkOutOfStoreSymlink`, pointing at the live
+  checkout — edits apply immediately, no rebuild. Every host links
+  everything; only entries bound to one OS (macOS preferences, the
+  sway session) check the platform. The repo must be checked out at
   `~/.dotfiles` on every host. Generic guests (`vm`, `container`) skip
   home-manager: a fresh guest has no checkout to point at.
 - **System vs home**: same layer names, different module systems.
   `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
   home-manager's — they cannot share files, so a layer that needs both
-  gets a pair: `module-common.nix` ↔ `home-common.nix`,
-  `profile-desktop.nix` ↔ `home-desktop.nix`.
+  gets a pair: `module-desktop-linux.nix` ↔ `home-desktop-linux.nix`.
 - **Home-manager and disko stay in `flake.nix`**: the leaf owns the
   system stack, but the hm NixOS/darwin module, the `home-*` list and
   the disko module need their flake inputs, so those lines live next
@@ -148,7 +148,7 @@ leaves are instantiated per architecture and the caller (`dots`,
   flathub via nix-flatpak so they track upstream between rebuilds,
   like casks do; anything that must see the host's PATH and dotfiles
   (terminal, editors, media tools) comes from nixpkgs. The session is dotfiles (`.config/sway`,
-  `waybar`, `fuzzel`, `mako`), linked by `home-desktop.nix`; nix only
+  `waybar`, `fuzzel`, `mako`), linked by `home-dotfiles.nix`; nix only
   installs what they call. keyd remaps the keyboards plugged into
   the machine and skips QEMU's virtual ones: keys arriving over
   SPICE were remapped by the client already (karabiner on the mac).

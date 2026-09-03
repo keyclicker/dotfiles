@@ -148,7 +148,7 @@ PROJECT_NAME="$(basename "$HOST_PROJECT" | tr -cd '[:alnum:]._-')"
 PROJECT_HASH="$(printf '%s' "$HOST_PROJECT" | sha256sum | cut -c1-8)"
 CONTAINER_WORK="/work/$PROJECT_NAME-$PROJECT_HASH"
 CONTAINER_HOME="/home/keyclicker"              # matches host-jail.nix
-CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home-common.nix links here
+CONTAINER_DOTFILES="$CONTAINER_HOME/.dotfiles" # home-dotfiles.nix links here
 CONTAINER_CLAUDE_HOME="$CONTAINER_HOME/.claude"
 CONTAINER_NIX="/nix"
 
@@ -208,7 +208,7 @@ fi
 # ============================================================
 
 # Seed the jail's own settings once. Host settings are never read, and
-# home-common.nix deliberately leaves these two files unmanaged, so the
+# home-dotfiles.nix deliberately leaves these two files unmanaged, so the
 # dotfiles mount cannot clobber them either.
 if [ ! -f "$HOST_CLAUDE_HOME/settings.json" ]; then
     cp "$SCRIPT_DIR/config-templates/settings.json" "$HOST_CLAUDE_HOME/settings.json"

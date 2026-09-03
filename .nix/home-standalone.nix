@@ -5,19 +5,17 @@
 { pkgs, ... }:
 
 {
-  imports = [ ./home-common.nix ];
+  imports = [ ./home-dotfiles.nix ];
 
   # System packages become user packages. The imported modules must
   # stay plain { pkgs, ... } functions for this to keep working; the
   # moment one needs config/lib, extract its list into shared data.
   # Extras (agent CLIs, browser) are added by the jail leaf.
-  home.packages =
-    (import ./module-common.nix { inherit pkgs; }).environment.systemPackages
-    ++ [
-      # Terminfo for terminals the distro's ncurses doesn't know yet;
-      # picked up via TERMINFO_DIRS exported in .zshenv.
-      pkgs.ghostty.terminfo
-    ];
+  home.packages = (import ./module-common.nix { inherit pkgs; }).environment.systemPackages ++ [
+    # Terminfo for terminals the distro's ncurses doesn't know yet;
+    # picked up via TERMINFO_DIRS exported in .zshenv.
+    pkgs.ghostty.terminfo
+  ];
 
   # User-level equivalent of the nix settings in module-common.nix
   # (whose nix.* options are system-scoped and don't apply here).

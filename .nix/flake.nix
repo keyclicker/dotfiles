@@ -62,8 +62,8 @@
             useUserPackages = true;
             backupFileExtension = "hm-bak";
             users.keyclicker.imports = [
-              ./home-common.nix
-              ./home-desktop.nix
+              ./home-dotfiles.nix
+              ./home-desktop-linux.nix
             ];
           };
         }
@@ -103,10 +103,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [
-                ./home-common.nix
-                ./home-desktop.nix
-              ];
+              users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
           { system.configurationRevision = self.rev or self.dirtyRev or null; }
@@ -123,7 +120,7 @@
             useGlobalPkgs = true;
             useUserPackages = true;
             backupFileExtension = "hm-bak";
-            users.keyclicker.imports = [ ./home-common.nix ];
+            users.keyclicker.imports = [ ./home-dotfiles.nix ];
           };
         }
       ];
