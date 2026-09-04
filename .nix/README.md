@@ -204,9 +204,8 @@ leaves are instantiated per architecture and the caller (`dots`,
   functions; the moment one needs config/lib, extract the package
   list into shared data instead. The jail adds agents + browser the
   same way.
-- **Pins**: Linux hosts follow `nixos-unstable` (`nixpkgs`); mac follows
-  `nixpkgs-unstable` (`nixpkgs-darwin`), matching the original
-  standalone darwin flake.
+- **Pins**: one `nixpkgs` (`nixos-unstable`) for every host, mac
+  included; nix-darwin, home-manager and disko follow it.
 
 ## Planned
 
