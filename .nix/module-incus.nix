@@ -35,6 +35,11 @@
       profiles = [
         {
           name = "default";
+          # Containers run docker (profile-server.nix), which needs
+          # namespaces of its own inside the CT. /dev/net/tun for
+          # tailscale incus hands out by default. Proxmox CTs get the
+          # same from `features: nesting=1` on the Proxmox side.
+          config."security.nesting" = "true";
           devices = {
             eth0 = {
               name = "eth0";
