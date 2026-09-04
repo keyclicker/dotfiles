@@ -13,12 +13,28 @@ shell without a rebuild. Rebuild only for packages and system settings.
 Installs nix if missing, clones to `~/.dotfiles` (the links depend on that
 path), runs the first switch.
 
+MacBook, nix-darwin:
+
 ```sh
-i=https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh
-curl -L $i | sh -s -- mac            # MacBook, nix-darwin
-curl -L $i | sh -s -- iso <host>     # fresh NixOS from the installer ISO
-curl -L $i | sh -s -- nixos <host>   # NixOS already running
-curl -L $i | sh -s -- standalone     # Ubuntu and friends, home-manager only
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- mac
+```
+
+Fresh NixOS from the installer ISO:
+
+```sh
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- iso <host>
+```
+
+NixOS already running:
+
+```sh
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- nixos <host>
+```
+
+Ubuntu and friends, home-manager only:
+
+```sh
+curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- standalone
 ```
 
 Hosts: `agents`, `desktop-vm`, `vm`, and `container` (nixos only). `iso`
