@@ -2,12 +2,12 @@
   description = "keyclicker's machines";
 
   inputs = {
-    # Linux hosts follow nixos-unstable; mac keeps nixpkgs-unstable
-    # (same pin the original standalone darwin flake used).
+    # One nixpkgs for every host, mac included: nixos-unstable is
+    # cut from the same commits as nixpkgs-unstable, only gated on
+    # the NixOS tests instead of the darwin jobs.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
@@ -20,7 +20,6 @@
     inputs@{
       self,
       nixpkgs,
-      nixpkgs-darwin,
       nix-darwin,
       home-manager,
       disko,

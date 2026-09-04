@@ -99,11 +99,9 @@ upstream_ref() {
   git -C "$repo" rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || true
 }
 
-# epoch of the nixpkgs pin this machine actually builds from
-# (darwin follows nixpkgs-darwin); 0 when unreadable
+# epoch of the nixpkgs pin every machine builds from; 0 when unreadable
 pin_epoch() {
-  if [ "$mode" = darwin ]; then node=nixpkgs-darwin; else node=nixpkgs; fi
-  jq -r ".nodes.\"$node\".locked.lastModified // 0" "$flake/flake.lock" \
+  jq -r '.nodes.nixpkgs.locked.lastModified // 0' "$flake/flake.lock" \
     2>/dev/null || echo 0
 }
 
