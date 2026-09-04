@@ -10,7 +10,9 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    disko.url = "github:nix-community/disko";
+    # PR 1277 until it merges: master's image builder still hands a
+    # module tree to vmTools as the kernel, which nixpkgs now rejects.
+    disko.url = "github:nix-community/disko/pull/1277/head";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     # Declarative flathub apps for the desktop (module-apps-linux.nix).
     nix-flatpak.url = "github:gmodena/nix-flatpak/latest";
