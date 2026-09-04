@@ -1,7 +1,7 @@
 # local.lan vocabulary: modules list their LAN-only ports here
 # instead of touching the firewall themselves; the one dynamic-attr
 # firewall write lives below and stays inert until a port is set.
-# Every guest's NIC is eth0 (VMs via net.ifnames=0 in vm.nix,
+# Every guest's NIC is eth0 (VMs via net.ifnames=0 in platform-vm.nix,
 # container veths natively), so the default fits all virtual
 # machines; a host with different hardware overrides it, null
 # keeps the LAN ports closed.
