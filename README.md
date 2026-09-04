@@ -1,167 +1,107 @@
 # dotfiles
 
-Shell, editors, window management, agent configs, and the nix flake
-that puts them on every machine I use: a MacBook, a NixOS desktop, an
-agent sandbox VM, throwaway guests, and whatever Ubuntu box I am
-logged into.
+Shell, editors, window managers, AI agent configs, and one nix flake that
+installs all of it on every machine I use: MacBook, NixOS desktop, agent
+sandbox VM, throwaway guests, Ubuntu boxes.
 
-Home-manager symlinks the files in this repo into `$HOME`, pointing at
-the live checkout. Editing `.zshrc` here changes the shell in the next
-prompt, no rebuild. A rebuild is only for packages and system
-settings.
+Home-manager symlinks the files here into `$HOME`. The links point at the
+checkout, not the nix store, so editing `.zshrc` takes effect in the next
+shell without a rebuild. Rebuild only for packages and system settings.
 
 ## Install
 
-One line per platform. It installs nix if missing, clones the repo to
-`~/.dotfiles` (home-manager's links point there, so the path is not
-optional) and does the first switch.
-
-MacBook, via nix-darwin:
+Installs nix if missing, clones to `~/.dotfiles` (the links depend on that
+path), runs the first switch.
 
 ```sh
-curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- mac
+i=https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh
+curl -L $i | sh -s -- mac            # MacBook, nix-darwin
+curl -L $i | sh -s -- iso <host>     # fresh NixOS from the installer ISO
+curl -L $i | sh -s -- nixos <host>   # NixOS already running
+curl -L $i | sh -s -- standalone     # Ubuntu and friends, home-manager only
 ```
 
-Fresh NixOS guest booted from the installer ISO. disko prints the
-disks it is about to wipe and waits for a typed `yes`. Hosts: `vm`,
-`agents`, `desktop-vm`.
+Hosts: `agents`, `desktop-vm`, `vm`, and `container` (nixos only). `iso`
+wipes two disks after a typed `yes` and leaves no checkout, so run
+`nixos <host>` after first boot. `standalone` leaves the distro in charge
+of the system and gives the user the same tools a NixOS host has.
 
-```sh
-curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- iso vm
-```
-
-NixOS that already boots, moved onto this repo's configuration. Hosts:
-`agents`, `desktop-vm`, `vm`, `container`.
-
-```sh
-curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- nixos agents
-```
-
-Ubuntu and friends. The distro keeps the system, nix gets the user
-environment and the same tools a NixOS host has.
-
-```sh
-curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- standalone
-```
-
-The same install driven from another machine over ssh, onto whatever
-the target booted (ISO, cloud image, an old NixOS):
+Same install from another machine over ssh:
 
 ```sh
 nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
 ```
 
-After an `iso` install, the host has no checkout yet. Boot it and run
-the `nixos <host>` line above to clone one.
+## Daily use
 
-## Day to day
-
-`dots` picks the right rebuild command for the machine it runs on,
-`darwin-rebuild`, `nixos-rebuild` or `home-manager`, so I never have
-to remember which.
-
-Build this machine's target and switch onto it:
+`dots` wraps `darwin-rebuild`, `nixos-rebuild`, and `home-manager`, picking
+the one that fits the machine.
 
 ```sh
-dots rebuild
+dots rebuild         # build this machine's target, switch
+dots upgrade         # git pull, bump flake.lock, rebuild
+dots status          # host, drift from origin, nixpkgs pin age
+dots list            # flake targets, * marks this machine
+dots set desktop-vm  # pin host when autodetect is wrong; `unset` reverts
 ```
 
-Pull the repo, bump `flake.lock`, then rebuild:
+`.zshrc` runs `dots warn` at startup: one line if the checkout is behind
+origin or the nixpkgs pin is older than two weeks.
 
-```sh
-dots upgrade
-```
-
-Where the machine stands: resolved host, how far the checkout drifted
-from origin, how old the nixpkgs pin is.
-
-```sh
-dots status
-```
-
-Every buildable target in the flake, with `*` on this machine's:
-
-```sh
-dots list
-```
-
-Pin the host when autodetect guesses wrong (`dots unset` returns to
-autodetect):
-
-```sh
-dots set desktop-vm
-```
-
-`.zshrc` runs `dots warn` at shell start, so a checkout that fell
-behind or a pin older than two weeks says so on its own instead of
-waiting to be asked. Rest of the commands: `dots help`.
-
-## What is here
+## Layout
 
 ```
-.nix/          the flake: one output per machine (see .nix/README.md)
-install.sh     first switch, one section per platform, readable as the manual
+.nix/          the flake, one output per host. Has its own README
+install.sh     first switch, one function per platform
 .zshrc         zsh: history, keybinds, aliases, prompt, plugin hooks
-.zshenv        environment for non-interactive shells
-.tmux.conf     tmux; plugins come from nixpkgs, no tpm
-.vimrc         plain vim, for machines that only have vim
-.gitconfig     git identity, gpg signing, machine-local include
-Brewfile       mac packages homebrew owns rather than nix
-.config/       nvim (kickstart-based), ghostty, sway + waybar + fuzzel + mako,
-               yabai + skhd + karabiner on the mac, yazi, mc, mpv, qalculate
-.claude/       Claude Code: CLAUDE.md, commands, agents, skills
+.zshenv        env for non-interactive shells
+.zprofile      homebrew on PATH (mac)
+.tmux.conf     tmux, plugins from nixpkgs, no tpm
+.vimrc         plain vim for machines that only have vim
+.gitconfig     identity, gpg signing, machine-local include
+.gnupg/        gpg and gpg-agent config
+Brewfile       mac packages homebrew owns instead of nix
+.config/       nvim (kickstart-based), ghostty, yazi, mc, mpv, qalculate,
+               sway + waybar + fuzzel + mako (linux),
+               yabai + skhd + karabiner + linearmouse (mac)
+.claude/       Claude Code: CLAUDE.md, skills
 .codex/        Codex: AGENTS.md, skills
-.agents/       shared agent instructions and skills both of the above link to
+.agents/       shared agent instructions and skills; .claude and .codex link here
 .doom.d/       doom emacs
-.scripts/      dots, the agent jails, small utilities
+.scripts/      dots, agent-jail, small utilities
 ```
 
-The nix side has its own README: layers, what every host composes, and
-the reasoning behind each choice.
+## Agent jail
 
-## Agent jails
-
-`agent-jail` runs Claude Code or Codex in a Docker container that
-mounts the project directory and nothing else of the host. The agent
-installs and authenticates inside the container, so the real
-`~/.claude`, `~/.codex` and the macOS Keychain never appear in it.
-
-Claude Code, from any project directory:
+`agent-jail` runs Claude Code or Codex in a Docker container. Only the
+current project directory is mounted, as `/work`. The agent installs and
+logs in inside the container, so the host's `~/.claude`, `~/.codex`, and
+Keychain never appear in it.
 
 ```sh
-aj
-```
-
-Codex instead:
-
-```sh
-aj --codex
+aj          # Claude Code
+aj --codex  # Codex
 ```
 
 Both run with their own permission prompts off. The container is the
-sandbox, which also means `/work` is read-write and network egress is
-open, so point it at repos under version control.
-`.scripts/agent-jail/README.md` has the rest.
+sandbox, so `/work` is writable and network is open. Use it on repos under
+version control. Details in `.scripts/agent-jail/README.md`.
 
-## First switch on a machine with older dotfiles
+## Migrating from old dotfiles
 
-Hand-made or stow symlinks collide with home-manager's. The flake sets
-`backupFileExtension = "hm-bak"`, so they get renamed aside instead of
-failing the activation. What is left over is dangling symlinks rather
-than data, worth a look before deleting:
+Existing symlinks (hand-made, stow) collide with home-manager's. The flake
+sets `backupFileExtension = "hm-bak"`, so activation renames them instead of
+failing. Leftovers are dangling links, not data. Check, then delete:
 
 ```sh
 find ~ ~/.config ~/.claude ~/.codex ~/.gnupg -maxdepth 1 -name '*.hm-bak'
 ```
 
-To confirm a link landed:
+A link is correct when it resolves to the checkout through one store path:
 
 ```sh
-readlink -f ~/.zshrc
+readlink -f ~/.zshrc   # ~/.dotfiles/.zshrc
 ```
-
-It should resolve to `~/.dotfiles/.zshrc` through one store path. That
-indirection is how `mkOutOfStoreSymlink` works.
 
 ## License
 
