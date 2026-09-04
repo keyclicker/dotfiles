@@ -27,6 +27,8 @@ usage: dots <command> [args]
   list                   flake targets; * marks this machine's
   rebuild [host] [args]  build + switch this machine (darwin/nixos/home auto)
   upgrade [host] [args]  pull repo, bump flake.lock, rebuild
+  image <target> [dest]  build the prebuilt image of a generic guest (vm,
+                         container); copy its files to dest (host:dir)
   set [host]             pin default host for rebuilds; bare \`set\` shows it
   unset                  back to hostname autodetect
   help                   this text
@@ -204,6 +206,24 @@ cmd_upgrade() {
   cmd_rebuild "$@"
 }
 
+# Build a generic guest's image (flake packages.<target>-image, x86_64
+# only) and ship it: the hypervisor imports the files instead of
+# running the installer. Import commands: .nix/README.md.
+cmd_image() {
+  case "${1:-}" in
+    vm|container) target="$1" ;;
+    *) usage >&2; exit 1 ;;
+  esac
+  out="$(nix build --no-link --print-out-paths "$flake#$target-image")"
+  ls -lLh "$out"
+  if [ "$#" -ge 2 ]; then
+    # -L copies what the linkFarm symlinks point at, under the link
+    # names; qcow2 needs no sparse handling, the format keeps the
+    # file at its content size.
+    rsync -L --info=progress2 "$out"/* "$2"
+  fi
+}
+
 # Pin the flake host used by rebuild/upgrade.
 cmd_set() {
   if [ "$#" -eq 0 ]; then
@@ -237,7 +257,7 @@ cmd="${1:-help}"
 if [ "$#" -gt 0 ]; then shift; fi
 case "$cmd" in
   help|-h|--help) usage ;;
-  status|list|warn|rebuild|upgrade|set|unset)
+  status|list|warn|rebuild|upgrade|image|set|unset)
     "cmd_$cmd" "$@" ;;
   *) usage >&2; exit 1 ;;
 esac

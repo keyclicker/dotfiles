@@ -14,7 +14,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 
 ```
 .nix/
-├── flake.nix                # inputs + one output per host leaf
+├── flake.nix                # inputs, one output per host leaf, the
+│                            # guest image packages
 │
 ├── option-lan.nix           # local.lan.* vocabulary: modules list LAN-only
 │                            # ports here; the one firewall write lives
@@ -122,6 +123,13 @@ home-manager needs `pkgs` for a fixed system, so identity-less home
 leaves are instantiated per architecture and the caller (`dots`,
 `agent-jail`) picks its own.
 
+Images (`packages.x86_64-linux`, built by `dots image <target>`):
+
+| package           | from        | files                                             |
+|-------------------|-------------|---------------------------------------------------|
+| `vm-image`        | `vm`        | `main.qcow2` + `swap.qcow2`, disko's build of `hardware-vm.nix` |
+| `container-image` | `container` | `rootfs.tar.xz` + `metadata.tar.xz` (incus), from `lxc-container.nix` |
+
 ## Design
 
 - **Home-manager owns the dotfile symlinks**: `home-dotfiles.nix`
@@ -147,6 +155,14 @@ leaves are instantiated per architecture and the caller (`dots`,
   an image or a `nixos-anywhere` reinstall all boot the same file.
   Every guest gets two disks: system and an encrypted swap disk
   (`nofail`, so a single-disk boot still comes up).
+- **Generic guests spawn from images**: the same disko attrset that
+  installs `vm` from the ISO formats two blank qcow2 files in a build
+  VM (`system.build.diskoImages`), so the image and an `iso vm`
+  install are the same system on the same partitions; `container`'s
+  rootfs tarball comes from the `lxc-container.nix` already in its
+  stack. `flake.nix` exposes them as packages, `dots image` builds and
+  ships them, the hypervisor imports once and clones. The image is a
+  starting point: instances keep taking changes with `dots rebuild`.
 - **The desktop mirrors the mac**: `host-desktop-vm.nix` composes what
   `host-mac.nix` does (common, desktop, agents, ollama) plus incus,
   with `module-desktop-linux.nix` standing in for yabai/skhd/karabiner and
@@ -211,7 +227,6 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 - a bare-metal NixOS desktop: `host-<name>.nix` composing the
   desktop modules on its own `hardware-<name>.nix`
-- prebuilt images for `vm` / `container` (#32)
 
 ## Usage
 
@@ -241,7 +256,7 @@ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 # the checkout home-manager links into); UTM on the mac: desktop-utm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 
-# generic guests (`iso vm` above first, then switch)
+# generic guests (from the image, see below, or `iso vm` above; then switch)
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
 
@@ -252,6 +267,66 @@ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@standalone-x86_64-linux
 
 The flake is addressed as `~/.dotfiles/.nix` directly; the old `~/.nix`
 symlink is no longer needed (but harmless if kept).
+
+## Guest images
+
+`vm` and `container` spawn from prebuilt images: import once, clone
+per instance, boot. No installer. Built on any x86_64 nix machine
+(the agents VM does), shipped with rsync:
+
+```sh
+dots image vm pve:/root/images/          # main.qcow2 + swap.qcow2
+dots image container pve:/root/images/   # rootfs.tar.xz + metadata.tar.xz
+```
+
+Proxmox VM: a template from the two disks, clones from the template.
+UEFI without pre-enrolled Secure Boot keys (systemd-boot is unsigned),
+virtio-scsi so the disks come up as sda/sdb (`hardware-vm.nix`),
+serial console and guest agent as `platform-vm.nix` expects:
+
+```sh
+qm create 9000 --name nixos-vm --ostype l26 --machine q35 --bios ovmf \
+  --efidisk0 local-zfs:1,efitype=4m,pre-enrolled-keys=0 \
+  --scsihw virtio-scsi-single --agent 1 --serial0 socket \
+  --net0 virtio,bridge=vmbr0 --cores 2 --memory 4096
+qm set 9000 --scsi0 local-zfs:0,import-from=/root/images/main.qcow2,discard=on
+qm set 9000 --scsi1 local-zfs:0,import-from=/root/images/swap.qcow2,discard=on,backup=0
+qm set 9000 --boot order=scsi0
+qm template 9000
+
+qm clone 9000 101 --name box
+qm disk resize 101 scsi0 32G   # optional; the root grows into it on boot
+qm start 101
+```
+
+Proxmox sends no hostname, so the clone boots as `localhost`:
+`hostnamectl set-hostname box` once, it persists (`platform-vm.nix`).
+Then `install.sh nixos vm` for the checkout home-manager links into.
+
+Proxmox CT: the rootfs tarball is the template. `--ostype nixos` has
+Proxmox write hostname and network the NixOS way; `nesting=1` is what
+docker inside needs (`module-incus.nix` sets the same for incus CTs):
+
+```sh
+cp /root/images/rootfs.tar.xz /var/lib/vz/template/cache/nixos-container.tar.xz
+pct create 201 local:vztmpl/nixos-container.tar.xz --ostype nixos \
+  --hostname box --unprivileged 1 --features nesting=1 \
+  --net0 name=eth0,bridge=vmbr0,ip=dhcp --rootfs local-zfs:8 \
+  --cores 2 --memory 2048
+pct start 201
+```
+
+incus (on a `vm` instance or anywhere): both tarballs make one image,
+the instance name becomes the hostname (`platform-container.nix`):
+
+```sh
+incus image import metadata.tar.xz rootfs.tar.xz --alias nixos-container
+incus launch nixos-container box
+```
+
+After a flake change: `dots image` again, import again; running
+instances take the change with `dots rebuild`, the image is only where
+they start.
 
 ## First switch on an existing machine
 

@@ -42,6 +42,14 @@ wipes two disks after a typed `yes` and leaves no checkout, so run
 `nixos <host>` after first boot. `standalone` leaves the distro in charge
 of the system and gives the user the same tools a NixOS host has.
 
+Generic guests (`vm`, `container`) also come as prebuilt images:
+import once on Proxmox or incus, clone, boot, no installer. Built on
+any x86_64 nix machine, import flow in `.nix/README.md`:
+
+```sh
+dots image vm pve:/root/images/
+```
+
 Same install from another machine over ssh:
 
 ```sh
@@ -59,6 +67,7 @@ dots upgrade         # git pull, bump flake.lock, rebuild
 dots status          # host, drift from origin, nixpkgs pin age
 dots list            # flake targets, * marks this machine
 dots set desktop-vm  # pin host when autodetect is wrong; `unset` reverts
+dots image vm pve:/root/images/   # prebuilt guest image, shipped to a host
 ```
 
 `.zshrc` runs `dots warn` at startup: one line if the checkout is behind

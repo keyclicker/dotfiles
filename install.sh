@@ -10,6 +10,10 @@
 #   nixos <host>      NixOS already running: agents, desktop-vm, vm, container
 #   standalone        Ubuntu and friends (home-manager)
 #
+# Generic guests (vm, container) also come as prebuilt images, no
+# installer: `dots image <target>` on a nix machine, import flow in
+# .nix/README.md; `nixos <host>` afterwards for the checkout.
+#
 # The configs enable flakes themselves; only the commands that run
 # before the first switch ask for them by hand.
 set -eu

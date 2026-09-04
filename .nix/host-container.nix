@@ -1,6 +1,8 @@
 # Generic container instance: no identity of its own — the name comes
 # from incus / Proxmox (platform-container.nix). Spawn it as many
-# times as needed.
+# times as needed from the prebuilt image (`dots image container`,
+# import flow in README.md); then `install.sh nixos container` for the
+# checkout home-manager links into.
 { ... }:
 
 {
