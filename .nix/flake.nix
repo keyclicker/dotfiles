@@ -17,14 +17,14 @@
   };
 
   outputs =
-    inputs@{
-      self,
+    {
       nixpkgs,
       nixpkgs-darwin,
       nix-darwin,
       home-manager,
       disko,
       nix-flatpak,
+      ...
     }:
     let
       # Standalone home-manager outputs carry no machine identity, but
@@ -92,7 +92,6 @@
               users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
-          { system.configurationRevision = self.rev or self.dirtyRev or null; }
         ];
       };
 
