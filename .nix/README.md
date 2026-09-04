@@ -211,7 +211,6 @@ leaves are instantiated per architecture and the caller (`dots`,
 
 - a bare-metal NixOS desktop: `host-<name>.nix` composing the
   desktop modules on its own `hardware-<name>.nix`
-- prebuilt images for `vm` / `container` (#32)
 
 ## Usage
 
@@ -227,6 +226,9 @@ curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh 
 # the same from another machine, onto whatever the target booted (ISO,
 # cloud image, old NixOS)
 nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
+
+# build both generic guest artifacts; paths print as each build finishes
+prebuild
 
 # any machine (wraps the right rebuild command; `dots help` for more)
 dots rebuild
@@ -249,6 +251,41 @@ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
 # appends this machine's architecture; by hand:
 home-manager switch --flake ~/.dotfiles/.nix#keyclicker@standalone-x86_64-linux
 ```
+
+## Prebuilt Proxmox guests
+
+`prebuild [output-directory]` builds both generic targets. Default output is
+`~/.dotfiles/prebuilt`, with one stable result link per target. Copy the file
+paths printed by the script to the Proxmox node.
+
+Restore the VM image under a free template VMID, assign a unique MAC, then mark
+it as a template and clone it. The image uses OVMF and boots without
+cloud-init.
+
+```sh
+qmrestore <vm.vma.zst> 9000 --storage <storage> --unique 1
+qm template 9000
+qm clone 9000 <vmid> --name <hostname> --full 1
+qm start <vmid>
+```
+
+For a container, copy the tarball into Proxmox's local template cache. Create
+one stopped container from it, turn that into a template, then clone it.
+
+```sh
+scp <container.tar.xz> root@<proxmox>:/var/lib/vz/template/cache/
+
+# on the Proxmox node
+pct create 9001 local:vztmpl/<container.tar.xz> --ostype unmanaged \
+  --storage <storage> --unprivileged 1 --features nesting=1,keyctl=1 \
+  --net0 name=eth0,bridge=vmbr0,ip=dhcp,type=veth
+pct template 9001
+pct clone 9001 <ctid> --hostname <hostname> --full 1
+pct start <ctid>
+```
+
+Both targets carry the configured SSH key. Clone the repo after first login so
+home-manager's dotfile links resolve, then use `dots rebuild` normally.
 
 The flake is addressed as `~/.dotfiles/.nix` directly; the old `~/.nix`
 symlink is no longer needed (but harmless if kept).

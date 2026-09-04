@@ -18,6 +18,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       nix-darwin,
       home-manager,
@@ -164,6 +165,22 @@
             };
           }
         ];
+      };
+
+      # Portable guest artifacts. `.scripts/prebuild` gives each one a
+      # stable result link and prints the file ready to copy to Proxmox.
+      packages.x86_64-linux = {
+        vm = self.nixosConfigurations.vm.config.system.build.images.proxmox;
+
+        # platform-container.nix already imports the upstream LXC image
+        # module, so its primary image is the reusable rootfs tarball.
+        container =
+          let
+            config = self.nixosConfigurations.container.config;
+          in
+          nixpkgs.lib.recursiveUpdate config.system.build.image {
+            passthru.filePath = config.image.filePath;
+          };
       };
 
       homeConfigurations =

@@ -1,0 +1,16 @@
+#!/bin/sh
+# Build the generic VM and container images, leaving stable result links.
+set -eu
+
+repo="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+flake="$repo/.nix"
+output="${1:-$repo/prebuilt}"
+
+mkdir -p "$output"
+
+for target in vm container; do
+  link="$output/$target"
+  nix build "$flake#$target" --out-link "$link"
+  file="$(nix eval --raw "$flake#$target.passthru.filePath")"
+  printf '%s\n' "$link/$file"
+done
