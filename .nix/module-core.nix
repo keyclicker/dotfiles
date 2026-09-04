@@ -58,6 +58,7 @@
     xz
 
     # Shell tools
+    fastfetch
     fd
     rsync
     wget
