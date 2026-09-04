@@ -16,7 +16,10 @@
     wants = [ "network-online.target" ];
     path = [
       pkgs.bash
+      pkgs.gcc
+      pkgs.gnumake
       pkgs.nodejs
+      pkgs.python3
     ];
     serviceConfig = {
       Type = "simple";
