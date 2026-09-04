@@ -122,6 +122,11 @@ standalone() {
   zsh="$HOME/.nix-profile/bin/zsh"
   grep -qx "$zsh" /etc/shells || echo "$zsh" | sudo tee -a /etc/shells
   sudo chsh -s "$zsh" "$USER"
+
+  # The nix store gc is a home-manager user timer (home-standalone.nix);
+  # user timers only tick while a user systemd instance runs. Linger
+  # starts it at boot instead of at first login.
+  sudo loginctl enable-linger "$USER"
 }
 
 # ==========================================================
