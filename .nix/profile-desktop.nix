@@ -1,4 +1,4 @@
-# Shared by desktops (mac + future NixOS desktop).
+# Shared by desktops (mac + the NixOS desktop leaves).
 { pkgs, ... }:
 
 {

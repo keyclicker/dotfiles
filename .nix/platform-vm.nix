@@ -21,7 +21,7 @@
     # One NIC name on every guest regardless of hypervisor PCI
     # layout (Proxmox: ens18, incus: enp5s0, ...): net.ifnames=0
     # restores kernel eth0 — the same name containers get for their
-    # veth, and the default lan.nix opens LAN-only ports on. Sane
+    # veth, and the default option-lan.nix opens LAN-only ports on. Sane
     # for single-NIC guests only; with several NICs the kernel
     # order is nondeterministic.
     usePredictableInterfaceNames = false;
