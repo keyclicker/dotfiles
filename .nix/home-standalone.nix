@@ -40,6 +40,8 @@ in
 
     # The distro manages its own system, but nothing there collects
     # the nix store, so this timer is the only gc these hosts get.
+    # A user timer needs the user's systemd instance up: install.sh
+    # enables linger so it runs from boot, not from the first login.
     gc = {
       automatic = true;
       dates = "weekly";
