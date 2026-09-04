@@ -76,12 +76,13 @@ in
     ".config/mpv/input.conf".source = link ".config/mpv/input.conf";
     ".config/mpv/mpv.conf".source = link ".config/mpv/mpv.conf";
     ".config/qalculate".source = link ".config/qalculate";
+
+    # per-file: ~/.gnupg holds keys and must stay 700
+    ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
   }
   // lib.optionalAttrs isDarwin {
     # brew shellenv
     ".zprofile".source = link ".zprofile";
-    # per-file: ~/.gnupg holds keys and must stay 700
-    ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
     # pinentry-mac path makes this darwin-only
     ".gnupg/gpg-agent.conf".source = link ".gnupg/gpg-agent.conf";
 
