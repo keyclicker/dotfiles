@@ -1,0 +1,31 @@
+#!/bin/sh
+# tmux-attach — ghostty's `command`: every window lands in one tmux group.
+#
+# Windows share the "main" session group (new-session -t): same windows,
+# own current window per terminal. A grouped session dies on detach unless
+# it is the group's last one (destroy-unattached keep-last, .tmux.conf), so
+# closed windows leave nothing behind.
+#
+#   no group yet             new session "main"
+#   group has a detached     attach to it
+#   all attached elsewhere   new grouped session "main-N"
+set -eu
+
+group=main
+
+# The quick terminal is a qalc popup (.zshrc), not a tmux client.
+if [ -n "${GHOSTTY_QUICK_TERMINAL-}" ]; then
+  exec zsh -l
+fi
+
+detached=$(tmux list-sessions -F '#{session_group} #{session_attached} #{session_name}' 2>/dev/null |
+  awk -v g="$group" '$1 == g && $2 == 0 { print $3; exit }')
+if [ -n "$detached" ]; then
+  exec tmux attach-session -t "=$detached"
+fi
+
+if tmux list-sessions -F '#{session_group}' 2>/dev/null | grep -qx "$group"; then
+  exec tmux new-session -t "$group"
+fi
+
+exec tmux new-session -s "$group" -t "$group"

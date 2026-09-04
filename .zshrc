@@ -237,6 +237,12 @@ if [[ -r ~/.config/zsh/plugins.zsh ]]; then
   HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
 fi
 
+# Ghostty only injects its shell integration into the process it spawns,
+# and that is tmux now (.scripts/tmux-attach); load it by hand.
+if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
+  source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+fi
+
 # opencode
 export PATH=/Users/keyclicker/.opencode/bin:$PATH
 
