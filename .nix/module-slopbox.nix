@@ -5,15 +5,15 @@
   # The web UI stays LAN-only.
   local.lan.allowedTCPPorts = [ 3773 ];
 
+  # Runs as keyclicker so the agents it spawns see the user's ~/.claude,
+  # ~/.codex and dotfiles. t3 resolves the environment for those from
+  # the user's login shell (`zsh -ilc`) itself, so the service PATH
+  # below is only what t3's own startup needs.
   systemd.services.t3 = {
     description = "T3 Code server";
     wantedBy = [ "multi-user.target" ];
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
-    environment = {
-      HOME = "/home/keyclicker";
-      T3CODE_HOME = "/var/lib/t3";
-    };
     path = [
       pkgs.bash
       pkgs.nodejs
@@ -25,6 +25,7 @@
       WorkingDirectory = "/home/keyclicker";
       StateDirectory = "t3";
       StateDirectoryMode = "0700";
+      # --base-dir is StateDirectory: t3's own state stays out of $HOME.
       ExecStart = "${pkgs.writeShellScript "t3-server" ''
         exec ${pkgs.nodejs}/bin/npx --yes t3@latest \
           --mode web \
