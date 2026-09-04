@@ -167,6 +167,10 @@ leaves are instantiated per architecture and the caller (`dots`,
   of its modules' `environment.systemPackages` — read the imports in
   the host leaf, then each module is self-contained. No separate
   package data file to cross-reference.
+- **Agent CLI releases update outside Nix**: `claude`, `codex`, and `opencode`
+  work immediately from nixpkgs, including offline. Their
+  launchers check once a day for current npm releases, install those under
+  `~/.local/share/agent-clis`, and use the writable copy from then on.
 - **Options over firewall pokes**: modules that serve on the LAN set
   `local.lan.allowed*Ports`; `option-lan.nix` turns the list into the
   one `networking.firewall.interfaces.<lan>` write. Every guest's NIC
