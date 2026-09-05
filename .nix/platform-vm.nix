@@ -75,19 +75,28 @@
       # the kernel just skips it.
       "damon_reclaim.min_age=120000000"
 
-      # At most 512 MiB reclaimed per 1 s window. The default time
-      # quota (10 ms/s) would throttle far below that, so raise it to
-      # 100 ms/s; the size quota is then the binding limit.
+      # Bound reclaim by CPU time only: 100 ms per 1 s window (the
+      # default 10 ms/s barely gets anything done). No size quota. A
+      # size quota is charged per region *tried*, not per page freed,
+      # and the coldest regions by far are free memory, the balloon
+      # and slab: never accessed, nothing on the LRU to reclaim. With
+      # a size cap they eat the whole budget every second and real
+      # page cache gets the leftovers (measured: 385 GB tried for
+      # 11.7 GB freed). Walking those regions costs almost no time,
+      # so the time quota lands where it matters.
       "damon_reclaim.quota_ms=100"
-      "damon_reclaim.quota_sz=536870912"
+      "damon_reclaim.quota_sz=0"
       "damon_reclaim.quota_reset_interval_ms=1000"
 
       # Watermarks are permille of *free* (not available) memory:
-      # start reclaiming below 80% free, stop above 90%, and back off
-      # below 10% free where kswapd/direct reclaim take over.
+      # start reclaiming below 80% free, stop above 90%. No low mark:
+      # the default hands off to kswapd below some free level, but
+      # kswapd only keeps ~min_free_kbytes free, so DAMON would never
+      # climb back above that mark and stay off exactly when the
+      # guest is full.
       "damon_reclaim.wmarks_high=900"
       "damon_reclaim.wmarks_mid=800"
-      "damon_reclaim.wmarks_low=100"
+      "damon_reclaim.wmarks_low=0"
 
       "damon_reclaim.enabled=Y"
 
