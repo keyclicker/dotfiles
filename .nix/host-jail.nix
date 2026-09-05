@@ -19,7 +19,6 @@ in
   imports = [
     ./home-standalone.nix
     ./home-agents.nix
-    ./option-npm-globals.nix
   ];
 
   home.username = "keyclicker";

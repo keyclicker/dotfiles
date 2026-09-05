@@ -9,7 +9,6 @@
     ./module-nvim-minimal.nix
     ./profile-server.nix
     ./platform-container.nix
-    ./option-lan.nix
   ];
 
   # incus on the Proxmox box and Proxmox CTs are both x86_64.

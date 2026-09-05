@@ -15,7 +15,6 @@
     # the docker socket; lazydocker over ssh does for now.
     ./platform-vm.nix
     ./hardware-vm.nix
-    ./option-lan.nix
   ];
 
   # Proxmox / incus on the Proxmox box; UTM on the mac wants aarch64

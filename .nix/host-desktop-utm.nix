@@ -19,7 +19,6 @@
     ./module-ollama-desktop.nix
     ./platform-vm.nix
     ./hardware-vm.nix
-    ./option-lan.nix
   ];
 
   nixpkgs.hostPlatform = "aarch64-linux";

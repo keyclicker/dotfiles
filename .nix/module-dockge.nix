@@ -16,6 +16,8 @@
 { ... }:
 
 {
+  imports = [ ./option-lan.nix ];
+
   virtualisation.oci-containers = {
     backend = "docker";
 

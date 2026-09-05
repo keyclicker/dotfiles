@@ -63,7 +63,6 @@
               ./home-dotfiles.nix
               ./home-desktop-linux.nix
               ./home-agents.nix
-              ./option-npm-globals.nix
             ];
           };
         }
@@ -93,7 +92,6 @@
               users.keyclicker.imports = [
                 ./home-dotfiles.nix
                 ./home-agents.nix
-                ./option-npm-globals.nix
               ];
             };
           }
@@ -114,7 +112,6 @@
               users.keyclicker.imports = [
                 ./home-dotfiles.nix
                 ./home-agents.nix
-                ./option-npm-globals.nix
               ];
             };
           }

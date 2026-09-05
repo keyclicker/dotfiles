@@ -1,8 +1,9 @@
 # local.npmGlobals vocabulary: npm packages a host keeps installed
 # globally, the way module-apps-darwin.nix keeps casks and
 # module-apps-linux.nix keeps flatpaks: an "ensure installed" list,
-# nothing pinned. Home layers list packages here; the one npm write
-# lives below and stays inert until the list is set.
+# nothing pinned. A home layer imports this file and lists packages
+# here; the one npm write lives below and stays inert until the list
+# is set.
 #
 # How it works:
 #

@@ -1,5 +1,6 @@
-# local.lan vocabulary: modules list their LAN-only ports here
-# instead of touching the firewall themselves; the one dynamic-attr
+# local.lan vocabulary: a module that serves on the LAN imports this
+# file and lists its ports here instead of touching the firewall
+# itself; the one dynamic-attr
 # firewall write lives below and stays inert until a port is set.
 # Every guest's NIC is eth0 (VMs via net.ifnames=0 in platform-vm.nix,
 # container veths natively), so the default fits all virtual

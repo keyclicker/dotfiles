@@ -5,6 +5,8 @@
 { config, lib, ... }:
 
 {
+  imports = [ ./option-lan.nix ];
+
   virtualisation.incus = {
     enable = true;
     ui.enable = true;

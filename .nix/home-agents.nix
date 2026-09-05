@@ -7,6 +7,8 @@
 { ... }:
 
 {
+  imports = [ ./option-npm-globals.nix ];
+
   local.npmGlobals.packages = [
     "@anthropic-ai/claude-code"
     "@openai/codex"

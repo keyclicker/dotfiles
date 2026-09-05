@@ -13,7 +13,6 @@
     ./module-iperf.nix
     ./platform-vm.nix
     ./hardware-vm.nix
-    ./option-lan.nix
   ];
 
   networking.hostName = "agents";
