@@ -1,7 +1,7 @@
 # Disks of every QEMU guest, declared with disko. One attrset, two
 # uses: `disko` partitions and formats blank disks from it at install
 # time, and the running system renders its fileSystems and swapDevices
-# from it. Partitions are found by GPT label, so a clone, an image or
+# from it. Filesystems are found by label, so a clone, an image or
 # a nixos-anywhere reinstall all mount the same way; nothing is probed
 # per machine (what nixos-generate-config used to pin as UUIDs).
 #
@@ -27,7 +27,7 @@
             format = "vfat";
             extraArgs = [
               "-n"
-              "BOOT"
+              "ESP"
             ];
             mountpoint = "/boot";
             # FAT has no Unix permissions of its own. Keep systemd-boot's
@@ -77,8 +77,13 @@
     };
   };
 
-  # A clone given a bigger disk grows into it on first boot: the
-  # partition in the initrd, the filesystem via autoResize.
+  # Match nixpkgs' Proxmox image labels. A later `nixos-rebuild` of an
+  # image-built VM and a disko-installed VM then mount the same names.
+  fileSystems."/".device = lib.mkForce "/dev/disk/by-label/nixos";
+  fileSystems."/boot".device = lib.mkForce "/dev/disk/by-label/ESP";
+
+  # A clone given a bigger disk grows into it on first boot. The initrd
+  # grows the partition, then the filesystem follows through autoResize.
   boot.growPartition = true;
   fileSystems."/".autoResize = true;
 }
