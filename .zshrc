@@ -1,3 +1,11 @@
+# Every terminal lands in the "main" tmux session: ghostty windows, ssh
+# logins, IDE terminals. First one creates it, the rest attach (-A).
+# Skipped inside tmux, without a tty (t3's `zsh -ilc`, editor snapshots),
+# and in the quick terminal.
+if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] && command -v tmux >/dev/null; then
+  exec tmux new-session -A -s main
+fi
+
 # Quick terminal runs qalc instead of a shell
 if [[ -n $GHOSTTY_QUICK_TERMINAL ]] && command -v qalc >/dev/null; then
   cd
@@ -237,8 +245,8 @@ if [[ -r ~/.config/zsh/plugins.zsh ]]; then
   HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_TIMEOUT=0.25
 fi
 
-# Ghostty only injects its shell integration into the process it spawns,
-# and that is tmux now (.scripts/tmux-attach); load it by hand.
+# Ghostty only injects its shell integration into the shell it spawns, and
+# that one execs tmux (top of this file); shells inside tmux load it by hand.
 if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
   source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
 fi
