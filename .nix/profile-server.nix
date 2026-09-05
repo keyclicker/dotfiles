@@ -13,6 +13,8 @@
 { pkgs, ... }:
 
 {
+  imports = [ ./option-lan.nix ];
+
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
   services.tailscale.enable = true;

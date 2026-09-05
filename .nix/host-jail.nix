@@ -16,20 +16,23 @@ let
   pnpmHome = "${config.home.homeDirectory}/.local/share/pnpm";
 in
 {
-  imports = [ ./home-standalone.nix ];
+  imports = [
+    ./home-standalone.nix
+    ./home-agents.nix
+  ];
 
   home.username = "keyclicker";
   home.homeDirectory = "/home/keyclicker";
 
-  # Agent CLIs and the browser stack on top of standalone's common
-  # set (same import-as-function pattern as home-standalone.nix).
+  # The browser stack on top of standalone's common set (same
+  # import-as-function pattern as home-standalone.nix); the agent CLIs
+  # are npm globals, imported above.
   # Only libc, locales, and certificates are jail-specific: a real
   # host has a distro underneath, this has not. Per-project tools are
   # not declared here — they come from the project's own lockfile,
   # via `uvx` or `pnpm dlx`.
   home.packages =
-    (import ./module-agents.nix { inherit pkgs; }).environment.systemPackages
-    ++ (import ./module-browser.nix { inherit pkgs; }).environment.systemPackages
+    (import ./module-browser.nix { inherit pkgs; }).environment.systemPackages
     ++ (with pkgs; [
       # Base system the image has no distro to provide. procps is here
       # rather than in module-core.nix because its ps reads /proc, so on

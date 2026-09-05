@@ -17,14 +17,12 @@
     ./module-dev.nix
     ./profile-server.nix
     ./profile-desktop.nix
-    ./module-agents.nix
     ./module-incus.nix
     ./module-desktop-linux.nix
     ./module-apps-linux.nix
     ./module-ollama-desktop.nix
     ./platform-vm.nix
     ./hardware-vm.nix
-    ./option-lan.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

@@ -8,7 +8,6 @@
     ./module-common.nix
     ./module-dev.nix
     ./profile-desktop.nix
-    ./module-agents.nix
     ./module-desktop-darwin.nix
     ./module-ollama-desktop.nix
     ./module-apps-darwin.nix
