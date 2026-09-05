@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Use this skill before ANY git action or making ANY changes to the code.
+description: Read once per context, before the first edit or non-read-only git command. Skip if already read.
 ---
 
 ## Commits & comments

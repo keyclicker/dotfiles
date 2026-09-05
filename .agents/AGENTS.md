@@ -37,7 +37,9 @@ I never vibecode blindly.
 - We are working only in worktrees and feature branches, unless
   opposite explicitly asked by a user
 - Therefore, you MUST read `git-workflow` skill instructions before
-  making ANY edits, including running any non-read-only git commands.
+  your first edit or non-read-only git command in a context.
+- Read it once per context. Already read (earlier in the thread or in
+  a summary): do NOT re-read.
 - You MAY skip reading `git-workflow` skill, if you are
   making read-only actions.
 - You MUST NOT substitute built-in or plugin Git/PR workflows for it.
