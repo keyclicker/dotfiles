@@ -137,8 +137,9 @@ leaves are instantiated per architecture and the caller (`dots`,
   checkout — edits apply immediately, no rebuild. Every host links
   everything; only entries bound to one OS (macOS preferences, the
   sway session) check the platform. The repo must be checked out at
-  `~/.dotfiles` on every host; `install.sh nixos <host>` clones it,
-  which is why an `iso` install is followed by that step.
+  `~/.dotfiles` on every host: NixOS hosts clone it on the first boot
+  that finds it missing (`profile-server.nix`), `install.sh` clones it
+  on the mac and on foreign Linux.
 - **System vs home**: same layer names, different module systems.
   `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
   home-manager's — they cannot share files, so a layer that needs both
@@ -251,8 +252,7 @@ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 # agents VM
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
-# desktop VM (`iso desktop-vm` first, then `install.sh nixos desktop-vm` for
-# the checkout home-manager links into); UTM on the mac: desktop-utm
+# desktop VM (`iso desktop-vm` first); UTM on the mac: desktop-utm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 
 # generic guests (`iso vm` above first, then switch)

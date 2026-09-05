@@ -5,9 +5,9 @@
 # mac is host-desktop-utm.nix, the same stack on aarch64). Unlike
 # host-vm.nix, home-manager links the dotfiles (sway,
 # waybar, ghostty, ...), so the repo must be checked out at
-# ~/.dotfiles: `install.sh iso desktop-vm`, reboot, `install.sh nixos
-# desktop-vm`. A bare-metal desktop later is its own leaf composing
-# the same desktop modules on its own hardware.
+# ~/.dotfiles: `install.sh iso desktop-vm`, and the first boot clones
+# it (profile-server.nix). A bare-metal desktop later is its own leaf
+# composing the same desktop modules on its own hardware.
 { ... }:
 
 {

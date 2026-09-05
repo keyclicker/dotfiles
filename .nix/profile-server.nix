@@ -10,8 +10,11 @@
 # own tools and run as keyclicker on purpose (module-slopbox.nix), and
 # docker containers are remapped off host root where the platform
 # allows (platform-vm.nix).
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  home = config.users.users.keyclicker.home;
+in
 {
   imports = [ ./option-lan.nix ];
 
@@ -38,6 +41,29 @@
     openssh.authorizedKeys.keys = [
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIGovJeDnHrDiFm+8iu2ucNSBCifqQVycI93JRYeTyj0VAAAADXNzaDp5dWJpLW5hbm8= ssh:yubi-nano"
     ];
+  };
+
+  # home-dotfiles.nix links $HOME into ~/.dotfiles, and a fresh guest
+  # (iso, nixos-anywhere, an image) boots without a checkout: every
+  # link dangles until one exists. The boot that finds it missing
+  # clones it; the condition makes every later boot a no-op and
+  # leaves a checkout put there by hand (`install.sh nixos <host>`)
+  # alone. Retries while the network or GitHub is not there yet.
+  systemd.services.dotfiles-clone = {
+    description = "First-boot checkout of ~/.dotfiles";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    unitConfig.ConditionPathExists = "!${home}/.dotfiles";
+    path = [ pkgs.git ];
+    script = "git clone https://github.com/keyclicker/dotfiles.git ${home}/.dotfiles";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "keyclicker";
+      Group = "users";
+      Restart = "on-failure";
+      RestartSec = "30s";
+    };
   };
 
   security.sudo = {
