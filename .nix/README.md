@@ -35,7 +35,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-slopbox.nix       # t3 code: CLI wrapper + web server (3773, LAN)
+├── module-slopbox.nix       # t3 code web server (3773, LAN), exec'ing the
+│                            # npm global of home-slopbox.nix
 ├── module-iperf.nix         # iperf3 server (5201, all interfaces)
 ├── module-incus.nix         # incus + web UI (8443, LAN + tailscale),
 │                            # nftables, docker/incus forwarding truce
@@ -78,6 +79,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # settings.ini, cursor), xdg user dirs
 ├── home-agents.nix          # AI coding agent CLIs (claude, codex, opencode)
 │                            # as npm globals
+├── home-slopbox.nix         # t3 code's CLI as an npm global, the server's
+│                            # binary too
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
 │                            # environment, nothing system-level
 │
@@ -115,7 +118,7 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + iperf + vm + hardware; home dotfiles + agents |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + iperf + vm + hardware; home dotfiles + agents + slopbox |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
 | `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
@@ -179,8 +182,9 @@ leaves are instantiated per architecture and the caller (`dots`,
   guest's NIC is `eth0` (`platform-vm.nix` disables predictable names;
   container veths are `eth0` natively), so the default fits all guests.
 - **npm globals like casks**: the agent CLIs (claude, codex, opencode)
-  are not packaged, they are kept at the registry's latest.
-  `home-agents.nix` lists them in `local.npmGlobals.packages`;
+  and t3 are not packaged, they are kept at the registry's latest.
+  `home-agents.nix` and `home-slopbox.nix` list them in
+  `local.npmGlobals.packages`;
   `option-npm-globals.nix` points `~/.npmrc` at `~/.local` and runs one
   `npm install --global` per activation, so a rebuild is an update and
   nothing is pinned, like casks and flatpaks. State stays in `$HOME`:

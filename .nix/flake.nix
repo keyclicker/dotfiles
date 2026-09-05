@@ -112,6 +112,7 @@
               users.keyclicker.imports = [
                 ./home-dotfiles.nix
                 ./home-agents.nix
+                ./home-slopbox.nix
               ];
             };
           }
