@@ -111,8 +111,11 @@ You should notice that, and help user to help you understand him better.
 
 ## Host computer
 
-- You MUST always know what computer you are working on before executing any bash.
-- You SHOULD check the `hostname` and `uname -a`, when it's time.
+- You MUST know which computer you are on before running any bash.
+- Check once per context: run `hostname` and `uname -a` the first time
+  you need bash, then remember the answer.
+- If the host is already known in the current context (earlier check,
+  summary, system prompt), do NOT check again.
 
 ### Agents box (host `agents`)
 
