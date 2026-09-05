@@ -26,11 +26,6 @@ adjust-cursor-thickness = 2
 cursor-invert-fg-bg = false
 cursor-text = #0b0d0b
 
-# Every window joins the shared tmux group (.scripts/tmux-attach). Login
-# zsh: ghostty.app on macOS starts with the bare launchd PATH, so tmux
-# (brew/nix) only shows up after /etc/zprofile and ~/.zprofile ran.
-command = zsh -lc ~/.scripts/tmux-attach
-
 # keybind = super+e=toggle_window_decorations
 
 quick-terminal-position = center
