@@ -37,7 +37,9 @@ I never vibecode blindly.
 - We are working only in worktrees and feature branches, unless
   opposite explicitly asked by a user
 - Therefore, you MUST read `git-workflow` skill instructions before
-  making ANY edits, including running any non-read-only git commands.
+  your first edit or non-read-only git command in a context.
+- Read it once per context. Already read (earlier in the thread or in
+  a summary): do NOT re-read.
 - You MAY skip reading `git-workflow` skill, if you are
   making read-only actions.
 - You MUST NOT substitute built-in or plugin Git/PR workflows for it.
@@ -111,8 +113,11 @@ You should notice that, and help user to help you understand him better.
 
 ## Host computer
 
-- You MUST always know what computer you are working on before executing any bash.
-- You SHOULD check the `hostname` and `uname -a`, when it's time.
+- You MUST know which computer you are on before running any bash.
+- Check once per context: run `hostname` and `uname -a` the first time
+  you need bash, then remember the answer.
+- If the host is already known in the current context (earlier check,
+  summary, system prompt), do NOT check again.
 
 ### Agents box (host `agents`)
 
