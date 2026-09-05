@@ -191,8 +191,9 @@ leaves are instantiated per architecture and the caller (`dots`,
 - **Generic guests have no name**: `platform-vm.nix` and
   `platform-container.nix` set `networking.hostName = ""`, so the
   spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
-  `hostnamectl set-hostname` persists in `/etc/hostname`. Pet hosts
-  set their name and win.
+  `hostnamectl set-hostname` persists in `/etc/hostname` (the VM points
+  hostnamed at that file, not at the store copy NixOS defaults to, which
+  a nameless guest does not have). Pet hosts set their name and win.
 - **Generic guests stay small**: `vm` and `container` compose
   `module-core.nix` alone, the floor a box is administered with over
   ssh (git, tmux, neovim, mc, htop, compose). Every host somebody works
