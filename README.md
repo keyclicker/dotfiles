@@ -38,9 +38,10 @@ curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh 
 ```
 
 Hosts: `agents`, `desktop-vm`, `vm`, and `container` (nixos only). `iso`
-wipes two disks after a typed `yes` and leaves no checkout, so run
-`nixos <host>` after first boot. `standalone` leaves the distro in charge
-of the system and gives the user the same tools a NixOS host has.
+wipes two disks after a typed `yes`; the first boot clones the checkout.
+`nixos <host>` moves a NixOS that is already running onto this
+configuration. `standalone` leaves the distro in charge of the system
+and gives the user the same tools a NixOS host has.
 
 Same install from another machine over ssh:
 

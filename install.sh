@@ -80,8 +80,8 @@ iso() {
   # No root password: root stays locked, keyclicker logs in by key
   # (profile-server.nix).
   sudo nixos-install --no-root-passwd --flake "$remote#$1"
-  # A host with home-manager (agents, desktop-vm) links into ~/.dotfiles;
-  # after the first boot `install.sh nixos <host>` clones it there.
+  # Nothing is cloned here either: the first boot clones ~/.dotfiles,
+  # which home-manager's links point into (profile-server.nix).
 }
 
 # The same install from another machine, over ssh, onto whatever the
