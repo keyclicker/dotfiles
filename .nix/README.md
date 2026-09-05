@@ -22,7 +22,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # inert until a port is set
 ├── option-npm-globals.nix   # local.npmGlobals.* vocabulary (home-manager):
 │                            # npm packages kept at latest, casks/flatpaks
-│                            # style; ~/.npmrc + one install per activation
+│                            # style; one install per activation
 │
 ├── module-core.nix          # every machine: nix settings (flakes, gc,
 │                            # optimise), the CLI floor a box is administered
@@ -182,10 +182,12 @@ leaves are instantiated per architecture and the caller (`dots`,
 - **npm globals like casks**: the agent CLIs (claude, codex, opencode)
   and t3 are not packaged, they are kept at the registry's latest.
   `home-agents.nix` lists them in `local.npmGlobals.packages`;
-  `option-npm-globals.nix` points `~/.npmrc` at `~/.local` and runs one
-  `npm install --global` per activation, so a rebuild is an update and
-  nothing is pinned, like casks and flatpaks. State stays in `$HOME`:
-  `npm update -g` by hand works the same.
+  `option-npm-globals.nix` runs one `npm install --global` per
+  activation, so a rebuild is an update and nothing is pinned, like
+  casks and flatpaks. `~/.npmrc` is a dotfile on every host and points
+  the global prefix at `~/.local`, so `npm install -g` by hand, with
+  whatever node a box has, lands on the same PATH. State stays in
+  `$HOME`: `npm update -g` by hand works the same.
 - **Generic guests have no name**: `platform-vm.nix` and
   `platform-container.nix` set `networking.hostName = ""`, so the
   spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or

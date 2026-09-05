@@ -7,9 +7,10 @@
 #
 # How it works:
 #
-#   - ~/.npmrc points npm's global prefix at ~/.local, so bins land
-#     in ~/.local/bin (on PATH via .zshrc) and libraries in
-#     ~/.local/lib/node_modules. No PATH plumbing of its own.
+#   - ~/.npmrc (a dotfile, linked on every host) points npm's global
+#     prefix at ~/.local, so bins land in ~/.local/bin (on PATH via
+#     .zshrc) and libraries in ~/.local/lib/node_modules. No PATH
+#     plumbing of its own.
 #   - Every activation runs `npm install --global <list>`: missing
 #     packages get installed, present ones move to the registry's
 #     latest. A rebuild is an update; so is `npm update -g` by hand.
@@ -43,10 +44,6 @@ in
   config = lib.mkIf (cfg.packages != [ ]) {
     # The installed CLIs are `#!/usr/bin/env node` shims.
     home.packages = [ pkgs.nodejs ];
-
-    home.file.".npmrc".text = ''
-      prefix=${prefix}
-    '';
 
     # .zshrc puts ~/.local/bin on PATH for shells; this covers the
     # jail, whose agents get hm-session-vars.sh instead of a shell.
