@@ -85,9 +85,9 @@ Consequences worth knowing:
 - Per-project tooling (linters, formatters, test runners) is deliberately not
   in the package set: it belongs to the project's lockfile, and a second global
   copy only drifts from it. Reach for `uvx <tool>` or `pnpm dlx <tool>`.
-- `claude`, `codex`, and `opencode` come from `module-agents.nix` as
-  `npx ...@latest` wrappers, so the jail always runs the current release and
-  nothing needs updating by hand.
+- `claude`, `codex`, and `opencode` come from `home-agents.nix` as npm
+  globals (`option-npm-globals.nix`), installed at the registry's latest on
+  every activation, so a re-provision is an update and nothing is pinned.
 - `home-dotfiles.nix` links your dotfiles into `$HOME`, so the agent gets your
   nvim, zsh, git, and tmux config, `CLAUDE.md`, commands, agents, and skills.
   It deliberately does **not** manage `.claude/settings.json`, which is why the

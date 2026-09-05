@@ -8,7 +8,6 @@
     ./module-common.nix
     ./module-dev.nix
     ./profile-server.nix
-    ./module-agents.nix
     ./module-browser.nix
     ./module-slopbox.nix
     ./module-iperf.nix
@@ -27,11 +26,12 @@
   # No host-specific packages: the CLI floor comes from
   # module-core.nix, the interactive tools from module-common.nix,
   # dev toolchains from module-dev.nix, server basics (zsh, terminfo,
-  # docker, tailscale) from profile-server.nix, AI coding agents from
-  # module-agents.nix, chromium and agent-browser from
-  # module-browser.nix, t3 web server from module-slopbox.nix, iperf3
-  # server from module-iperf.nix, Proxmox/QEMU guest bits from
-  # platform-vm.nix.
+  # docker, tailscale) from profile-server.nix, chromium and
+  # agent-browser from module-browser.nix, t3 web server from
+  # module-slopbox.nix, iperf3 server from module-iperf.nix,
+  # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents
+  # are npm globals in the home layer (home-agents.nix, wired in
+  # flake.nix).
 
   system.stateVersion = "26.05";
 }

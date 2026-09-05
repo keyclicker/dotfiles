@@ -13,7 +13,6 @@
     ./module-dev.nix
     ./profile-server.nix
     ./profile-desktop.nix
-    ./module-agents.nix
     ./module-incus.nix
     ./module-desktop-linux.nix
     ./module-apps-linux.nix

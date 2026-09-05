@@ -19,6 +19,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── option-lan.nix           # local.lan.* vocabulary: modules list LAN-only
 │                            # ports here; the one firewall write lives
 │                            # inside and stays inert until a port is set
+├── option-npm-globals.nix   # local.npmGlobals.* vocabulary (home-manager):
+│                            # npm packages kept at latest, casks/flatpaks
+│                            # style; ~/.npmrc + one install per activation
 │
 ├── module-core.nix          # every machine: nix settings (flakes, gc,
 │                            # optimise), the CLI floor a box is administered
@@ -30,7 +33,6 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-nvim-minimal.nix  # generic guests: nvim flagged minimal (no LSP,
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
-├── module-agents.nix        # AI coding agent CLIs (claude, codex, opencode)
 ├── module-browser.nix       # headless chromium + agent-browser for agents
 ├── module-slopbox.nix       # t3 code: CLI wrapper + web server (3773, LAN)
 ├── module-iperf.nix         # iperf3 server (5201, all interfaces)
@@ -73,6 +75,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # ...); OS-bound entries check the platform
 ├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
 │                            # settings.ini, cursor), xdg user dirs
+├── home-agents.nix          # AI coding agent CLIs (claude, codex, opencode)
+│                            # as npm globals
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
 │                            # environment, nothing system-level
 │
@@ -96,7 +100,7 @@ a self-contained piece that imports nothing from the repo.
 
 | prefix      | role                                                          |
 |-------------|---------------------------------------------------------------|
-| `option-`   | `local.*` vocabulary and the central write it gates. Modules **set** the options, never import the file; the host pulls it in. |
+| `option-`   | `local.*` vocabulary and the central write it gates. Modules **set** the options, never import the file; the host pulls it in (home-side options: the host's home list in `flake.nix`). |
 | `module-`   | one software area each, finest slice, imports nothing         |
 | `profile-`  | machine role: what every server / desktop gets                |
 | `platform-` | substrate glue (VM, container); imports only nixpkgs profiles |
@@ -108,9 +112,9 @@ Outputs by leaf:
 
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
-| `mac`                            | `host-mac.nix`       | core + common + dev + desktop + agents + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + agents + browser + slopbox + iperf + vm + hardware + lan; home dotfiles |
-| `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + agents + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux |
+| `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + iperf + vm + hardware + lan; home dotfiles + agents |
+| `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware + lan; home dotfiles + desktop-linux + agents |
 | `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware + lan; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container + lan; home dotfiles       |
@@ -172,6 +176,13 @@ leaves are instantiated per architecture and the caller (`dots`,
   one `networking.firewall.interfaces.<lan>` write. Every guest's NIC
   is `eth0` (`platform-vm.nix` disables predictable names; container
   veths are `eth0` natively), so the default fits all guests.
+- **npm globals like casks**: the agent CLIs (claude, codex, opencode)
+  are not packaged, they are kept at the registry's latest.
+  `home-agents.nix` lists them in `local.npmGlobals.packages`;
+  `option-npm-globals.nix` points `~/.npmrc` at `~/.local` and runs one
+  `npm install --global` per activation, so a rebuild is an update and
+  nothing is pinned, like casks and flatpaks. State stays in `$HOME`:
+  `npm update -g` by hand works the same.
 - **Generic guests have no name**: `platform-vm.nix` and
   `platform-container.nix` set `networking.hostName = ""`, so the
   spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
