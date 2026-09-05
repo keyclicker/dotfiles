@@ -67,6 +67,15 @@
           };
         }
       ];
+
+      # Generic guests take local, out-of-repo configuration from
+      # /etc/nixos/local.nix when the machine has one: a port to open,
+      # a service, anything an image spawned N times must not carry.
+      # The path is outside the flake, so pure evaluation sees no file
+      # (pathExists is false, the list empty) and only `--impure`
+      # imports it; `dots rebuild` passes the flag when the file
+      # exists. Pets do not get this: their config is the repo.
+      localModules = nixpkgs.lib.optional (builtins.pathExists /etc/nixos/local.nix) /etc/nixos/local.nix;
     in
     {
       # Wiring only: one output per machine, each pointing at its
@@ -138,7 +147,8 @@
       };
 
       # Generic guests: one configuration, spawned as many times as
-      # needed, no pet identity (see the leaves).
+      # needed, no pet identity (see the leaves). Per-machine extras
+      # live in /etc/nixos/local.nix on the guest (localModules).
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
       nixosConfigurations."vm" = nixpkgs.lib.nixosSystem {
@@ -154,7 +164,8 @@
               users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
-        ];
+        ]
+        ++ localModules;
       };
 
       # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
@@ -170,7 +181,8 @@
               users.keyclicker.imports = [ ./home-dotfiles.nix ];
             };
           }
-        ];
+        ]
+        ++ localModules;
       };
 
       homeConfigurations =

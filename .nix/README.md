@@ -194,6 +194,14 @@ leaves are instantiated per architecture and the caller (`dots`,
   `hostnamectl set-hostname` persists in `/etc/hostname` (the VM points
   hostnamed at that file, not at the store copy NixOS defaults to, which
   a nameless guest does not have). Pet hosts set their name and win.
+- **Generic guests take a local patch**: a guest that needs one thing
+  the shared image must not carry (a port, a service, a name) puts it in
+  `/etc/nixos/local.nix`; `vm` and `container` import that file when it
+  exists (`localModules` in `flake.nix`). It is outside the flake, so
+  only an impure evaluation sees it: `dots rebuild` passes `--impure`
+  when the file is there, a bare `nixos-rebuild` needs the flag by hand
+  or the patch silently drops out. Pets do not import it: their config
+  is the repo.
 - **Generic guests stay small**: `vm` and `container` compose
   `module-core.nix` alone, the floor a box is administered with over
   ssh (git, tmux, neovim, mc, htop, compose). Every host somebody works
@@ -261,6 +269,8 @@ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 # generic guests (`iso vm` above first, then switch)
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#vm
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#container
+# with a local patch in /etc/nixos/local.nix (or `dots rebuild`, which adds the flag)
+sudo nixos-rebuild switch --impure --flake ~/.dotfiles/.nix#vm
 
 # foreign Linux (Ubuntu pi, VPS; user environment only). `dots rebuild`
 # appends this machine's architecture; by hand:

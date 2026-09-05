@@ -183,7 +183,11 @@ cmd_rebuild() {
   target="$(flake_target "$host")"
   case "$mode" in
     darwin) exec sudo darwin-rebuild switch --flake "$flake#$target" "$@" ;;
-    nixos)  exec sudo nixos-rebuild switch --flake "$flake#$target" "$@" ;;
+    nixos)
+      # generic guests import /etc/nixos/local.nix (flake.nix); the
+      # file is outside the flake, so only an impure eval sees it
+      if [ -e /etc/nixos/local.nix ]; then set -- --impure "$@"; fi
+      exec sudo nixos-rebuild switch --flake "$flake#$target" "$@" ;;
     home)
       # -b: back up files home-manager wants to replace on first switch.
       if command -v home-manager >/dev/null 2>&1; then
