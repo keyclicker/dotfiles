@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Cut AI tells from any writing. Must always apply.
+description: Cut AI tells from any writing. Applies to every message you write. Read once per context, never re-read.
 ---
 
 # Unslop
