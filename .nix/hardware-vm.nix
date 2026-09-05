@@ -1,6 +1,7 @@
-# Disks of every QEMU guest, declared with disko. One attrset, two
+# Disks of every QEMU guest, declared with disko. One attrset, three
 # uses: `disko` partitions and formats blank disks from it at install
-# time, and the running system renders its fileSystems and swapDevices
+# time, `dots image vm` does the same to blank image files in a build
+# VM, and the running system renders its fileSystems and swapDevices
 # from it. Partitions are found by GPT label, so a clone, an image or
 # a nixos-anywhere reinstall all mount the same way; nothing is probed
 # per machine (what nixos-generate-config used to pin as UUIDs).
@@ -76,6 +77,21 @@
       };
     };
   };
+
+  # The image build (flake.nix: vm-image): one qcow2 per disk above,
+  # sized here. qcow2 stays as small as its contents and every
+  # hypervisor imports it, so the virtual sizes cost nothing: the
+  # system disk holds the closure (3.6G today) with room to grow, the
+  # swap disk carries only its GPT and gets its key at boot. A guest
+  # wanting more grows into a resized system disk (below); swap is
+  # sized once, at the import.
+  disko.imageBuilder = {
+    # The default embeds networking.hostName, "" on generic guests.
+    name = "vm-image";
+    imageFormat = "qcow2";
+  };
+  disko.devices.disk.main.imageSize = "8G";
+  disko.devices.disk.swap.imageSize = "4G";
 
   # A clone given a bigger disk grows into it on first boot: the
   # partition in the initrd, the filesystem via autoResize.

@@ -10,7 +10,9 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    disko.url = "github:nix-community/disko";
+    # PR 1277 until it merges: master's image builder still hands a
+    # module tree to vmTools as the kernel, which nixpkgs now rejects.
+    disko.url = "github:nix-community/disko/pull/1277/head";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     # Declarative flathub apps for the desktop (module-apps-linux.nix).
     nix-flatpak.url = "github:gmodena/nix-flatpak/latest";
@@ -18,6 +20,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       nix-darwin,
       home-manager,
@@ -165,6 +168,31 @@
           }
         ];
       };
+
+      # Prebuilt guest images (#32): the files a hypervisor imports
+      # instead of running the installer. x86_64 like the guests;
+      # `dots image <target> [host:dir]` builds and ships one, the
+      # import flow is in README.md.
+      packages.x86_64-linux =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          vm = self.nixosConfigurations.vm.config;
+          container = self.nixosConfigurations.container.config;
+        in
+        {
+          # main.qcow2 + swap.qcow2: disko formats blank images as
+          # hardware-vm.nix says and installs the vm closure into them,
+          # in a build VM, so the result boots like an `iso vm` install.
+          vm-image = vm.system.build.diskoImages;
+
+          # rootfs.tar.xz (lxc-container.nix, already in the container's
+          # stack) + the incus metadata tarball next to it; Proxmox CTs
+          # take the rootfs alone.
+          container-image = pkgs.linkFarm "container-image" {
+            "rootfs.tar.xz" = "${container.system.build.tarball}/${container.image.filePath}";
+            "metadata.tar.xz" = "${container.system.build.metadata}/${container.image.filePath}";
+          };
+        };
 
       homeConfigurations =
         # Foreign Linux (Ubuntu pi, VPS, ...): distro system, nix user
