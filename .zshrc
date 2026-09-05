@@ -3,7 +3,14 @@
 # Skipped inside tmux, without a tty (t3's `zsh -ilc`, editor snapshots),
 # and in the quick terminal.
 if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] && command -v tmux >/dev/null; then
-  exec tmux new-session -A -s main
+  # Finder's "New Ghostty Tab Here" only sets the start dir. Turn it into
+  # a tmux window in main; when a client already shows main, this tab is
+  # redundant and closes.
+  if [[ $TERM_PROGRAM == ghostty && $PWD != $HOME ]] && tmux has-session -t '=main' 2>/dev/null; then
+    tmux new-window -t main -c "$PWD"
+    (( $(tmux display -p -t main '#{session_attached}') )) && exit
+  fi
+  exec tmux new-session -A -s main -c "$PWD"
 fi
 
 # Quick terminal runs qalc instead of a shell
