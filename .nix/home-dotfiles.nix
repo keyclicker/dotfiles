@@ -48,6 +48,7 @@ in
     ".zshrc".source = link ".zshrc";
     ".zshenv".source = link ".zshenv";
     ".gitconfig".source = link ".gitconfig";
+    ".npmrc".source = link ".npmrc";
     ".tmux.conf".source = link ".tmux.conf";
     ".vimrc".source = link ".vimrc";
     ".scripts".source = link ".scripts";
