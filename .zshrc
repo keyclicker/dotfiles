@@ -1,8 +1,12 @@
-# Every terminal lands in the "main" tmux session: ghostty windows, ssh
-# logins, IDE terminals. First one creates it, the rest attach (-A).
-# Skipped inside tmux, without a tty (t3's `zsh -ilc`, editor snapshots),
-# and in the quick terminal.
-if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] && command -v tmux >/dev/null; then
+# Ghostty windows and ssh logins land in the "main" tmux session: the
+# first one creates it, the rest attach (-A). Only those two: tmux dies
+# when clients of different heights share a session and a pane redraws
+# fullscreen (tmux/tmux#5268, open as of 3.7c). Autologin consoles
+# (80x24 tty1/ttyS0 on VMs) and IDE panes are exactly such clients, so
+# they get a bare shell. Also skipped inside tmux, without a tty (t3's
+# `zsh -ilc`, editor snapshots) and in the quick terminal.
+if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] \
+    && [[ -n $SSH_TTY || $TERM_PROGRAM == ghostty ]] && command -v tmux >/dev/null; then
   # Finder's "New Ghostty Tab Here" only sets the start dir: open a tmux
   # window there, then attach like any other tab. Exiting instead would
   # trip ghostty's "failed to launch" screen: on macOS any exit under
