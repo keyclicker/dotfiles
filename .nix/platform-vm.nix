@@ -1,10 +1,5 @@
 # Shared by NixOS VMs running under Proxmox/QEMU.
-{
-  config,
-  lib,
-  modulesPath,
-  ...
-}:
+{ lib, modulesPath, ... }:
 
 {
   imports = [
@@ -18,9 +13,11 @@
     # hands the hostname to whoever knows it: incus sends the instance
     # name in the DHCP lease (networkd applies it while no static name
     # exists); Proxmox, UTM and plain libvirt send nothing, so the
-    # guest boots as localhost until `hostnamectl set-hostname` names
-    # it (see the hostnamed override below). Pet hosts set their name
-    # and win.
+    # guest boots as localhost until /etc/nixos/local.nix names it
+    # (localModules in flake.nix). Not `hostnamectl`: NixOS points
+    # hostnamed at the store copy of this option, which a nameless
+    # guest does not have, so the static name has nowhere to land.
+    # Pet hosts set their name and win.
     hostName = lib.mkDefault "";
 
     # One NIC name on every guest regardless of hypervisor PCI
@@ -30,18 +27,6 @@
     # for single-NIC guests only; with several NICs the kernel
     # order is nondeterministic.
     usePredictableInterfaceNames = false;
-  };
-
-  # NixOS points hostnamed at /etc/static/hostname, the store copy of
-  # networking.hostName, so on a nameless guest `hostnamectl
-  # set-hostname` has nowhere to write: the file does not exist and
-  # its directory is the read-only store, so the name never lands
-  # anywhere and is gone at reboot. Point hostnamed at the real
-  # /etc/hostname instead: nothing else claims that path while
-  # hostName is "", and PID 1 reads it at boot, after switch-root
-  # too. Pet hosts keep the NixOS default, their declared name wins.
-  systemd.services.systemd-hostnamed.environment = lib.mkIf (config.networking.hostName == "") {
-    SYSTEMD_ETC_HOSTNAME = lib.mkForce "/etc/hostname";
   };
 
   systemd.network = {

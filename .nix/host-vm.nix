@@ -1,7 +1,7 @@
 # Generic VM instance: no identity of its own — the name comes from
-# DHCP or `hostnamectl` (platform-vm.nix). Spawn it on Proxmox, incus,
-# UTM, ... as many times as needed. Prebuilt images come later (#32);
-# until then `install.sh iso vm` from the installer ISO, then
+# DHCP or /etc/nixos/local.nix (platform-vm.nix). Spawn it on Proxmox,
+# incus, UTM, ... as many times as needed. Prebuilt images come later
+# (#32); until then `install.sh iso vm` from the installer ISO, then
 # `install.sh nixos vm` for the checkout home-manager links into.
 { ... }:
 
