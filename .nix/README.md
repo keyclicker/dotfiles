@@ -63,7 +63,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
 │                            # DHCP on eth0, systemd-boot, serial console,
-│                            # hostname from DHCP / hostnamectl, SPICE agent
+│                            # hostname from DHCP / local.nix, SPICE agent
 │                            # (graphical.target only)
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
@@ -190,10 +190,11 @@ leaves are instantiated per architecture and the caller (`dots`,
   `$HOME`: `npm update -g` by hand works the same.
 - **Generic guests have no name**: `platform-vm.nix` and
   `platform-container.nix` set `networking.hostName = ""`, so the
-  spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc) or
-  `hostnamectl set-hostname` persists in `/etc/hostname` (the VM points
-  hostnamed at that file, not at the store copy NixOS defaults to, which
-  a nameless guest does not have). Pet hosts set their name and win.
+  spawner's name sticks (incus via DHCP or lxc, Proxmox CT via lxc);
+  a guest nobody names boots as `localhost` until `/etc/nixos/local.nix`
+  sets `networking.hostName` (next bullet). `hostnamectl` is not a way:
+  NixOS points hostnamed at the store copy of the option, which a
+  nameless guest does not have. Pet hosts set their name and win.
 - **Generic guests take a local patch**: a guest that needs one thing
   the shared image must not carry (a port, a service, a name) puts it in
   `/etc/nixos/local.nix`; `vm` and `container` import that file when it
