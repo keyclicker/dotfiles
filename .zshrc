@@ -86,6 +86,7 @@ alias md="mkdir -p"
 
 alias ql="qlmanage -p"
 alias yt="yt-dlp"
+alias checkip="curl https://checkip.amazonaws.com" # public IP
 
 alias ff="ffmpeg -hide_banner -i"
 alias ffp="ffprobe -hide_banner"
