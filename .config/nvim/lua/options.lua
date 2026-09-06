@@ -29,6 +29,13 @@ vim.opt.showmode = false
 --  See `:help 'clipboard'`
 -- vim.opt.clipboard = 'unnamedplus'
 
+-- Over ssh there is no clipboard tool, and nvim's OSC 52 autodetect
+-- fails inside tmux (tmux answers the DA1/XTGETTCAP probes itself).
+-- Force the provider: tmux forwards OSC 52 to the host terminal.
+if vim.env.SSH_TTY then
+  vim.g.clipboard = 'osc52'
+end
+
 -- Enable break indent
 vim.opt.breakindent = true
 
