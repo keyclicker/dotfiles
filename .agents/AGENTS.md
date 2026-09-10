@@ -89,13 +89,12 @@ or cheaply reversible work.
 ## Model name (for Codex)
 
 - This section applies only to Codex.
-- Whenever you need to use your model name, read the `model` key from
-  `~/.codex/config.toml`. This includes answering which model you are and
-  writing Assisted-by trailers.
-- Re-read it every time. Do not reuse an earlier answer because model may
-  change between turns.
-- Never use generic names such as `GPT-5-based Codex` when configured model
-  name is available.
+- Whenever you need your model name, use the `codex-model` skill. This
+  includes identity questions, Assisted-by trailers, and GitHub attribution.
+- Run its local helper each time: the active model may change between turns.
+- This lookup does not require `openai-docs` or web research. Use session
+  metadata, not the default in `config.toml` or a model's self-description.
+- If the helper cannot verify the model, report it as unknown. Do not guess.
 
 ## Build-in memory
 
