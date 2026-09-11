@@ -6,12 +6,19 @@
 
 let
   t3 = "/home/keyclicker/.local/bin/t3";
+  # StateDirectory below: t3's own state stays out of $HOME.
+  baseDir = "/var/lib/t3";
 in
 {
   imports = [ ./option-lan.nix ];
 
   # The web UI stays LAN-only.
   local.lan.allowedTCPPorts = [ 3773 ];
+
+  # The CLI (`t3 auth pairing create`, `t3 project ...`) defaults to
+  # ~/.t3, a different store than the service reads, so tokens minted
+  # there are "invalid" to the server. Point it at the same dir.
+  environment.sessionVariables.T3CODE_HOME = baseDir;
 
   # Runs as keyclicker so the agents it spawns see the user's ~/.claude,
   # ~/.codex and dotfiles. t3 resolves the environment for those from
@@ -36,14 +43,13 @@ in
       WorkingDirectory = "/home/keyclicker";
       StateDirectory = "t3";
       StateDirectoryMode = "0700";
-      # --base-dir is StateDirectory: t3's own state stays out of $HOME.
       ExecStart = "${pkgs.writeShellScript "t3-server" ''
         exec ${t3} \
           --mode web \
           --host 0.0.0.0 \
           --port 3773 \
           --no-browser \
-          --base-dir /var/lib/t3
+          --base-dir ${baseDir}
       ''}";
       Restart = "on-failure";
       RestartSec = 5;
