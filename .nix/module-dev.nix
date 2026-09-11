@@ -8,6 +8,7 @@
   environment.systemPackages = with pkgs; [
     # Dependencies
     tree-sitter # nvim
+    unzip # nvim: mason unpacks zip-shipped tools (clangd, stylua) with it
 
     # Build
     cmake
