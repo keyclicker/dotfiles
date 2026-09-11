@@ -134,14 +134,9 @@ Please notify me, if anything is broken and needs nix config patch.
 
 #### HTML serving
 
-- When I ask for HTML, alternative designs, or a visual comparison, you
-  SHOULD generate an HTML file instead of only describing it in Markdown.
-- On the agents box, serve the result privately over Tailscale Serve.
-  Check `tailscale serve status` first and choose an unused path:
-  `tailscale serve --bg --set-path=/html/<task> <absolute-output-directory>`.
-- Serve only the generated HTML and its assets; use relative asset URLs.
-  Preserve existing routes and keep the result available after the turn.
-- Verify the served page loads and return its full clickable Tailscale URL.
+`~/public/` is served privately over Tailscale HTTPS on port `8444`.
+Put HTML and assets in `~/public/<task>/` and share the URL with that path.
+Get the base URL from `tailscale serve status`; serving is already configured.
 
 ### User's MacBook (host: `mac`)
 
