@@ -138,6 +138,12 @@ Please enjoy the abundance of packages and binaries in nix.
 
 Please notify me, if anything is broken and needs nix config patch.
 
+#### HTML serving
+
+`~/public/` is served privately over Tailscale HTTPS on port `8444`.
+Put HTML and assets directly in `~/public/` and share their URLs.
+Get the base URL from `tailscale serve status`; serving is already configured.
+
 ### User's MacBook (host: `mac`)
 
 This is my personal machine.
