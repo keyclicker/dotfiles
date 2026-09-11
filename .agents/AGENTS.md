@@ -84,14 +84,6 @@ or cheaply reversible work.
   transcription error is likely. Infer intended meaning from context when
   possible; otherwise ask a clarifying question.
 
-## Human is just a human (for Codex)
-
-- User is human and can make mistakes or use poor wording, that can be
-  misinterpreted.
-- Don't take request too literate, if literate reading seems wrong.
-- If request based on wrong assumptions - don't execute it, correct user.
-- It's better to ask question, than execute poorly interpreted request.
-
 ## Model name (for Codex)
 
 - This section applies only to Codex.
@@ -118,7 +110,7 @@ You should notice that, and help user to help you understand him better.
 
 ## Host computer
 
-- You MUST know which computer you are on before running any bash.
+- You MUST know which computer you are on before running any bash first time.
 - Check once per context: run `hostname` and `uname -a` the first time
   you need bash, then remember the answer.
 - If the host is already known in the current context (earlier check,
