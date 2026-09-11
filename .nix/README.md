@@ -37,6 +37,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-browser.nix       # headless chromium + agent-browser for agents
 ├── module-slopbox.nix       # t3 code web server (3773, LAN), exec'ing the
 │                            # npm global of home-agents.nix
+├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
+│                            # Python server + Jinja template in .scripts
 ├── module-iperf.nix         # iperf3 server (5201, all interfaces)
 ├── module-incus.nix         # incus + web UI (8443, LAN + tailscale),
 │                            # nftables, docker/incus forwarding truce
@@ -116,7 +118,7 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + iperf + vm + hardware; home dotfiles + agents |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + html-serving + iperf + vm + hardware; home dotfiles + agents |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
 | `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
