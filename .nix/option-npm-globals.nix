@@ -18,7 +18,8 @@
 #     `npm rm -g` and the CLIs' own self-updaters work as on any
 #     machine. Dropping a package from the list does not uninstall
 #     it; that is an `npm rm -g` by hand.
-#   - Offline, the install is a warning, not a failed switch.
+#   - Offline or stuck installs time out with a warning instead of
+#     failing the switch.
 {
   config,
   lib,
@@ -50,8 +51,10 @@ in
     home.sessionPath = [ "${prefix}/bin" ];
 
     home.activation.npmGlobals = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if ! run ${pkgs.nodejs}/bin/npm install --global ${lib.escapeShellArgs cfg.packages}; then
-        warnEcho "npm globals: install failed (offline?); retry: npm install -g ${toString cfg.packages}"
+      if ! run ${pkgs.coreutils}/bin/timeout --kill-after=10s 2m \
+        ${pkgs.nodejs}/bin/npm install --global --no-audit --no-fund \
+        ${lib.escapeShellArgs cfg.packages}; then
+        warnEcho "npm globals: install failed or timed out; retry: npm install -g ${toString cfg.packages}"
       fi
     '';
   };
