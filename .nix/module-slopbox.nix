@@ -1,4 +1,4 @@
-# T3 Code web server. The `t3` binary is the npm global that
+# T3 Code web server. The `t3` binary is the Bun global that
 # home-agents.nix keeps installed in the user's ~/.local/bin, so the
 # service waits for home-manager's activation on a first boot and
 # picks up whatever version the last rebuild left.

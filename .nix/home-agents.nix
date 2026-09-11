@@ -1,12 +1,12 @@
-# AI coding agent CLIs (claude, codex, opencode) and t3 code as npm
-# globals (option-npm-globals.nix): normally the current release,
-# updated on every rebuild, the way casks and flatpaks track upstream.
-# Every NixOS/darwin machine plus the jail; not the foreign Linux
-# hosts (host-standalone.nix). The t3 web server (module-slopbox.nix)
-# execs the same install, so one `npm install` serves both. Not to be
-# confused with host-agents.nix (the sandbox host that merely gets
-# this too).
-{ ... }:
+# Coding CLIs track latest on every rebuild. T3 uses Bun because npm's
+# peer resolver loops on its published Effect dependencies. Both installers
+# put their commands in ~/.local/bin; the T3 service uses that same binary.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [ ./option-npm-globals.nix ];
@@ -15,12 +15,23 @@
     "@anthropic-ai/claude-code"
     "@openai/codex"
     "opencode-ai"
-
-    # npm ignores dependency-local overrides. Keep T3 and its Effect
-    # runtime aligned until upstream publishes exact transitive pins:
-    # https://github.com/pingdotgg/t3code/issues/2667
-    "t3@0.0.40"
-    "effect@4.0.0-beta.103"
-    "@effect/platform-node-shared@4.0.0-beta.103"
   ];
+
+  programs.bun.enable = true;
+
+  # Bun reads this even when activation has no XDG_CONFIG_HOME.
+  home.file.".bunfig.toml".text = ''
+    [install]
+    globalBinDir = "${config.home.homeDirectory}/.local/bin"
+  '';
+
+  home.extraActivationPath = [ pkgs.bun ];
+
+  # Run after npm and home-file linking. Each installer has its own
+  # deadline so their combined runtime stays below activation's timeout.
+  home.activation.t3 = lib.hm.dag.entryAfter [ "npmGlobals" "linkGeneration" ] ''
+    run ${pkgs.coreutils}/bin/timeout --kill-after=10s 2m \
+      ${pkgs.bun}/bin/bun add --global t3@latest \
+      || warnEcho "T3: install failed (exit $?); retry: bun add --global t3@latest"
+  '';
 }
