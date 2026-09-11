@@ -132,6 +132,17 @@ Please enjoy the abundance of packages and binaries in nix.
 
 Please notify me, if anything is broken and needs nix config patch.
 
+#### HTML serving
+
+- When I ask for HTML, alternative designs, or a visual comparison, you
+  SHOULD generate an HTML file instead of only describing it in Markdown.
+- On the agents box, serve the result privately over Tailscale Serve.
+  Check `tailscale serve status` first and choose an unused path:
+  `tailscale serve --bg --set-path=/html/<task> <absolute-output-directory>`.
+- Serve only the generated HTML and its assets; use relative asset URLs.
+  Preserve existing routes and keep the result available after the turn.
+- Verify the served page loads and return its full clickable Tailscale URL.
+
 ### User's MacBook (host: `mac`)
 
 This is my personal machine.
