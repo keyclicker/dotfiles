@@ -17,6 +17,10 @@
     "opencode-ai"
   ];
 
+  # TODO: Temporary until T3 fixes its published dependency metadata.
+  # Once a clean `npm install --global t3@latest` succeeds and the server
+  # starts correctly, return "t3" to local.npmGlobals.packages and remove
+  # the Bun setup and T3 activation hook below. Keep tracking latest.
   programs.bun.enable = true;
 
   # Bun reads this even when activation has no XDG_CONFIG_HOME.
