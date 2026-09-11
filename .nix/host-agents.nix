@@ -10,6 +10,7 @@
     ./profile-server.nix
     ./module-browser.nix
     ./module-slopbox.nix
+    ./module-html-serving.nix
     ./module-iperf.nix
     ./platform-vm.nix
     ./hardware-vm.nix
@@ -28,6 +29,7 @@
   # docker, tailscale) from profile-server.nix, chromium and
   # agent-browser from module-browser.nix, t3 web server from
   # module-slopbox.nix, iperf3 server from module-iperf.nix,
+  # HTML directory serving from module-html-serving.nix,
   # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents
   # are npm globals in the home layer (home-agents.nix, wired in
   # flake.nix).

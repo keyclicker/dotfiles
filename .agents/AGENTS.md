@@ -32,6 +32,12 @@ I never vibecode blindly.
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
 
+## HTML
+
+An HTML request means a static page by default, with a clear layout and
+tabs if useful. Add navigation, multiple pages, or elaborate interactions
+only when the task calls for them. Prioritize the content and readability.
+
 ## Git / GitHub workflow
 
 - We are working only in worktrees and feature branches, unless

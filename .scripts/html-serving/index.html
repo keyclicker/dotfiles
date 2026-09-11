@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>~/public/{{ subdirectory }}</title>
+    <style>
+      {% include "style.css" %}
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <div class="heading">
+        <h1><a href="/">~/public/</a>{{ subdirectory }}</h1>
+        <span class="count">
+          {{ entries | length }} {{ 'item' if entries | length == 1 else 'items' }}
+        </span>
+      </div>
+      <div class="file-list">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col" class="modified">Modified</th>
+              <th scope="col" class="size">Size</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if subdirectory %}
+              <tr>
+                <td colspan="3"><a href="../">← Parent directory</a></td>
+              </tr>
+            {% endif %}
+            {% for entry in entries %}
+              <tr>
+                <td>
+                  <a href="{{ entry.url }}">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      {% if entry.folder %}
+                        <path d="M3 7V4h6l3 3h9v13H3Z" />
+                      {% else %}
+                        <path d="M5 3h9l5 5v13H5ZM14 3v6h5" />
+                      {% endif %}
+                    </svg>
+                    {{ entry.name }}
+                  </a>
+                </td>
+                <td class="modified">
+                  <time datetime="{{ entry.modified.isoformat() }}">
+                    {{ entry.modified.strftime('%d %b %Y, %H:%M') }}
+                  </time>
+                </td>
+                <td class="size">{{ entry.size }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="3" class="empty">This directory is empty.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>
