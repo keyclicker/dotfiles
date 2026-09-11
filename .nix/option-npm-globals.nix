@@ -1,9 +1,8 @@
 # local.npmGlobals vocabulary: npm packages a host keeps installed
 # globally, the way module-apps-darwin.nix keeps casks and
 # module-apps-linux.nix keeps flatpaks: an "ensure installed" list,
-# nothing pinned. A home layer imports this file and lists packages
-# here; the one npm write lives below and stays inert until the list
-# is set.
+# using npm package specs. A home layer imports this file and lists
+# packages here; the one npm write stays inert until the list is set.
 #
 # How it works:
 #
@@ -12,13 +11,14 @@
 #     .zshrc) and libraries in ~/.local/lib/node_modules. No PATH
 #     plumbing of its own.
 #   - Every activation runs `npm install --global <list>`: missing
-#     packages get installed, present ones move to the registry's
-#     latest. A rebuild is an update; so is `npm update -g` by hand.
+#     packages get installed, present ones move to the requested
+#     version (latest when no version is specified).
 #   - State lives in $HOME, not the store. `npm install -g`,
 #     `npm rm -g` and the CLIs' own self-updaters work as on any
 #     machine. Dropping a package from the list does not uninstall
 #     it; that is an `npm rm -g` by hand.
-#   - Offline, the install is a warning, not a failed switch.
+#   - Offline or stuck installs time out with a warning instead of
+#     failing the switch.
 {
   config,
   lib,
@@ -36,8 +36,8 @@ in
     default = [ ];
     example = [ "@anthropic-ai/claude-code" ];
     description = ''
-      npm packages kept installed globally at the registry's latest:
-      installed or updated on every activation.
+      npm package specs installed or updated globally on every activation.
+      Unversioned names track the registry's latest release.
     '';
   };
 
@@ -45,14 +45,24 @@ in
     # The installed CLIs are `#!/usr/bin/env node` shims.
     home.packages = [ pkgs.nodejs ];
 
+    # Lifecycle scripts use node-gyp for native addons (e.g. node-pty).
+    # Activation has its own PATH, independent of the user's packages.
+    home.extraActivationPath = [
+      pkgs.nodejs
+      pkgs.python3
+      pkgs.gnumake
+      pkgs.stdenv.cc
+    ];
+
     # .zshrc puts ~/.local/bin on PATH for shells; this covers the
     # jail, whose agents get hm-session-vars.sh instead of a shell.
     home.sessionPath = [ "${prefix}/bin" ];
 
     home.activation.npmGlobals = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if ! run ${pkgs.nodejs}/bin/npm install --global ${lib.escapeShellArgs cfg.packages}; then
-        warnEcho "npm globals: install failed (offline?); retry: npm install -g ${toString cfg.packages}"
-      fi
+      run ${pkgs.coreutils}/bin/timeout --kill-after=10s 2m \
+        ${pkgs.nodejs}/bin/npm install --global --no-audit --no-fund \
+        ${lib.escapeShellArgs cfg.packages} \
+        || warnEcho "npm globals: install failed (exit $?); retry: npm install -g ${toString cfg.packages}"
     '';
   };
 }
