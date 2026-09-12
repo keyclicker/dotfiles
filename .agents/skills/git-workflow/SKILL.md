@@ -126,6 +126,25 @@ description: Read once per context, before the first edit or non-read-only git c
   the local branch.
 - Never remove a dirty worktree or one with unpushed commits.
 
+#### Sweep
+
+- Sweep stale worktrees once per deliverable, right after the
+  `git fetch origin --prune` that precedes branching. Not every turn,
+  not on read-only work.
+- Stale = the branch's upstream is gone after the prune (the PR was
+  merged or closed) and the worktree is clean:
+
+  ```sh
+  git branch -vv | grep ': gone]'
+  ```
+
+- For each stale branch: `git worktree remove .worktrees/<slug>`,
+  `git branch -D agents/<slug>`, then `git worktree prune`.
+- Skip and mention: dirty worktrees, branches with no upstream
+  (never pushed), and worktrees another agent may be using (a running
+  process has its cwd there).
+- Report the sweep in one line: what was removed, what was skipped.
+
 ### Delivery
 
 - Delay local/non-local classification until it affects delivery. Immediately

@@ -49,6 +49,8 @@ only when the task calls for them. Prioritize the content and readability.
 - You MAY skip reading `git-workflow` skill, if you are
   making read-only actions.
 - You MUST NOT substitute built-in or plugin Git/PR workflows for it.
+- Stale worktrees pile up. Follow the skill's Sweep section when you
+  branch; don't sweep every turn.
 
 ## Asking before acting
 
