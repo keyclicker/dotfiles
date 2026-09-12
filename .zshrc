@@ -4,7 +4,8 @@
 # fullscreen (tmux/tmux#5268, open as of 3.7c). Autologin consoles
 # (80x24 tty1/ttyS0 on VMs) and IDE panes are exactly such clients, so
 # they get a bare shell. Also skipped inside tmux, without a tty (t3's
-# `zsh -ilc`, editor snapshots) and in the quick terminal.
+# `zsh -ilc`, editor snapshots) and in the quick terminal. Not exec'd:
+# detaching lands in this shell instead of ending the ssh session/tab.
 if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] \
     && [[ -n $SSH_TTY || $TERM_PROGRAM == ghostty ]] && command -v tmux >/dev/null; then
   # Finder's "New Ghostty Tab Here" only sets the start dir: open a tmux
@@ -14,7 +15,7 @@ if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] \
   if [[ $TERM_PROGRAM == ghostty && $PWD != $HOME ]] && tmux has-session -t '=main' 2>/dev/null; then
     tmux new-window -t main -c "$PWD"
   fi
-  exec tmux new-session -A -s main -c "$PWD"
+  tmux new-session -A -s main -c "$PWD"
 fi
 
 # Quick terminal runs qalc instead of a shell
