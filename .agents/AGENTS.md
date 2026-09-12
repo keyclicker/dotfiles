@@ -146,6 +146,75 @@ This is my personal machine.
 Try to reduce blast radius and externalities outside the working dir,
 unless the user asks to fix or do something globally.
 
+## Repository and GitHub writing
+
+Applies to comments, commits, PRs, issues, and reviews, not conversational style.
+
+Write for a collaborator with the code or diff. Be direct and specific. Prefer
+exact identifiers, paths, and code expressions over wordy explanations. Fragments
+are fine; vague shorthand is not. Optimize for reading effort, not word count.
+
+State actual behavior, constraints, and failures. Keep details that affect
+correctness. Never invent intent, reasons, or guarantees.
+
+Comments should explain non-obvious behavior, constraints, or verified reasons.
+Omit comments that merely restate code. Issues and reviews should identify the
+problem and, when known, the requested change.
+
+Commit and PR titles should name the change. Follow repository format and
+attribution rules. Bodies should add useful context without repeating the title
+or diff. Validation should say what was checked, without narrating routine work.
+
+### 1. Name the failure precisely
+
+Bad:
+
+```text
+There is a problem in greeting when the user argument is null because
+the function tries to access the name property on that null value.
+```
+
+Good:
+
+```text
+greeting(null) throws at user.name.
+```
+
+### 2. State the exact validation rule
+
+Bad:
+
+```ts
+// If every field has an empty name and an empty value, the group
+// does not need to have a name for validation to pass.
+```
+
+Good:
+
+```ts
+// Group name is optional when all field names and values are empty.
+```
+
+### 3. Name the change; retain specific validation
+
+Bad:
+
+```text
+Title: Invite improvements
+
+This PR adds a copy button for invite links. The button lets users
+copy an invite link to the clipboard. I tested it in the browser and
+confirmed that clicking the button copies the invite URL.
+```
+
+Good (repository uses Conventional Commits for PR titles):
+
+```text
+Title: feat(invites): add copy button for invite links
+
+Validation: clicking Copy link copies the invite URL to the clipboard.
+```
+
 --------------------------------------------------------------------------------
 
 ## Kostyls
