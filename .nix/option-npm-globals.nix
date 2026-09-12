@@ -54,8 +54,8 @@ in
       pkgs.stdenv.cc
     ];
 
-    # .zshrc puts ~/.local/bin on PATH for shells; this covers the
-    # jail, whose agents get hm-session-vars.sh instead of a shell.
+    # .zshrc puts ~/.local/bin on PATH for shells; this covers whatever
+    # gets hm-session-vars.sh instead of a shell.
     home.sessionPath = [ "${prefix}/bin" ];
 
     home.activation.npmGlobals = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

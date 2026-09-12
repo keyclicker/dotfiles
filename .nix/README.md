@@ -92,9 +92,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # virtio-blk disk names, pl011 console
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
-├── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
-│                            # environment only, one output per arch
-└── host-jail.nix            # Docker jail (.scripts/agent-jail), same
+└── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
+                             # environment only, one output per arch
 ```
 
 ## Layers
@@ -124,12 +123,11 @@ Outputs by leaf:
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container; home dotfiles       |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
-| `keyclicker@jail-<system>`       | `host-jail.nix`      | home standalone + agents + browser                                    |
 
 `<system>` is `x86_64-linux` or `aarch64-linux`: standalone
 home-manager needs `pkgs` for a fixed system, so identity-less home
-leaves are instantiated per architecture and the caller (`dots`,
-`agent-jail`) picks its own.
+leaves are instantiated per architecture and the caller (`dots`)
+picks its own.
 
 ## Design
 
@@ -230,8 +228,7 @@ leaves are instantiated per architecture and the caller (`dots`,
   the distro; only the nix store gc is ours, as a user timer. This
   works while the imported modules stay plain `{ pkgs, ... }`
   functions; the moment one needs config/lib, extract the package
-  list into shared data instead. The jail adds agents + browser the
-  same way.
+  list into shared data instead.
 - **Pins**: one `nixpkgs` (`nixos-unstable`) for every host, mac
   included; nix-darwin, home-manager and disko follow it.
 

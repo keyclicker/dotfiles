@@ -29,7 +29,7 @@
       # Standalone home-manager outputs carry no machine identity, but
       # home-manager needs pkgs for a fixed system, so each leaf is
       # instantiated once per architecture as keyclicker@<name>-<system>
-      # and the caller (dots, agent-jail) picks the one matching its own.
+      # and the caller (dots) picks the one matching its own.
       homePerSystem =
         name: leaf:
         nixpkgs.lib.listToAttrs (
@@ -189,8 +189,6 @@
         # Foreign Linux (Ubuntu pi, VPS, ...): distro system, nix user
         # environment. `dots rebuild` resolves the architecture.
         # $ home-manager switch --flake ~/.dotfiles/.nix#keyclicker@standalone-x86_64-linux
-        homePerSystem "standalone" ./host-standalone.nix
-        # Docker jail: activated inside the container by .scripts/agent-jail.
-        // homePerSystem "jail" ./host-jail.nix;
+        homePerSystem "standalone" ./host-standalone.nix;
     };
 }

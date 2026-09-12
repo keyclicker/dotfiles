@@ -84,24 +84,8 @@ Brewfile       mac packages homebrew owns instead of nix
 .codex/        Codex: AGENTS.md, skills
 .agents/       shared agent instructions and skills; .claude and .codex link here
 .doom.d/       doom emacs
-.scripts/      dots, agent-jail, small utilities
+.scripts/      dots, small utilities
 ```
-
-## Agent jail
-
-`agent-jail` runs Claude Code or Codex in a Docker container. Only the
-current project directory is mounted, as `/work`. The agent installs and
-logs in inside the container, so the host's `~/.claude`, `~/.codex`, and
-Keychain never appear in it.
-
-```sh
-aj          # Claude Code
-aj --codex  # Codex
-```
-
-Both run with their own permission prompts off. The container is the
-sandbox, so `/work` is writable and network is open. Use it on repos under
-version control. Details in `.scripts/agent-jail/README.md`.
 
 ## Migrating from old dotfiles
 
