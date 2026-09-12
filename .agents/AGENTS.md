@@ -146,6 +146,119 @@ This is my personal machine.
 Try to reduce blast radius and externalities outside the working dir,
 unless the user asks to fix or do something globally.
 
+## Repository and GitHub writing
+
+Applies to code comments, commit messages, PR descriptions, issues, review comments,
+and similar technical text. It does not define conversational style.
+
+Write for a collaborator who has the relevant code or diff. Be direct, specific,
+and easy to read. Optimize for the reader’s effort, not the word count.
+
+Use exact identifiers, paths, and code expressions when they communicate more
+clearly than prose. Fragments are fine when their meaning is complete. Avoid vague
+shorthand such as “breaks,” “handles things,” or unexplained variable names.
+
+State the actual behavior, condition, constraint, or failure. Preserve details that
+affect correctness. Do not invent intent, reasons, or guarantees.
+
+Comments should explain constraints, non-obvious behavior, or useful reasons. Omit
+comments that merely restate obvious code. Keep verified reasons when they help
+the reader understand the implementation.
+
+Commit and PR titles should name the concrete change. Follow the repository’s
+commit format, PR conventions, and attribution rules. Bodies should add context
+the title and diff do not already communicate. Include relevant validation,
+stating what was checked rather than narrating the work.
+
+Issues and reviews should identify the problem and, when known, the requested
+change.
+
+### 1. Name the failure precisely
+
+Before:
+
+```text
+There is a problem in greeting when the user argument is null because
+the function tries to access the name property on that null value.
+```
+
+After:
+
+```text
+greeting(null) throws at user.name.
+```
+
+### 2. Express constraints directly
+
+Before:
+
+```ts
+// The API rejects requests containing more than 100 items, so each
+// batch must contain no more than 100 items.
+```
+
+After:
+
+```ts
+// API rejects batches with > 100 items.
+```
+
+### 3. State the exact validation rule
+
+Before:
+
+```ts
+// If every field has an empty name and an empty value, the group
+// does not need to have a name for validation to pass.
+```
+
+After:
+
+```ts
+// Group name is optional when all field names and values are empty.
+```
+
+Do not replace this with “empty groups are ignored”: that claims different
+behavior.
+
+### 4. Name the change; retain specific validation
+
+Before:
+
+```text
+Title: Invite improvements
+
+This PR adds a copy button for invite links. The button lets users
+copy an invite link to the clipboard. I tested it in the browser and
+confirmed that clicking the button copies the invite URL.
+```
+
+After, in a repository using Conventional Commits for PR titles:
+
+```text
+Title: feat(invites): add copy button for invite links
+
+Validation: clicking Copy link copies the invite URL to the clipboard.
+```
+
+### 5. Identify the problem and requested change
+
+Before:
+
+```text
+The request body written to this log contains the user's plaintext
+password and email address. Replace it with the request ID, failure
+code, and authentication provider. These fields provide diagnostic
+context without including the password or email address.
+```
+
+After:
+
+```text
+Logs plaintext passwords and email addresses. Replace the request body
+with request ID, failure code, and authentication provider.
+```
+
 --------------------------------------------------------------------------------
 
 ## Kostyls
