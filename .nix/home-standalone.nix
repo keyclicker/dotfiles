@@ -14,7 +14,6 @@ in
   imports = [ ./home-dotfiles.nix ];
 
   # The full stack a NixOS/darwin machine gets, not the guest floor.
-  # Extras (agent CLIs, browser) are added by the jail leaf.
   home.packages =
     lib.concatMap packagesOf [
       ./module-core.nix

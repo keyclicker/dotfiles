@@ -1,6 +1,5 @@
-# Headless browser stack for agents. Shared by host-agents.nix and
-# host-jail.nix, which both run agents without a display and without
-# a usable kernel sandbox (LXC guest, Docker container).
+# Headless browser stack for agents: host-agents.nix runs them
+# without a display and without a usable kernel sandbox (LXC guest).
 { pkgs, ... }:
 
 {

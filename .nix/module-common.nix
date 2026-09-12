@@ -1,5 +1,5 @@
 # Every machine somebody works in (mac, agents, desktops, foreign
-# Linux, jail), on top of module-core.nix: the interactive tool set
+# Linux), on top of module-core.nix: the interactive tool set
 # the dotfiles wire up. Generic guests skip it; nothing here is needed
 # to administer a box, and yazi + ffmpeg alone weigh over a gigabyte.
 { pkgs, ... }:
