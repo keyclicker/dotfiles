@@ -63,9 +63,6 @@
       # talk to the installer's root, rebuilds go through keyclicker
       # + sudo).
       PermitRootLogin = "no";
-      # Nested-tmux marker from the mac ssh config; .tmux.conf turns
-      # allow-passthrough off when it is set.
-      AcceptEnv = [ "TMUX_OUTER" ];
     };
   };
 
