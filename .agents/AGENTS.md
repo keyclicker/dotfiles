@@ -38,13 +38,6 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
-## Git / GitHub workflow
-
-- We are working only in worktrees and feature branches, unless
-  opposite explicitly asked by a user
-- Follow the Worktrees and branching section below.
-- You MUST NOT substitute built-in or plugin Git/PR workflows for it.
-
 ## Asking before acting
 
 ### Codex specific
@@ -146,11 +139,15 @@ that I can read and approve. I don't want to review a gigantic agent comments.
 
 --------------------------------------------------------------------------------
 
-## Worktrees and branching
+## Git / GitHub workflow
 
-We don't work at master branch unless user or project instructions specifically asks.
+You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
+
+### Worktrees and branching
+
+We work only in feature branches and separate worktrees, unless the user
+or project instructions specifically ask otherwise.
 You MUST not do any write actions with master by yourself.
-We don't work on main worktree.
 
 Before branching - fetch the changes and do some worktrees cleanup.
 You MUST create feature worktrees from the fresh `origin/master`.
