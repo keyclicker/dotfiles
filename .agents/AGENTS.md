@@ -123,7 +123,7 @@ It's agents owned virtual machine.
 It runs nixos with config tailored for agents.
 Please enjoy the abundance of packages and binaries in nix.
 
-- You SHOULD install any packages you might need in the future in the profile.
+- You SHOULD install any packages you might need in the future in the nix profile.
 - You MAY use nix shell for any disposable package.
 - You MAY access web and use agent-browser/playwright.
 - You SHOULD maintain the machine: Collect garbage, fix any issues.
@@ -146,74 +146,197 @@ This is my personal machine.
 Try to reduce blast radius and externalities outside the working dir,
 unless the user asks to fix or do something globally.
 
-## Repository and GitHub writing
+If you need external access use highly readable shell commands
+that I can read and approve. I don't want to review a gigantic agent comments.
+
+--------------------------------------------------------------------------------
+
+## Worktrees and branching
+
+We don't work at master branch unless user or project instructions specifically asks.
+You MUST not do any write actions with master by yourself.
+We don't work on main worktree.
+
+Before branching - pull the changes and do some worktrees cleanup.
+If local master conflicts with pull - report.
+Branch from the fresh origin/master.
+
+Example:
+
+```sh
+git pull origin --prune
+git rev-list --left-right --count master...origin/master
+git worktree add -b agents/<slug> .worktrees/agents-<slug> <base>
+```
+
+#### Cleanup
+
+- Branch merged: `git worktree remove`, `git worktree prune`, delete
+  the local branch.
+- Never remove a dirty worktree or one with unpushed commits.
+
+#### Branch names
+
+- Format: `agents/<slug>`.
+- `<slug>`: lowercase kebab-case, 2-4 words, area first.
+- Examples: `agents/nix-restructure`, `agents/zsh-tool-hooks`.
+- No nested paths, no type prefix. Type belongs in the commit header.
+
+#### Worktree location
+
+- Path: `.worktrees/agents-<slug>`
+- `/.worktrees/` goes in `.git/info/exclude` and the global ignore
+- Create from the main worktree root.
+- Never nest a worktree inside another worktree.
+- Paths MUST be relative: `worktree.useRelativePaths = true`, else
+  `git worktree add --relative-paths`.
+
+#### PR
+
+By default - do PR after a completing a task.
+If changes requested after PR was made - check if PR is merged.
+
+- not merged: push new changes in the same PR.
+- merged: make a new PR.
+
+If requested changes to the PR are very big - offer to make stacked PR.
+
+## Commits, Issues and PRs
+
+We use Conventional Commits.
+
+### Titles / Header Descriptions
+
+Header descriptions should be like a clickbait YouTube titles (but not misleading).
+Ok, just in case: not literally!
+But in the sense, that they should give a reader a clear understanding of the main thing
+in this change, not the broad fuzzy scope of the change.
+
+PR titles usually become commit messages, so follow the repository's title
+conventions.
+Look at recently merged PRs and Git history for examples.
+
+Prefer a concise, human-readable title that explains why the change matters:
+
+BAD
+> ❌ perf(server): negotiate permessage-deflate on the websocket
+
+GOOD
+> ✅ perf(server): cut websocket frame size by 70%+ with gzipping
+
+Issue title may but should not be a conventional style.
+
+### Commits Body / Descriptions
+
+If the body is big and verbose, no one will ever read it.
+Small changes don't require body at all.
+
+PRs are usually get squashed and the commit messages get concatenated into one big commit
+message. Big bodies makes the squash commit message unbearable.
+
+Bodies should add clarity not fuzziness.
+For sheer verbosity they're code diff.
+
+You MAY use header-bullet style if appropriate.
+
+Open the description with a simple explanation of the problem based on the
+user's original prompt, then briefly explain the solution. Do not lead with an
+implementation inventory:
+
+BAD
+> ❌ Removed implicit workspace carry-over from every "new thread" entry point (cmd
++n / cmd+shift+o, sidebar v1/v2 buttons, command palette). New threads inherit
+only the project from context; branch, worktree, and env mode always come from
+the configured defaults. Deleted buildContextualThreadOptions,
+startNewThreadInProjectFromContext, and the v1 sidebar's seed-context machinery.
+
+GOOD
+> ✅ My "new worktree" default was ignored when starting new threads on existing
+worktrees. Super unintuitive. Now your preferences always apply.
+
+### PRs and Issues bodies
+
+Above applies here, but they can be bigger.
+If you did any validation steps you should note it.
+
+### Footer
+
+Footer should contain only:
+
+```text
+Assisted-by: <model name>
+```
+
+- Claude examples: `Fable 5.1`, `Opus 4.8`
+- GPT examples: `GPT 6 Astra`, `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
+
+### Body Header?
+
+When you post a github issue, review or comment, start with:
+
+```text
+By: <model name>
+```
+
+Omit the footer.
+
+## Comments, Repo and GitHub writing
 
 Applies to comments, commits, PRs, issues, and reviews, not conversational style.
 
 Write for a collaborator with the code or diff. Be direct and specific. Prefer
 exact identifiers, paths, and code expressions over wordy explanations. Fragments
 are fine; vague shorthand is not. Optimize for reading effort, not word count.
+Don't afraid of humor and irony if it's appropriate.
 
-State actual behavior, constraints, and failures. Keep details that affect
-correctness. Never invent intent, reasons, or guarantees.
+Use code notation inside writing.
+It helps with readability and it's easier to scan.
 
-Comments should explain non-obvious behavior, constraints, or verified reasons.
-Omit comments that merely restate code. Issues and reviews should identify the
-problem and, when known, the requested change.
+## Comments
 
-Commit and PR titles should name the change. Follow repository format and
-attribution rules. Bodies should add useful context without repeating the title
-or diff. Validation should say what was checked, without narrating routine work.
+A good comment is usually one-line comment that gives reader a hint what's going on.
+Multi-line comments are good, especially for architecture explanations.
+But if you need multi-line comment, there is a chance there is something bad with
+readability of your code.
+The best documentation is the code that you can read like a doc.
 
-### 1. Name the failure precisely
+- Use banner comments when appropriate
+- Prefer imperative tone
+- Never `int a = 42; // asign 42 to integer variable a`
 
-Bad:
+## Documentation comments
 
-```text
-There is a problem in greeting when the user argument is null because
-the function tries to access the name property on that null value.
-```
+All functions, classes and other top level declarations should be documented.
 
-Good:
+There are two ends of the spectrum here: there are consumer code and there are library code.
+Consumer code - code that has one or a few entry points (e.g. main() or gameloop())
+Library code - is the code that can be used anywhere in the program (e.g. Q_rsqrt())
 
-```text
-greeting(null) throws at user.name.
-```
+Consumer code declarations should be documented lightly.
+But the more code looks like library code, the more you should blow the documentation up.
+When it's clearly library code, you should use language-specific doc
+conventions like Google docstrings or tsdoc.
 
-### 2. State the exact validation rule
+## Code style and spacing
 
-Bad:
+The code should generally be 80 chars wide (unless some language specific exception)
 
-```ts
-// If every field has an empty name and an empty value, the group
-// does not need to have a name for validation to pass.
-```
+Always give a code some space to breath. A tightly written code is unreadable.
+Use good vertical spacing between logical blocks.
+Comment logical blocks when they need it.
 
-Good:
+Always try to keep the spirit of the given programming language best practices.
 
-```ts
-// Group name is optional when all field names and values are empty.
-```
+I'm not Uncle Bob. Big functions are ok. But smaller functions are better
+if they don't compromise on readability, conventions or performance.
 
-### 3. Name the change; retain specific validation
+### Secrets & personal info
 
-Bad:
-
-```text
-Title: Invite improvements
-
-This PR adds a copy button for invite links. The button lets users
-copy an invite link to the clipboard. I tested it in the browser and
-confirmed that clicking the button copies the invite URL.
-```
-
-Good (repository uses Conventional Commits for PR titles):
-
-```text
-Title: feat(invites): add copy button for invite links
-
-Validation: clicking Copy link copies the invite URL to the clipboard.
-```
+- NEVER commit secrets or personal info: private keys, API tokens,
+  passwords, session cookies, email addresses beyond the git identity,
+  hostnames/IPs of private machines, or machine-local paths that leak
+  them.
+- Before committing, check the diff for such data.
 
 --------------------------------------------------------------------------------
 
