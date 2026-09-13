@@ -38,18 +38,6 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
-## Git / GitHub workflow
-
-- We are working only in worktrees and feature branches, unless
-  opposite explicitly asked by a user
-- Therefore, you MUST read `git-workflow` skill instructions before
-  your first edit or non-read-only git command in a context.
-- Read it once per context. Already read (earlier in the thread or in
-  a summary): do NOT re-read.
-- You MAY skip reading `git-workflow` skill, if you are
-  making read-only actions.
-- You MUST NOT substitute built-in or plugin Git/PR workflows for it.
-
 ## Asking before acting
 
 ### Codex specific
@@ -151,22 +139,24 @@ that I can read and approve. I don't want to review a gigantic agent comments.
 
 --------------------------------------------------------------------------------
 
-## Worktrees and branching
+## Git / GitHub workflow
 
-We don't work at master branch unless user or project instructions specifically asks.
+You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
+
+### Worktrees and branching
+
+We work only in feature branches and separate worktrees, unless the user
+or project instructions specifically ask otherwise.
 You MUST not do any write actions with master by yourself.
-We don't work on main worktree.
 
-Before branching - pull the changes and do some worktrees cleanup.
-If local master conflicts with pull - report.
-Branch from the fresh origin/master.
+Before branching - fetch the changes and do some worktrees cleanup.
+You MUST create feature worktrees from the fresh `origin/master`.
 
 Example:
 
 ```sh
-git pull origin --prune
-git rev-list --left-right --count master...origin/master
-git worktree add -b agents/<slug> .worktrees/agents-<slug> <base>
+git fetch origin --prune
+git worktree add -b agents/<slug> .worktrees/agents-<slug> origin/master
 ```
 
 #### Cleanup
@@ -204,6 +194,11 @@ If requested changes to the PR are very big - offer to make stacked PR.
 ## Commits, Issues and PRs
 
 We use Conventional Commits.
+
+- Commit and PR titles MUST use imperative descriptions, e.g.
+  `fix: handle expired tokens`, not `fix: handled expired tokens`.
+- Every commit message line, including header, body, and footers,
+  MUST NOT exceed 72 characters. PR titles have the same limit.
 
 ### Titles / Header Descriptions
 
