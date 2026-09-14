@@ -17,7 +17,13 @@ class DirectoryServerTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name) / "public"
         self.root.mkdir()
-        handler = partial(DirectoryHandler, directory=str(self.root))
+        self.allowed = Path(self.temporary.name) / "allowed"
+        self.allowed.mkdir()
+        handler = partial(
+            DirectoryHandler,
+            allowed_roots=[self.allowed],
+            directory=str(self.root),
+        )
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
         self.thread = threading.Thread(target=self.server.serve_forever)
         self.thread.start()
@@ -77,6 +83,16 @@ class DirectoryServerTests(unittest.TestCase):
             self.get("outside.html")
         self.assertEqual(error.exception.code, 403)
         error.exception.close()
+
+    def test_symlinks_can_expose_directories_inside_allowed_roots(self):
+        shared = self.allowed / "shared"
+        shared.mkdir()
+        document = shared / "document.html"
+        document.write_text("Shared document")
+        (self.root / "shared").symlink_to(shared, target_is_directory=True)
+
+        self.assertIn('href="shared/"', self.get())
+        self.assertEqual(self.get("shared/document.html"), "Shared document")
 
 
 if __name__ == "__main__":

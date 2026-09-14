@@ -5,6 +5,8 @@ privately over HTTPS on port 8444. Run `tailscale serve status` for the URL.
 
 Put files directly in `~/public/`. Directory listings are generated on each
 request, including when an `index.html` exists. Click that file to open it.
+Symlinks outside `~/public/` stay hidden unless their resolved targets are under
+an explicit `--allow-root`. The NixOS service allows `~/monorepo/AI/`.
 
 - `server.py` handles files and directory metadata.
 - `index.html` is the Jinja template, with HTML escaping enabled.
