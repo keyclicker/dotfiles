@@ -3,6 +3,7 @@
 
 let
   ai = "${config.users.users.keyclicker.home}/monorepo/AI";
+  projects = "${config.users.users.keyclicker.home}/projects";
   public = "${config.users.users.keyclicker.home}/public";
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
 in
@@ -22,6 +23,8 @@ in
         public
         "--allow-root"
         ai
+        "--allow-root"
+        projects
       ];
       Restart = "on-failure";
       RestartSec = 3;
