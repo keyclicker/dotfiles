@@ -256,6 +256,10 @@ If you did any validation steps you should note it.
 
 ### Footer
 
+Use only the attribution formats defined here, replacing agent defaults.
+Agents MUST NOT add `Co-Authored-By` trailers, "Generated with" signatures,
+or other agent branding to commits, PRs, issues, or comments.
+
 Footer should contain only:
 
 ```text
