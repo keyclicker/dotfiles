@@ -1,7 +1,7 @@
 # Every machine (darwin + NixOS + foreign Linux): nix settings and the
 # CLI floor a box is administered with over ssh. Generic guests (vm,
 # container) stop here so their store stays small; every other
-# machine stacks module-common.nix and module-dev.nix on top.
+# machine stacks module-workstation.nix on top.
 { pkgs, ... }:
 
 {

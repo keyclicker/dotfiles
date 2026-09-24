@@ -17,8 +17,7 @@ in
   home.packages =
     lib.concatMap packagesOf [
       ./module-core.nix
-      ./module-common.nix
-      ./module-dev.nix
+      ./module-workstation.nix
     ]
     ++ [
       # Terminfo for terminals the distro's ncurses doesn't know yet;

@@ -5,8 +5,7 @@
 {
   imports = [
     ./module-core.nix
-    ./module-common.nix
-    ./module-dev.nix
+    ./module-workstation.nix
     ./profile-server.nix
     ./module-browser.nix
     ./module-slopbox.nix
@@ -24,8 +23,8 @@
   # own the services; only the name is this host's own.
 
   # No host-specific packages: the CLI floor comes from
-  # module-core.nix, the interactive tools from module-common.nix,
-  # dev toolchains from module-dev.nix, server basics (zsh, terminfo,
+  # module-core.nix, interactive tools and dev toolchains from
+  # module-workstation.nix, server basics (zsh, terminfo,
   # docker, tailscale) from profile-server.nix, chromium and
   # agent-browser from module-browser.nix, t3 web server from
   # module-slopbox.nix, iperf3 server from module-iperf.nix,

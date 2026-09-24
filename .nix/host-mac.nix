@@ -5,8 +5,7 @@
 {
   imports = [
     ./module-core.nix
-    ./module-common.nix
-    ./module-dev.nix
+    ./module-workstation.nix
     ./profile-desktop.nix
     ./module-desktop-darwin.nix
     ./module-ollama-desktop.nix

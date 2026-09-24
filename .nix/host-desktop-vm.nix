@@ -7,8 +7,7 @@
 {
   imports = [
     ./module-core.nix
-    ./module-common.nix
-    ./module-dev.nix
+    ./module-workstation.nix
     ./profile-server.nix
     ./profile-desktop.nix
     ./module-incus.nix

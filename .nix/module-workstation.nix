@@ -1,11 +1,32 @@
-# Dev toolchains: build tools, languages, C compilers. Stacked
-# wherever module-common.nix is, on its own so the toolchain list
-# reads separately from the shell tools and can be left off a host
-# that only needs a shell.
+# Interactive tools and dev toolchains for every machine somebody works in
+# (mac, agents, desktops, foreign Linux), on top of module-core.nix.
+# Generic guests skip this layer to keep their stores small.
 { pkgs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
+    # GitHub
+    gh
+
+    # Shell tools
+    bat
+    stow
+    p7zip
+    carapace
+    delta
+
+    # User tools
+    tokei
+    vifm
+    yazi
+    btop
+
+    # Media
+    ffmpeg
+
+    # Encryption
+    gnupg
+
     # Dependencies
     tree-sitter # nvim
     unzip # nvim: mason unpacks zip-shipped tools (clangd, stylua) with it

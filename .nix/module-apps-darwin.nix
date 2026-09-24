@@ -54,7 +54,8 @@
     ];
   };
 
-  # Mac-only packages; cross-platform ones come from module-core / module-common / module-dev / profile-desktop.
+  # Mac-only packages; cross-platform ones come from module-core,
+  # module-workstation and profile-desktop.
   environment.systemPackages = with pkgs; [
     # Containers
     docker

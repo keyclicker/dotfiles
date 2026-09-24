@@ -27,10 +27,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-core.nix          # every machine: nix settings (flakes, gc,
 │                            # optimise), the CLI floor a box is administered
 │                            # with; generic guests stop here
-├── module-common.nix        # every machine somebody works in: the
-│                            # interactive tool set (yazi, ffmpeg, gh, ...)
-├── module-dev.nix           # dev toolchains: build tools, languages,
-│                            # C compilers; stacked wherever common is
+├── module-workstation.nix   # every machine somebody works in: interactive
+│                            # tools, build tools, languages, C compilers
 ├── module-nvim-minimal.nix  # generic guests: nvim flagged minimal (no LSP,
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
@@ -202,10 +200,9 @@ picks its own.
 - **Generic guests stay small**: `vm` and `container` compose
   `module-core.nix` alone, the floor a box is administered with over
   ssh (git, tmux, neovim, mc, htop, compose). Every host somebody works
-  in stacks `module-common.nix` (interactive tools) and
-  `module-dev.nix` (toolchains) on top; those two are most of a
-  machine's store, and a guest spawned N times would pay for them N
-  times.
+  in stacks `module-workstation.nix` (interactive tools and toolchains)
+  on top; this is most of a machine's store, and a guest spawned N
+  times would pay for it N times.
 - **One nvim config, a minimal profile for guests**: the same linked
   `.config/nvim` runs everywhere; `module-nvim-minimal.nix` exports
   `NVIM_MINIMAL`, which turns off every spec that pulls a toolchain
@@ -217,7 +214,7 @@ picks its own.
   not the minutes a slow VM spends in gcc.
 - **Foreign Linux gets the shell environment, 1:1**:
   `home-standalone.nix` feeds the `environment.systemPackages` of
-  `module-core.nix`, `module-common.nix` and `module-dev.nix` into
+  `module-core.nix` and `module-workstation.nix` into
   `home.packages` by importing each module as a plain function, so an
   Ubuntu shell has exactly the tools a NixOS one has. Nothing
   system-level is emulated: hostname, nix daemon, services stay with
