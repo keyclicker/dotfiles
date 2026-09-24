@@ -1,13 +1,7 @@
-# Desktop VM (#35): the mac's stack on NixOS — sway where the mac has
-# yabai, flathub where it has homebrew casks — plus incus, which the
-# mac cannot host. A VM leaf like host-vm.nix: no name of its own,
-# label-mounted disks, cloneable; Proxmox on the x86 box (UTM on the
-# mac is host-desktop-utm.nix, the same stack on aarch64). Unlike
-# host-vm.nix, home-manager links the dotfiles (sway,
-# waybar, ghostty, ...), so the repo must be checked out at
-# ~/.dotfiles: `install.sh iso desktop-vm`, reboot, `install.sh nixos
-# desktop-vm`. A bare-metal desktop later is its own leaf composing
-# the same desktop modules on its own hardware.
+# Desktop on QEMU's aarch64 virt machine, accelerated by HVF on the mac.
+# Use virtio-blk disks: system on vda, swap on vdb. Mounts use labels.
+# Install with `install.sh iso desktop-vm`, then after reboot run
+# `install.sh nixos desktop-vm` for the checkout home-manager links into.
 { ... }:
 
 {
@@ -25,13 +19,14 @@
     ./hardware-vm.nix
   ];
 
-  nixpkgs.hostPlatform = "x86_64-linux";
+  nixpkgs.hostPlatform = "aarch64-linux";
 
-  # Proxmox: display=virtio (or virtio-gl), audio0
-  # device=ich9-intel-hda,driver=spice. SPICE guest side: clipboard
-  # both ways and the display following the client window. This is
-  # the system half; the session half is `exec spice-vdagent` in the
-  # sway config.
+  disko.devices.disk = {
+    main.device = "/dev/vda";
+    swap.device = "/dev/vdb";
+  };
+
+  # Optional SPICE integration when QEMU exposes a vdagent channel.
   services.spice-vdagentd.enable = true;
 
   system.stateVersion = "26.05";

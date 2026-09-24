@@ -47,9 +47,8 @@
             ]
         );
 
-      # Flake-input plumbing shared by the desktop leaves (Proxmox and
-      # UTM): disko, nix-flatpak and home-manager with the desktop
-      # home layers.
+      # Desktop input plumbing: disko, nix-flatpak and home-manager
+      # with the desktop home layers.
       desktopModules = [
         disko.nixosModules.disko
         nix-flatpak.nixosModules.nix-flatpak
@@ -136,14 +135,6 @@
           os = "linux";
         };
         modules = [ ./host-desktop-vm.nix ] ++ desktopModules;
-      };
-
-      # $ dots set desktop-utm; dots rebuild
-      nixosConfigurations."desktop-utm" = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          os = "linux";
-        };
-        modules = [ ./host-desktop-utm.nix ] ++ desktopModules;
       };
 
       # Generic guests: one configuration, spawned as many times as

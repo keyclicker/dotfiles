@@ -65,8 +65,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── platform-vm.nix          # QEMU guests (Proxmox, incus, UTM): networkd
 │                            # DHCP on eth0, systemd-boot, serial console,
-│                            # hostname from DHCP / local.nix, SPICE agent
-│                            # (graphical.target only)
+│                            # hostname from DHCP / local.nix
 ├── platform-container.nix   # LXC guests (incus, Proxmox CT): hostname
 │                            # from lxc, no build sandbox
 │
@@ -86,10 +85,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
-├── host-desktop-vm.nix      # desktop VM (#35): the mac's stack on sway, no
-│                            # identity; Proxmox on the x86 box
-├── host-desktop-utm.nix     # the same under UTM on the mac: aarch64,
-│                            # virtio-blk disk names, pl011 console
+├── host-desktop-vm.nix      # aarch64 desktop on handwritten QEMU/HVF
+│                            # on the mac: virtio-blk disks, PL011 console
 ├── host-vm.nix              # generic VM, spawned N times, no identity
 ├── host-container.nix       # generic container, same idea
 └── host-standalone.nix      # any foreign Linux (Ubuntu pi, VPS): user
@@ -119,7 +116,6 @@ Outputs by leaf:
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
 | `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + html-serving + iperf + vm + hardware; home dotfiles + agents |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
-| `desktop-utm`                    | `host-desktop-utm.nix`| the same on aarch64 (UTM on the mac)                                |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container; home dotfiles       |
 | `keyclicker@standalone-<system>` | `host-standalone.nix`| home standalone                                                       |
@@ -263,7 +259,7 @@ sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
 # desktop VM (`iso desktop-vm` first, then `install.sh nixos desktop-vm` for
-# the checkout home-manager links into); UTM on the mac: desktop-utm
+# the checkout home-manager links into); aarch64 QEMU on Apple silicon
 sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#desktop-vm
 
 # generic guests (`iso vm` above first, then switch)
@@ -294,3 +290,21 @@ find ~ ~/.config ~/.claude ~/.codex ~/.gnupg -maxdepth 1 -name '*.hm-bak'
 Verify with `readlink -f ~/.zshrc` — it should resolve to
 `~/.dotfiles/.zshrc` (via one store-path indirection, which is how
 `mkOutOfStoreSymlink` works).
+
+## Desktop QEMU on Apple silicon
+
+`desktop-vm` is the single ARM desktop target; the former `desktop-utm`
+output is removed. Existing ARM guests can run `dots set desktop-vm`
+before rebuilding. The former x86 desktop needs a fresh ARM installation;
+its system disk cannot be reused as an ARM installation.
+
+Use QEMU's `virt` machine with HVF, UEFI firmware with writable variables,
+virtio-blk system and swap disks (`vda` / `vdb`), a `virtio-gpu-pci` display,
+a USB keyboard/tablet, and a virtio network adapter. The serial console is
+`ttyAMA0`; the headless x86 `vm` target still uses `ttyS0`.
+
+Boot an aarch64 NixOS installer ISO and run `install.sh iso desktop-vm`.
+This formats both attached disks. After rebooting without the ISO, run
+`install.sh nixos desktop-vm` to clone the dotfiles and pin the target.
+The SPICE guest agent remains available if a QEMU client supplies its
+channel; a basic Cocoa window does not provide SPICE integration.
