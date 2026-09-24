@@ -1,5 +1,10 @@
 # Shared by NixOS VMs running under Proxmox/QEMU.
-{ lib, modulesPath, ... }:
+{
+  lib,
+  modulesPath,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -50,7 +55,7 @@
   };
 
   boot = {
-    # All our Proxmox VMs use OVMF/UEFI.
+    # QEMU guests boot through UEFI (OVMF on x86, EDK2 on ARM).
     loader = {
       timeout = 0;
 
@@ -62,11 +67,13 @@
       efi.canTouchEfiVariables = true;
     };
 
-    # Keep VGA as a fallback, but make Proxmox serial0 usable as the
-    # primary terminal through xterm.js / `qm terminal`.
+    # Keep the display console; use the UART exposed by each machine.
+    # ARM virt has PL011, while the x86 guests use a 16550.
     kernelParams = [
       "console=tty0"
-      "console=ttyS0,115200n8"
+      (
+        if pkgs.stdenv.hostPlatform.isAarch64 then "console=ttyAMA0,115200n8" else "console=ttyS0,115200n8"
+      )
 
       # Proactively evict pages that haven't been touched for 2
       # minutes so the guest's footprint shrinks back after IO bursts
