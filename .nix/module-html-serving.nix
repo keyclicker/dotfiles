@@ -1,7 +1,8 @@
 # Shared HTML directory, available privately through Tailscale Serve.
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
+  projects = "${config.users.users.keyclicker.home}/projects";
   public = "${config.users.users.keyclicker.home}/public";
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
 in
@@ -14,7 +15,14 @@ in
     serviceConfig = {
       User = "keyclicker";
       Group = "users";
-      ExecStart = "${python}/bin/python ${../.scripts/html-serving}/server.py --directory ${public}";
+      ExecStart = lib.escapeShellArgs [
+        "${python}/bin/python"
+        "${../.scripts/html-serving}/server.py"
+        "--directory"
+        public
+        "--allow-root"
+        projects
+      ];
       Restart = "on-failure";
       RestartSec = 3;
       NoNewPrivileges = true;

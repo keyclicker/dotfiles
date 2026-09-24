@@ -18,10 +18,19 @@ TEMPLATES = Environment(
 
 
 class DirectoryHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, allowed_roots=(), **kwargs):
+        self.allowed_roots = tuple(Path(root).resolve() for root in allowed_roots)
+        super().__init__(*args, **kwargs)
+
+    def is_allowed(self, path):
+        """Return whether path resolves inside a configured public root."""
+        resolved = path.resolve()
+        roots = (Path(self.directory), *self.allowed_roots)
+        return any(resolved.is_relative_to(root) for root in roots)
+
     def send_head(self):
-        root = Path(self.directory)
         path = Path(self.translate_path(self.path))
-        if not path.resolve().is_relative_to(root):
+        if not self.is_allowed(path):
             self.send_error(403)
             return None
 
@@ -41,7 +50,7 @@ class DirectoryHandler(SimpleHTTPRequestHandler):
             return None
 
         for child in children:
-            if not child.resolve().is_relative_to(root):
+            if not self.is_allowed(child):
                 continue
             try:
                 stat = child.stat()
@@ -80,7 +89,12 @@ class DirectoryHandler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=Path.home() / "public")
+    parser.add_argument("--allow-root", action="append", default=[], type=Path)
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
-    handler = partial(DirectoryHandler, directory=str(args.directory.resolve()))
+    handler = partial(
+        DirectoryHandler,
+        allowed_roots=args.allow_root,
+        directory=str(args.directory.resolve()),
+    )
     ThreadingHTTPServer(("127.0.0.1", args.port), handler).serve_forever()
