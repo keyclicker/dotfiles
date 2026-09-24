@@ -2,7 +2,6 @@
 { config, lib, pkgs, ... }:
 
 let
-  ai = "${config.users.users.keyclicker.home}/monorepo/AI";
   projects = "${config.users.users.keyclicker.home}/projects";
   public = "${config.users.users.keyclicker.home}/public";
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
@@ -21,8 +20,6 @@ in
         "${../.scripts/html-serving}/server.py"
         "--directory"
         public
-        "--allow-root"
-        ai
         "--allow-root"
         projects
       ];
