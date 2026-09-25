@@ -10,10 +10,26 @@ let
   baseDir = "/var/lib/t3";
 in
 {
-  imports = [ ./option-lan.nix ];
-
-  # The web UI stays LAN-only.
-  local.lan.allowedTCPPorts = [ 3773 ];
+  # Keep the backend local; Tailscale Serve owns the HTTPS listener.
+  systemd.services.t3-tailnet = {
+    description = "Expose T3 over Tailscale";
+    wantedBy = [ "multi-user.target" ];
+    wants = [
+      "tailscaled.service"
+      "t3.service"
+    ];
+    after = [
+      "tailscaled.service"
+      "t3.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --https=443 http://127.0.0.1:3773";
+      Restart = "on-failure";
+      RestartSec = 15;
+    };
+  };
 
   # The CLI (`t3 auth pairing create`, `t3 project ...`) defaults to
   # ~/.t3, a different store than the service reads, so tokens minted
@@ -46,7 +62,7 @@ in
       ExecStart = "${pkgs.writeShellScript "t3-server" ''
         exec ${t3} \
           --mode web \
-          --host 0.0.0.0 \
+          --host 127.0.0.1 \
           --port 3773 \
           --no-browser \
           --base-dir ${baseDir}

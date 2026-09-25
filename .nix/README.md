@@ -33,17 +33,17 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-slopbox.nix       # t3 code web server (3773, LAN), exec'ing the
+├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
 │                            # npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
 │                            # Python server + Jinja template in .scripts
-├── module-iperf.nix         # iperf3 server (5201, all interfaces)
-├── module-incus.nix         # incus + web UI (8443, LAN + tailscale),
+├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
+├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
 ├── module-dockge.nix        # dockge on the docker socket; written, not
 │                            # composed anywhere (password-only web UI)
-├── module-ollama-desktop.nix # ollama on loopback: launchd user agent on
-│                             # the mac, services.ollama on NixOS, one tuning
+├── module-ollama-desktop.nix # ollama on loopback + tailnet TCP 11434;
+│                            # launchd on mac, services.ollama on NixOS
 ├── module-desktop-darwin.nix # the mac desktop below the apps: system
 │                             # defaults, Touch ID for sudo
 ├── module-desktop-linux.nix # the NixOS desktop below the apps: sway +
@@ -305,3 +305,42 @@ This formats both attached disks. After rebooting without the ISO, run
 `install.sh nixos desktop-vm` to clone the dotfiles and pin the target.
 The SPICE guest agent remains available if a QEMU client supplies its
 channel; a basic Cocoa window does not provide SPICE integration.
+
+## Service exposure
+
+The NixOS firewall uses native nftables. Its input chain still applies
+when Tailscale accepts a packet in its own base chain; do not switch back
+to the iptables backend or trust `tailscale0` wholesale.
+
+| Service | LAN | Tailscale | Local backend |
+| --- | --- | --- | --- |
+| SSH | TCP 22 | Closed | Wildcard listener, interface firewall |
+| mDNS | UDP 5353 | Closed | systemd-resolved |
+| DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
+| T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
+| HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
+| iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
+| Ollama (desktops) | Closed | TCP 11434 via Serve | 127.0.0.1:11434 |
+| Incus (VM hosts) | Closed | Closed | Unix socket only |
+| Dockge (not imported) | Closed | TCP 5001 | Wildcard listener, interface firewall |
+
+Tailscale's encrypted transport uses UDP 41641 on all interfaces. DHCP
+and ICMP retain the system firewall defaults. Incus guests get DNS and
+DHCP on `incusbr0`; the bridge does not bypass the host firewall.
+
+LAN means the configured `local.lan.interface` (normally `eth0`), not a
+source-subnet restriction. Localhost remains available for local clients.
+New host services should allow ports on `tailscale0` or bind loopback and
+use Tailscale Serve. Docker port publishing bypasses the host input chain:
+explicitly publish on a Tailscale address, never an unspecified address.
+
+On macOS, Ollama's launch agent uses the Homebrew Tailscale app's CLI.
+The app must be installed and signed in, and Serve must be permitted by
+tailnet policy. Apple-managed SSH, mDNS and the macOS firewall are not
+configured by this repo; their LAN restrictions need verification on the
+Mac. Standalone home-manager likewise does not own the distro firewall.
+
+Rebuild each managed host to apply these changes. Existing Incus preseed
+state has its HTTPS address explicitly cleared. T3's existing background
+Serve route on 443 is updated in place; unrelated Serve routes and Docker
+stacks are preserved. Apply the SSH restriction from the LAN or console.

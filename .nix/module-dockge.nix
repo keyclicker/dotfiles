@@ -6,7 +6,7 @@
 # Host networking on purpose: a docker-published port is DNAT'ed
 # ahead of the NixOS firewall and would be open on every interface.
 # In the host namespace dockge is an ordinary listener on 5001 and
-# the firewall gates it like any other service (LAN + tailscale).
+# the firewall gates it like any other service (Tailscale only).
 #
 # Not composable with platform-vm.nix as is: its docker remaps
 # container root to dockremap's range, which can neither open the
@@ -16,8 +16,6 @@
 { ... }:
 
 {
-  imports = [ ./option-lan.nix ];
-
   virtualisation.oci-containers = {
     backend = "docker";
 
@@ -33,6 +31,5 @@
     };
   };
 
-  local.lan.allowedTCPPorts = [ 5001 ];
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 5001 ];
 }
