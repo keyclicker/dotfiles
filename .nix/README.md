@@ -40,8 +40,6 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
-├── module-dockge.nix        # dockge on the docker socket; written, not
-│                            # composed anywhere (password-only web UI)
 ├── module-ollama-desktop.nix # ollama on loopback + tailnet TCP 11434;
 │                            # launchd on mac, services.ollama on NixOS
 ├── module-desktop-darwin.nix # the mac desktop below the apps: system
@@ -322,7 +320,6 @@ to the iptables backend or trust `tailscale0` wholesale.
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | TCP 11434 via Serve | 127.0.0.1:11434 |
 | Incus (VM hosts) | Closed | Closed | Unix socket only |
-| Dockge (not imported) | Closed | TCP 5001 | Wildcard listener, interface firewall |
 
 Tailscale's encrypted transport uses UDP 41641 on all interfaces. DHCP
 and ICMP retain the system firewall defaults. Incus guests get DNS and
