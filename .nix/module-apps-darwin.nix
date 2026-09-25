@@ -1,6 +1,6 @@
 # GUI apps on the mac, as homebrew casks (self-updating, signed,
 # what the apps' own installers would put in /Applications), plus
-# the mac-only packages from nixpkgs. module-apps-linux.nix is the
+# selected packages from nixpkgs. module-apps-linux.nix is the
 # same set for the NixOS desktop.
 { pkgs, ... }:
 
@@ -21,11 +21,11 @@
       "ghostty"
       "github"
       "visual-studio-code"
-      "imhex"
 
       "chatgpt"
       "claude"
       "t3-code"
+      "muse"
 
       "postico"
       "postman"
@@ -35,17 +35,16 @@
       "raspberry-pi-imager"
       "utm"
 
-      "qbittorrent"
       "spotify"
 
       "obs"
-      "xld"
       "grandperspective"
       "blender"
       "adobe-creative-cloud"
 
       "obsidian"
       "discord"
+      "telegram"
       "puremac"
       "mactex-no-gui"
 
@@ -54,9 +53,13 @@
     ];
   };
 
-  # Mac-only packages; cross-platform ones come from module-core,
-  # module-workstation and profile-desktop.
+  # Packages managed by Nix on macOS.
   environment.systemPackages = with pkgs; [
+    # Desktop apps
+    imhex
+    qbittorrent
+    xld
+
     # Containers
     docker
     docker-buildx
