@@ -17,8 +17,18 @@
 
   programs.zsh.enable = true;
   programs.nix-ld.enable = true;
-  services.tailscale.enable = true;
+
+  # Separate nftables base chains keep NixOS restrictions effective even
+  # when Tailscale accepts a packet in its own chain.
+  networking.nftables.enable = true;
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+  };
   virtualisation.docker.enable = true;
+
+  # Only host administration and discovery belong on the LAN.
+  local.lan.allowedTCPPorts = [ 22 ];
 
   # mDNS responder (resolved below)
   local.lan.allowedUDPPorts = [ 5353 ];
@@ -33,7 +43,10 @@
 
   users.users.keyclicker = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [
+      "wheel"
+      "docker"
+    ];
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIGovJeDnHrDiFm+8iu2ucNSBCifqQVycI93JRYeTyj0VAAAADXNzaDp5dWJpLW5hbm8= ssh:yubi-nano"
@@ -56,6 +69,7 @@
 
   services.openssh = {
     enable = true;
+    openFirewall = false;
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;

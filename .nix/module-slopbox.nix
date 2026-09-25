@@ -10,10 +10,9 @@ let
   baseDir = "/var/lib/t3";
 in
 {
-  imports = [ ./option-lan.nix ];
+  imports = [ ./option-tailnet.nix ];
 
-  # The web UI stays LAN-only.
-  local.lan.allowedTCPPorts = [ 3773 ];
+  local.tailnet.https."443" = "http://127.0.0.1:3773";
 
   # The CLI (`t3 auth pairing create`, `t3 project ...`) defaults to
   # ~/.t3, a different store than the service reads, so tokens minted
@@ -46,7 +45,7 @@ in
       ExecStart = "${pkgs.writeShellScript "t3-server" ''
         exec ${t3} \
           --mode web \
-          --host 0.0.0.0 \
+          --host 127.0.0.1 \
           --port 3773 \
           --no-browser \
           --base-dir ${baseDir}
