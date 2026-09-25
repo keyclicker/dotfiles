@@ -40,7 +40,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
-├── module-ollama-desktop.nix # ollama on loopback + tailnet TCP 11434;
+├── module-ollama-desktop.nix # ollama on loopback only;
 │                            # launchd on mac, services.ollama on NixOS
 ├── module-desktop-darwin.nix # the mac desktop below the apps: system
 │                             # defaults, Touch ID for sudo
@@ -318,7 +318,7 @@ to the iptables backend or trust `tailscale0` wholesale.
 | T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
 | HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
-| Ollama (desktops) | Closed | TCP 11434 via Serve | 127.0.0.1:11434 |
+| Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
 | Incus (VM hosts) | Closed | Closed | Unix socket only |
 
 Tailscale's encrypted transport uses UDP 41641 on all interfaces. DHCP
@@ -331,11 +331,21 @@ New host services should allow ports on `tailscale0` or bind loopback and
 use Tailscale Serve. Docker port publishing bypasses the host input chain:
 explicitly publish on a Tailscale address, never an unspecified address.
 
-On macOS, Ollama's launch agent uses the Homebrew Tailscale app's CLI.
-The app must be installed and signed in, and Serve must be permitted by
-tailnet policy. Apple-managed SSH, mDNS and the macOS firewall are not
-configured by this repo; their LAN restrictions need verification on the
-Mac. Standalone home-manager likewise does not own the distro firewall.
+Service modules import `option-tailnet.nix` and declare only their routes:
+
+```nix
+local.tailnet.https."443" = "http://127.0.0.1:3773";
+local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
+```
+
+Each generated oneshot unit configures one background Serve listener.
+`tailscaled` handles the traffic; stopping the unit removes just its port.
+Serve must be permitted by tailnet policy. Unrelated routes stay intact.
+
+Mac and desktop Ollama stay loopback-only. Apple-managed SSH, mDNS and the
+macOS firewall are not configured by this repo; their LAN restrictions
+need verification on the Mac. Standalone home-manager likewise does not
+own the distro firewall.
 
 Rebuild each managed host to apply these changes. Existing Incus preseed
 state has its HTTPS address explicitly cleared. T3's existing background

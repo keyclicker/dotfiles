@@ -1,5 +1,10 @@
 # Shared HTML directory, available privately through Tailscale Serve.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   projects = "${config.users.users.keyclicker.home}/projects";
@@ -7,6 +12,10 @@ let
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
 in
 {
+  imports = [ ./option-tailnet.nix ];
+
+  local.tailnet.https."8444" = "http://127.0.0.1:8765";
+
   systemd.tmpfiles.rules = [ "d ${public} 0755 keyclicker users -" ];
 
   systemd.services.html-serving = {
@@ -26,28 +35,6 @@ in
       Restart = "on-failure";
       RestartSec = 3;
       NoNewPrivileges = true;
-    };
-  };
-
-  # Configure just this port, leaving other tailnet services alone.
-  systemd.services.html-serving-tailnet = {
-    description = "Expose the HTML directory over Tailscale";
-    wantedBy = [ "multi-user.target" ];
-    wants = [
-      "tailscaled.service"
-      "html-serving.service"
-    ];
-    after = [
-      "tailscaled.service"
-      "html-serving.service"
-    ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --https=8444 http://127.0.0.1:8765";
-      TimeoutStartSec = 30;
-      Restart = "on-failure";
-      RestartSec = 15;
     };
   };
 }
