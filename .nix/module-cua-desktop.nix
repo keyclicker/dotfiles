@@ -1,4 +1,4 @@
-# Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only VNC.
+# Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only noVNC.
 {
   config,
   pkgs,
@@ -6,6 +6,10 @@
 }:
 
 {
+  imports = [ ./option-tailnet.nix ];
+
+  local.tailnet.https."8445" = "http://127.0.0.1:6080";
+
   services.xserver = {
     enable = true;
     displayManager.lightdm.enable = false;
@@ -69,19 +73,23 @@
     };
   };
 
-  # Tailnet identity gates access; the unauthenticated VNC backend is local.
-  systemd.services.vnc-tailnet = {
-    description = "Expose TigerVNC over Tailscale";
+  # Serve the browser client and bridge WebSockets to the local VNC server.
+  systemd.services.novnc = {
+    description = "Browser access to the XFCE desktop";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "tailscaled.service" ];
-    after = [ "tailscaled.service" ];
     serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --tcp=5901 tcp://127.0.0.1:5901";
-      TimeoutStartSec = 30;
+      ExecStart = builtins.concatStringsSep " " [
+        "${pkgs.python3Packages.websockify}/bin/websockify"
+        "--web ${pkgs.novnc}/share/webapps/novnc"
+        "127.0.0.1:6080 127.0.0.1:5901"
+      ];
+      DynamicUser = true;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
       Restart = "on-failure";
-      RestartSec = 15;
+      RestartSec = 3;
     };
   };
 

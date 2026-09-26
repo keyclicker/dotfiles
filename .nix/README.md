@@ -33,7 +33,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # XFCE/X11 + Cua + Tailnet-only TigerVNC
+├── module-cua-desktop.nix   # XFCE/X11 + Cua + Tailnet-only noVNC
 ├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
 │                            # npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
@@ -310,7 +310,9 @@ channel; a basic Cocoa window does not provide SPICE integration.
 `agents` runs a persistent XFCE/X11 session on TigerVNC. Cua Driver uses
 its official prebuilt installer; Nix provides its runtime libraries through
 `nix-ld` and starts `~/.local/bin/cua-driver` with the desktop. Do not use
-Cua's source-building flake on this VM.
+Cua's source-building flake on this VM. The driver binary is installed
+manually, outside Nix; a fresh machine needs the step below. Keep this
+manual installation until a suitable prebuilt Nix package is available.
 
 Install the prebuilt driver once as the desktop user:
 
@@ -321,10 +323,15 @@ bash /tmp/cua-install.sh --no-modify-path
 
 After updating Cua, restart it with `systemctl --user restart cua-driver`.
 
-Connect TigerVNC Viewer to `agents:1` while on the tailnet. Tailscale Serve
-forwards TCP 5901 to the loopback-only VNC server. Tailnet access rules are
-the login gate; no separate VNC password is required. X11 clients use a
-private session cookie, and X11's TCP listener is disabled.
+Open `https://<tailnet-hostname>:8445/vnc.html?autoconnect=true&resize=remote`
+in a browser while connected to the tailnet. noVNC is the browser client;
+TigerVNC supplies the virtual X11 display. Websockify serves noVNC and
+bridges its WebSocket connection to the local VNC server.
+
+`local.tailnet.https` exposes the loopback-only web service through
+Tailscale Serve. Tailnet access rules are the login gate; no separate VNC
+password is required. Raw VNC stays on loopback. X11 clients use a private
+session cookie, and X11's TCP listener is disabled.
 
 The `vnc-desktop` user service starts at boot through user lingering;
 `xinit` manages the X server and desktop together. Cua starts with the
@@ -351,7 +358,7 @@ to the iptables backend or trust `tailscale0` wholesale.
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
 | T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
-| VNC (agents) | Closed | TCP 5901 via Serve | 127.0.0.1:5901 |
+| Desktop (agents) | Closed | HTTPS 8445 via Serve | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
 | HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
