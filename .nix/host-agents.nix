@@ -11,6 +11,7 @@
     ./module-cua-desktop.nix
     ./module-slopbox.nix
     ./module-html-serving.nix
+    ./module-gateway.nix
     ./module-projects-smb.nix
     ./module-iperf.nix
     ./platform-vm.nix
@@ -32,6 +33,7 @@
   # module-slopbox.nix, XFCE desktop and Cua from
   # module-cua-desktop.nix, iperf3 server from module-iperf.nix,
   # HTML directory serving from module-html-serving.nix,
+  # the tailnet front door for all of them from module-gateway.nix,
   # tailnet project sharing from module-projects-smb.nix,
   # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents
   # are npm globals in the home layer (home-agents.nix, wired in

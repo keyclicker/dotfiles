@@ -74,6 +74,11 @@ class DirectoryServerTests(unittest.TestCase):
         self.assertIn('href="index.html"', listing)
         self.assertEqual(self.get("example/index.html"), "<h1>Example</h1>")
 
+    def test_root_link_is_relative_for_path_prefixes(self):
+        (self.root / "a" / "b").mkdir(parents=True)
+        self.assertIn('<h1><a href="./">', self.get())
+        self.assertIn('<h1><a href="../../">', self.get("a/b/"))
+
     def test_symlinks_cannot_expose_files_outside_public(self):
         outside = self.root.parent / "private.html"
         outside.write_text("Private document")
