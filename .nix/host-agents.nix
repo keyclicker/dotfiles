@@ -8,6 +8,7 @@
     ./module-workstation.nix
     ./profile-server.nix
     ./module-browser.nix
+    ./module-cua-desktop.nix
     ./module-slopbox.nix
     ./module-html-serving.nix
     ./module-projects-smb.nix
@@ -28,7 +29,8 @@
   # module-workstation.nix, server basics (zsh, terminfo,
   # docker, tailscale) from profile-server.nix, chromium and
   # agent-browser from module-browser.nix, t3 web server from
-  # module-slopbox.nix, iperf3 server from module-iperf.nix,
+  # module-slopbox.nix, XFCE and Cua from module-cua-desktop.nix,
+  # iperf3 server from module-iperf.nix,
   # HTML directory serving from module-html-serving.nix,
   # tailnet project sharing from module-projects-smb.nix,
   # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents

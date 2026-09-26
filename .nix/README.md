@@ -33,6 +33,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
+├── module-cua-desktop.nix   # XFCE/X11 console + Cua + SPICE guest tools
+├── package-cua-driver.nix   # pinned upstream Cua binary, patched for NixOS
 ├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
 │                            # npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
@@ -303,6 +305,28 @@ This formats both attached disks. After rebooting without the ISO, run
 `install.sh nixos desktop-vm` to clone the dotfiles and pin the target.
 The SPICE guest agent remains available if a QEMU client supplies its
 channel; a basic Cocoa window does not provide SPICE integration.
+
+## Agents desktop
+
+`agents` runs XFCE on X11 with automatic console login, SPICE guest
+integration, and Cua Driver. `package-cua-driver.nix` pins the upstream
+release and hash; update those together instead of using Cua's self-updater.
+The user service starts with `graphical-session.target` and uses Cua's
+default permission mode and local Unix socket.
+
+Proxmox supplies the SPICE server and virtual display. Configure the VM's
+display as SPICE/QXL and cold-start it to expose the guest agent channel.
+The guest module does not open a SPICE TCP port. Remote clients need access
+to the Proxmox SPICE proxy through the tailnet and a console ticket issued
+by Proxmox.
+
+From a terminal in the desktop session:
+
+```sh
+cua-driver doctor
+cua-driver status
+systemctl --user status cua-driver
+```
 
 ## Service exposure
 
