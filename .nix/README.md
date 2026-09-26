@@ -331,12 +331,23 @@ New host services should allow ports on `tailscale0` or bind loopback and
 use Tailscale Serve. Docker port publishing bypasses the host input chain:
 explicitly publish on a Tailscale address, never an unspecified address.
 
-Each service declares a small systemd oneshot unit running
-`tailscale serve --bg`. The Tailscale daemon handles traffic; `ExecStop`
-removes that unit's port when it stops, including removal during a rebuild.
-Manual routes on other ports are preserved. Changes made manually to a
-managed port are overwritten when its unit restarts, not continuously
-reconciled. Serve must be permitted by tailnet policy.
+Service modules import `option-tailnet.nix` and declare their routes:
+
+```nix
+local.tailnet.https."443" = "http://127.0.0.1:3773";
+local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
+```
+
+The thin wrapper generates one oneshot unit per port. Tailscaled handles
+traffic; stopping a unit removes only its listener. Removing a declaration
+and rebuilding therefore removes the route. Manual routes on other ports
+remain intact. Manual changes to managed ports are overwritten when their
+units restart, not continuously reconciled. Each port must appear in only
+one map; Tailscale validates the port and target when applying the route.
+
+The pinned upstream `services.tailscale.serve` module targets named
+Tailscale Services and couples the frontend and backend web protocols.
+Keep this wrapper for HTTPS-to-HTTP routes on the existing machine address.
 
 Mac and desktop Ollama stay loopback-only. Apple-managed SSH, mDNS and the
 macOS firewall are not configured by this repo; their LAN restrictions

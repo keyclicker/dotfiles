@@ -10,6 +10,10 @@ let
   baseDir = "/var/lib/t3";
 in
 {
+  imports = [ ./option-tailnet.nix ];
+
+  local.tailnet.https."443" = "http://127.0.0.1:3773";
+
   # The CLI (`t3 auth pairing create`, `t3 project ...`) defaults to
   # ~/.t3, a different store than the service reads, so tokens minted
   # there are "invalid" to the server. Point it at the same dir.
@@ -48,25 +52,6 @@ in
       ''}";
       Restart = "on-failure";
       RestartSec = 5;
-    };
-  };
-
-  # Own this Serve port; leave unrelated routes alone.
-  systemd.services.t3-tailnet = {
-    wantedBy = [ "multi-user.target" ];
-    wants = [ "tailscaled.service" ];
-    after = [
-      "tailscaled.service"
-      "t3.service"
-    ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --yes --https=443 http://127.0.0.1:3773";
-      ExecStop = "${pkgs.tailscale}/bin/tailscale serve --https=443 off";
-      TimeoutStartSec = 30;
-      Restart = "on-failure";
-      RestartSec = 15;
     };
   };
 }
