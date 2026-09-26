@@ -11,8 +11,6 @@
     ./module-nvim-minimal.nix
     ./profile-server.nix
     ./module-incus.nix
-    # module-dockge.nix exists but stays out: password-only web UI on
-    # the docker socket; lazydocker over ssh does for now.
     ./platform-vm.nix
     ./hardware-vm.nix
   ];
