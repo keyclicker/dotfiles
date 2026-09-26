@@ -16,8 +16,9 @@ Tailscale terminates HTTPS on 443 and forwards it to nginx on
 - `nginx.conf` holds every route. It is included into nginx's `http`
   block, and `@site@` is replaced with this directory.
 - `index.html` is the static services list served at `/`.
-- `../../.nix/module-gateway.nix` enables nginx and declares the 443
-  route via `option-tailnet.nix`.
+- `../../.nix/module-gateway.nix` enables nginx, runs the
+  html-serving directory server and declares the 443 route via
+  `option-tailnet.nix`.
 
 Apps that load assets from `/` (T3, Udex) can't live under a path, so
 they keep their own tailnet ports; the index links to them through

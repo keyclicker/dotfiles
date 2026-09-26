@@ -14,7 +14,7 @@ root does not publish it automatically.
 - `server.py` handles files and directory metadata.
 - `index.html` is the Jinja template, with HTML escaping enabled.
 - `style.css` is included in the rendered page.
-- `../../.nix/module-html-serving.nix` supplies Python/Jinja and the systemd
+- `../../.nix/module-gateway.nix` supplies Python/Jinja and the systemd
   service, and creates the public directory.
 
 The agents host imports the module. After merging, `dots rebuild` installs
