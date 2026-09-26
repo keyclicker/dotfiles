@@ -33,6 +33,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
+├── module-cua-desktop.nix   # XFCE/X11 + Cua + Tailnet-only noVNC
 ├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
 │                            # npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
@@ -304,6 +305,40 @@ This formats both attached disks. After rebooting without the ISO, run
 The SPICE guest agent remains available if a QEMU client supplies its
 channel; a basic Cocoa window does not provide SPICE integration.
 
+## Agents desktop
+
+`agents` runs a persistent XFCE/X11 desktop for computer use. TigerVNC
+supplies the virtual display; the `vnc-desktop` user service starts it at
+boot through lingering, and viewer disconnects leave it running.
+
+Open it in a browser while on the tailnet:
+
+```text
+https://<tailnet-hostname>:8445/vnc.html?autoconnect=true&resize=remote
+```
+
+Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
+rules are the only login gate: VNC has no password and never leaves
+loopback, X11 uses a private cookie and no TCP listener.
+
+Cua Driver is the one manual step. Nix has no prebuilt package, and Cua's
+own flake compiles from source, so install the official binary once as
+the desktop user:
+
+```sh
+curl -fsSL https://cua.ai/driver/install.sh -o /tmp/cua-install.sh
+bash /tmp/cua-install.sh --no-modify-path
+```
+
+Nix supplies its libraries through `nix-ld` and starts
+`~/.local/bin/cua-driver` with the graphical session. After an update:
+`systemctl --user restart cua-driver`. To debug, from a desktop terminal:
+
+```sh
+cua-driver doctor
+systemctl --user status vnc-desktop cua-driver
+```
+
 ## Service exposure
 
 The NixOS firewall uses native nftables. Its input chain still applies
@@ -316,6 +351,7 @@ to the iptables backend or trust `tailscale0` wholesale.
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
 | T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
+| Desktop (agents) | Closed | HTTPS 8445 via Serve | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
 | HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
