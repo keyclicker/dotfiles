@@ -29,6 +29,14 @@
         "read only" = "no";
         "guest ok" = "yes";
         "guest only" = "yes";
+
+        # Keep Finder litter out of the repos: refuse `.DS_Store`, and
+        # store Mac metadata in xattrs instead of `._*` AppleDouble files.
+        "veto files" = "/.DS_Store/";
+        "delete veto files" = "yes";
+        "vfs objects" = "catia fruit streams_xattr";
+        "fruit:metadata" = "stream";
+        "fruit:resource" = "stream";
       };
     };
   };
