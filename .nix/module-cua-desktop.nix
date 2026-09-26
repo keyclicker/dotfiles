@@ -1,27 +1,56 @@
 # Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only noVNC
 # (module-gateway.nix serves it at /desktop/).
 {
-  config,
   lib,
   pkgs,
   ...
 }:
 
 let
-  display = ":1";
+  cuaDriver = import ./package-cua-driver.nix { inherit pkgs; };
   vncPort = "5901";
   webPort = "6080";
-  xauthority = "%t/vnc-desktop/Xauthority";
-
-  # 4:3 and fixed: agents click in screenshot pixels, so the frame must not
-  # follow whoever's browser window is open. noVNC scales it instead.
-  geometry = "1280x960";
 in
 {
   services.xserver = {
     enable = true;
-    # vnc-desktop below starts the session; no login screen.
-    displayManager.lightdm.enable = false;
+    videoDrivers = [ "dummy" ];
+
+    # A real Xorg server hot-plugs Cua's virtual input devices; Xvnc cannot.
+    # Keep the 4:3 frame independent of the viewer's browser dimensions.
+    resolutions = [
+      {
+        x = 1280;
+        y = 960;
+      }
+    ];
+    virtualScreen = {
+      x = 1280;
+      y = 960;
+    };
+    serverFlagsSection = ''
+      Option "BlankTime" "0"
+      Option "StandbyTime" "0"
+      Option "SuspendTime" "0"
+      Option "OffTime" "0"
+    '';
+    monitorSection = ''
+      HorizSync 30-100
+      VertRefresh 50-100
+    '';
+    deviceSection = ''
+      VideoRam 16384
+    '';
+
+    displayManager.lightdm = {
+      enable = true;
+      greeter.enable = false;
+      extraConfig = ''
+        logind-check-graphical = false
+        minimum-display-number = 1
+      '';
+    };
+
     desktopManager.xfce = {
       enable = true;
       # The server account has no password to unlock a screensaver.
@@ -29,71 +58,69 @@ in
     };
   };
 
-  # Default fonts come with X; noto covers the rest of the web.
-  fonts.packages = [ pkgs.noto-fonts ];
-
-  # Start the desktop at boot, not at the first login.
-  users.users.keyclicker.linger = true;
-
-  # xinit owns both processes: restarting the service restarts the session.
-  systemd.user.services.vnc-desktop = {
-    description = "XFCE desktop on TigerVNC";
-    wantedBy = [ "default.target" ];
-    environment = {
-      XAUTHORITY = xauthority;
-      XDG_SESSION_TYPE = "x11";
-      XDG_CURRENT_DESKTOP = "XFCE";
-    };
-    preStart = ''
-      umask 077
-      ${pkgs.xauth}/bin/xauth add ${display} . \
-        "$(${pkgs.util-linux}/bin/mcookie)"
-    '';
-    serviceConfig = {
-      RuntimeDirectory = "vnc-desktop";
-      ExecStart = toString [
-        "${pkgs.xinit}/bin/xinit"
-        config.services.displayManager.sessionData.wrapper
-        "${pkgs.xfce4-session}/bin/startxfce4"
-        "-- ${pkgs.tigervnc}/bin/Xvnc ${display}"
-        "-auth ${xauthority} -nolisten tcp"
-        "-rfbport ${vncPort} -localhost -SecurityTypes None -AlwaysShared"
-        "-geometry ${geometry} -AcceptSetDesktopSize=0 -depth 24 -s 0"
-      ];
-      Restart = "always";
-      RestartSec = 3;
+  services.displayManager = {
+    defaultSession = "xfce";
+    autoLogin = {
+      enable = true;
+      user = "keyclicker";
     };
   };
 
-  # Cua reads windows through the accessibility bus.
+  # Use NixOS's restricted uinput group, not a world-writable device.
+  hardware.uinput.enable = true;
+  users.users.keyclicker.extraGroups = [ "uinput" ];
+  users.users.keyclicker.linger = true;
+
+  fonts.packages = [ pkgs.noto-fonts ];
   services.gnome.at-spi2-core.enable = true;
 
-  # Cua's official prebuilt installer uses the standard Linux loader.
-  programs.nix-ld.libraries = with pkgs; [
-    libX11
-    libXi
-    libxkbcommon
-  ];
+  environment.systemPackages = [ cuaDriver ];
 
-  # Inherit the display and session bus imported by the X11 session wrapper.
+  # XFCE runs application autostarts after its window manager is ready.
+  # Starting at graphical-session.target races the compositor: Cua chooses
+  # its overlay visual once at startup, leaving the cursor invisible.
+  environment.etc."xdg/autostart/cua-desktop.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Cua desktop services
+    Exec=${pkgs.systemd}/bin/systemctl --user start cua-driver.service desktop-vnc.service
+    OnlyShowIn=XFCE;
+    Terminal=false
+    StartupNotify=false
+  '';
+
   systemd.user.services.cua-driver = {
     description = "Cua desktop automation";
-    wantedBy = [ "graphical-session.target" ];
     after = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
 
-    # Drop the unit's minimal PATH: apps launched through Cua need the
-    # session's PATH, imported by the X11 session wrapper.
+    # Preserve the graphical session's PATH for apps launched through Cua.
     environment.PATH = lib.mkForce null;
 
     serviceConfig = {
-      ExecStart = "%h/.local/bin/cua-driver serve";
+      ExecStart = "${cuaDriver}/bin/cua-driver serve";
       Restart = "on-failure";
       RestartSec = 2;
     };
   };
 
-  # Serve the browser client and bridge WebSockets to the local VNC server.
+  # Export the existing Xorg desktop; viewer disconnects leave it running.
+  # DISPLAY and XAUTHORITY come from the NixOS X11 session wrapper.
+  systemd.user.services.desktop-vnc = {
+    description = "Share the XFCE desktop over loopback VNC";
+    after = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = toString [
+        "${pkgs.tigervnc}/bin/x0vncserver"
+        "-rfbport ${vncPort} -localhost -SecurityTypes None -AlwaysShared"
+        "-AcceptSetDesktopSize=0"
+      ];
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
+
   systemd.services.novnc = {
     description = "Browser access to the XFCE desktop";
     wantedBy = [ "multi-user.target" ];

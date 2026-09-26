@@ -1,0 +1,23 @@
+AT-SPI InsertText takes a character offset but a UTF-8 byte length.
+Passing a character count truncates non-ASCII text in GTK applications.
+
+--- a/crates/platform-linux/src/atspi/native.rs
++++ b/crates/platform-linux/src/atspi/native.rs
+@@ -2732,7 +2732,7 @@
+         Ok(tp) => tp.caret_offset().await.unwrap_or(0),
+         Err(_) => 0,
+     };
+-    let len = text.chars().count() as i32;
++    let len = i32::try_from(text.len())?;
+ 
+     if et.insert_text(off, text, len).await.unwrap_or(false) {
+         return Ok(true);
+@@ -5189,7 +5189,7 @@
+             Ok(tp) => tp.caret_offset().await.unwrap_or(0),
+             Err(_) => 0,
+         };
+-        let len = value.chars().count() as i32;
++        let len = i32::try_from(value.len())?;
+         if et.insert_text(off, value, len).await.unwrap_or(false) {
+             commit_editable_write(&proxies).await;
+             return Ok(());

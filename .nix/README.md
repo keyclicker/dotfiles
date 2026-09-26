@@ -33,7 +33,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # XFCE/X11 + Cua + noVNC on loopback
+├── module-cua-desktop.nix   # XFCE/Xorg + Cua + noVNC on loopback
+├── package-cua-driver.nix   # upstream build with the AT-SPI Unicode fix
 ├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
 │                            # exec'ing the npm global of home-agents.nix
 ├── module-gateway.nix       # tailnet front door on 443: services index,
@@ -309,9 +310,19 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 ## Agents desktop
 
-`agents` runs a persistent XFCE/X11 desktop for computer use. TigerVNC
-supplies the virtual display; the `vnc-desktop` user service starts it at
-boot through lingering, and viewer disconnects leave it running.
+`agents` runs XFCE on a real Xorg server with the dummy video driver.
+LightDM logs the desktop user in automatically on display `:1`. The frame
+stays at 1280×960; noVNC scales it without changing the desktop resolution.
+TigerVNC's `x0vncserver` shares that display over loopback, and viewer
+disconnects leave the session running.
+
+Xorg and NixOS's `hardware.uinput` module let Cua hot-plug its virtual
+keyboard and pointer. The desktop user belongs to `uinput`; the device is
+not world-writable. Xvnc cannot provide this background-input route.
+
+Cua 0.29.1 preserves the core keyboard focus during background typing,
+but XFWM can mark the target title active. Treat the title highlight as
+separate from the window receiving the user's keys.
 
 Open it in a browser while on the tailnet:
 
@@ -323,24 +334,26 @@ Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
 rules are the only login gate: VNC has no password and never leaves
 loopback, X11 uses a private cookie and no TCP listener.
 
-Cua Driver is the manual part. Nix has no prebuilt package, and Cua's
-own flake compiles from source, so install the official binary once as
-the desktop user:
+Cua Driver is built from the pinned release with its upstream Nix recipe.
+`package-cua-driver.nix` applies the AT-SPI byte-length correction so
+non-ASCII text is not truncated. Remove that patch when a release includes
+the fix, then update the source tag and hash together.
+
+XFCE's standard application autostart starts the `cua-driver` and
+`desktop-vnc` user services after its window manager is ready. Do not attach
+Cua directly to `graphical-session.target`: that target starts before XFCE,
+and Cua can choose a non-composited overlay visual before the compositor
+exists. The colored agent cursor and action animations should be visible
+in noVNC. Both services stop with the graphical session.
+
+After replacing an existing manual installation, point MCP clients at the
+Nix-managed executable. Restart the agent's MCP connection after restarting
+the daemon. Remove the old `~/.local/bin/cua-driver` symlink if it still
+points to the manual installer, so shell commands also use the Nix build.
+The client configuration is mutable app state:
 
 ```sh
-curl -fsSL https://cua.ai/driver/install.sh -o /tmp/cua-install.sh
-bash /tmp/cua-install.sh --no-modify-path
-```
-
-Nix supplies its libraries through `nix-ld` and starts
-`~/.local/bin/cua-driver` with the graphical session. After an update:
-`systemctl --user restart cua-driver`.
-
-Then hand it to the agents. `~/.claude.json` and `~/.codex/config.toml`
-are mutable app state, so the MCP server is registered by hand:
-
-```sh
-cua=~/.local/bin/cua-driver
+cua=/run/current-system/sw/bin/cua-driver
 sock=~/.cache/cua-driver/cua-driver.sock
 
 # --socket is required: without it, `mcp` runs its own runtime in the
@@ -358,7 +371,7 @@ To debug, from a desktop terminal:
 
 ```sh
 cua-driver doctor
-systemctl --user status vnc-desktop cua-driver
+systemctl --user status desktop-vnc cua-driver
 ```
 
 ## Service exposure
