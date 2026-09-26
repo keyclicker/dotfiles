@@ -2,6 +2,7 @@
 # (module-gateway.nix serves it at /desktop/).
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -80,6 +81,11 @@ in
     wantedBy = [ "graphical-session.target" ];
     after = [ "graphical-session.target" ];
     partOf = [ "graphical-session.target" ];
+
+    # Drop the unit's minimal PATH: apps launched through Cua need the
+    # session's PATH, imported by the X11 session wrapper.
+    environment.PATH = lib.mkForce null;
+
     serviceConfig = {
       ExecStart = "%h/.local/bin/cua-driver serve";
       Restart = "on-failure";
