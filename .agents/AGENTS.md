@@ -200,7 +200,7 @@ We use Conventional Commits.
   `fix: handle expired tokens`, not `fix: handled expired tokens`.
 - Every commit message line, including header, body, and footers,
   MUST NOT exceed 72 characters. PR titles have the same limit.
-- Signing is not mandatory. You MAY skip it.
+- Signing is not mandatory on feature branches. You MAY skip it.
 
 ### Titles / Header Descriptions
 
