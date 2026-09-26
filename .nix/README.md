@@ -33,8 +33,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # XFCE/X11 console + Cua + SPICE guest tools
-├── package-cua-driver.nix   # pinned upstream Cua binary, patched for NixOS
+├── module-cua-desktop.nix   # XFCE/X11 + Cua + Tailnet-only TigerVNC
 ├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
 │                            # npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
@@ -308,24 +307,36 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 ## Agents desktop
 
-`agents` runs XFCE on X11 with automatic console login, SPICE guest
-integration, and Cua Driver. `package-cua-driver.nix` pins the upstream
-release and hash; update those together instead of using Cua's self-updater.
-The user service starts with `graphical-session.target` and uses Cua's
-default permission mode and local Unix socket.
+`agents` runs a persistent XFCE/X11 session on TigerVNC. Cua Driver uses
+its official prebuilt installer; Nix provides its runtime libraries through
+`nix-ld` and starts `~/.local/bin/cua-driver` with the desktop. Do not use
+Cua's source-building flake on this VM.
 
-Proxmox supplies the SPICE server and virtual display. Configure the VM's
-display as SPICE/QXL and cold-start it to expose the guest agent channel.
-The guest module does not open a SPICE TCP port. Remote clients need access
-to the Proxmox SPICE proxy through the tailnet and a console ticket issued
-by Proxmox.
+Install the prebuilt driver once as the desktop user:
+
+```sh
+curl -fsSL https://cua.ai/driver/install.sh -o /tmp/cua-install.sh
+bash /tmp/cua-install.sh --no-modify-path
+```
+
+After updating Cua, restart it with `systemctl --user restart cua-driver`.
+
+Connect TigerVNC Viewer to `agents:1` while on the tailnet. Tailscale Serve
+forwards TCP 5901 to the loopback-only VNC server. Tailnet access rules are
+the login gate; no separate VNC password is required. X11 clients use a
+private session cookie, and X11's TCP listener is disabled.
+
+The `vnc-desktop` user service starts at boot through user lingering;
+`xinit` manages the X server and desktop together. Cua starts with the
+graphical session, using the same display and accessibility bus. Viewer
+disconnects leave the desktop running. No Proxmox display changes needed.
 
 From a terminal in the desktop session:
 
 ```sh
 cua-driver doctor
 cua-driver status
-systemctl --user status cua-driver
+systemctl --user status vnc-desktop cua-driver
 ```
 
 ## Service exposure
@@ -340,6 +351,7 @@ to the iptables backend or trust `tailscale0` wholesale.
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
 | T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
+| VNC (agents) | Closed | TCP 5901 via Serve | 127.0.0.1:5901 |
 | HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
