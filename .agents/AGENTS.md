@@ -118,6 +118,18 @@ Please enjoy the abundance of packages and binaries in nix.
 
 Please notify me, if anything is broken and needs nix config patch.
 
+#### GUI desktop
+
+An XFCE desktop runs on X11 display `:1`, driven by the `cua-driver`
+daemon.
+
+- You MAY operate GUI apps there through the `cua-driver` MCP tools.
+  The `cua-driver` skill covers the observe, act, verify loop.
+- The desktop is shared between agents: one controller at a time.
+- Use the `cua-driver` CLI for diagnostics (`status`, `call health_report`).
+  `doctor` warns about a missing `DISPLAY` in agent shells; that's expected.
+- I can watch the desktop at `https://<node>/desktop/`.
+
 #### HTML serving
 
 `~/public/` is served privately over Tailscale HTTPS at
