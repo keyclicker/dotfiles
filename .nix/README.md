@@ -33,11 +33,14 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # XFCE/X11 + Cua + Tailnet-only noVNC
-├── module-slopbox.nix       # t3 code web server (HTTPS, tailnet), exec'ing the
-│                            # npm global of home-agents.nix
-├── module-html-serving.nix  # ~/public directory index (8444, Tailscale),
-│                            # Python server + Jinja template in .scripts
+├── module-cua-desktop.nix   # XFCE/X11 + Cua + noVNC on loopback
+├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
+│                            # exec'ing the npm global of home-agents.nix
+├── module-html-serving.nix  # ~/public directory index on loopback,
+│                            # Python server in packages/html-serving
+├── module-gateway.nix       # tailnet front door on 443: services index,
+│                            # nginx routes paths to the loopback services
+│                            # above (config in packages/gateway)
 ├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
@@ -111,7 +114,7 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + html-serving + iperf + vm + hardware; home dotfiles + agents |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + html-serving + gateway + iperf + vm + hardware; home dotfiles + agents |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container; home dotfiles       |
@@ -314,7 +317,7 @@ boot through lingering, and viewer disconnects leave it running.
 Open it in a browser while on the tailnet:
 
 ```text
-https://<tailnet-hostname>:8445/vnc.html?autoconnect=true&resize=remote
+https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=remote
 ```
 
 Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
@@ -350,9 +353,10 @@ to the iptables backend or trust `tailscale0` wholesale.
 | SSH | TCP 22 | Closed | Wildcard listener, interface firewall |
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
-| T3 (agents) | Closed | HTTPS 443 via Serve | 127.0.0.1:3773 |
-| Desktop (agents) | Closed | HTTPS 8445 via Serve | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
-| HTML (agents) | Closed | HTTPS 8444 via Serve | 127.0.0.1:8765 |
+| Gateway (agents) | Closed | HTTPS 443 via Serve | nginx 127.0.0.1:8080 |
+| T3 (agents) | Closed | HTTPS 3773 via Serve | 127.0.0.1:3773 |
+| Desktop (agents) | Closed | `/desktop/` via gateway | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
+| HTML (agents) | Closed | `/public/` via gateway | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
 | Incus (VM hosts) | Closed | Closed | Unix socket only |
@@ -370,9 +374,14 @@ explicitly publish on a Tailscale address, never an unspecified address.
 Service modules import `option-tailnet.nix` and declare their routes:
 
 ```nix
-local.tailnet.https."443" = "http://127.0.0.1:3773";
+local.tailnet.https."3773" = "http://127.0.0.1:3773";
 local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
 ```
+
+Serve listens on the tailnet address only, so a backend on loopback can
+share the port number. On agents, web apps that work under a path skip
+their own route: they bind loopback and `packages/gateway/nginx.conf`
+serves them on 443.
 
 The thin wrapper generates one oneshot unit per port. Tailscaled handles
 traffic; stopping a unit removes only its listener. Removing a declaration
@@ -391,6 +400,7 @@ need verification on the Mac. Standalone home-manager likewise does not
 own the distro firewall.
 
 Rebuild each managed host to apply these changes. Existing Incus preseed
-state has its HTTPS address explicitly cleared. T3's existing background
-Serve route on 443 is updated in place; unrelated Serve routes and Docker
+state has its HTTPS address explicitly cleared. The Serve route on 443 is
+updated in place (now the gateway, T3 moves to 3773), the old
+8444/8445 routes are removed; unrelated Serve routes and Docker
 stacks are preserved. Apply the SSH restriction from the LAN or console.

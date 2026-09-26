@@ -85,6 +85,8 @@ Brewfile       mac packages homebrew owns instead of nix
 .agents/       shared agent instructions and skills; .claude and .codex link here
 .doom.d/       doom emacs
 .scripts/      dots, small utilities
+packages/      subprojects: agents gateway, html-serving,
+               InputSourceSelector (source of .scripts/input)
 ```
 
 ## Migrating from old dotfiles

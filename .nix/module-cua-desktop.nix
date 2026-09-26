@@ -1,4 +1,5 @@
-# Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only noVNC.
+# Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only noVNC
+# (module-gateway.nix serves it at /desktop/).
 {
   config,
   pkgs,
@@ -12,10 +13,6 @@ let
   xauthority = "%t/vnc-desktop/Xauthority";
 in
 {
-  imports = [ ./option-tailnet.nix ];
-
-  local.tailnet.https."8445" = "http://127.0.0.1:${webPort}";
-
   services.xserver = {
     enable = true;
     # vnc-desktop below starts the session; no login screen.

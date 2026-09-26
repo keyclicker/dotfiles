@@ -75,6 +75,8 @@ class DirectoryHandler(SimpleHTTPRequestHandler):
             .render(
                 entries=entries,
                 subdirectory="" if relative == Path(".") else relative.as_posix() + "/",
+                # Relative, so the listing works behind a path prefix.
+                root_url="../" * len(relative.parts) or "./",
             )
             .encode("utf-8")
         )

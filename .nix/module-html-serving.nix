@@ -1,4 +1,5 @@
-# Shared HTML directory, available privately through Tailscale Serve.
+# Shared HTML directory on loopback; module-gateway.nix serves it at
+# /public/ on the tailnet.
 {
   config,
   lib,
@@ -12,10 +13,6 @@ let
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
 in
 {
-  imports = [ ./option-tailnet.nix ];
-
-  local.tailnet.https."8444" = "http://127.0.0.1:8765";
-
   systemd.tmpfiles.rules = [ "d ${public} 0755 keyclicker users -" ];
 
   systemd.services.html-serving = {
@@ -26,7 +23,7 @@ in
       Group = "users";
       ExecStart = lib.escapeShellArgs [
         "${python}/bin/python"
-        "${../.scripts/html-serving}/server.py"
+        "${../packages/html-serving}/server.py"
         "--directory"
         public
         "--allow-root"
