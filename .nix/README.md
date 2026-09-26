@@ -323,7 +323,7 @@ Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
 rules are the only login gate: VNC has no password and never leaves
 loopback, X11 uses a private cookie and no TCP listener.
 
-Cua Driver is the one manual step. Nix has no prebuilt package, and Cua's
+Cua Driver is the manual part. Nix has no prebuilt package, and Cua's
 own flake compiles from source, so install the official binary once as
 the desktop user:
 
@@ -334,7 +334,27 @@ bash /tmp/cua-install.sh --no-modify-path
 
 Nix supplies its libraries through `nix-ld` and starts
 `~/.local/bin/cua-driver` with the graphical session. After an update:
-`systemctl --user restart cua-driver`. To debug, from a desktop terminal:
+`systemctl --user restart cua-driver`.
+
+Then hand it to the agents. `~/.claude.json` and `~/.codex/config.toml`
+are mutable app state, so the MCP server is registered by hand:
+
+```sh
+cua=~/.local/bin/cua-driver
+sock=~/.cache/cua-driver/cua-driver.sock
+
+# --socket is required: without it, `mcp` runs its own runtime in the
+# agent's process, which has no X11 access and sees 0 windows
+claude mcp add --scope user cua-driver -- $cua mcp --socket $sock
+codex mcp add cua-driver -- $cua mcp --socket $sock
+
+# links the skill into .agents/skills (gitignored), shared by both agents;
+# drop the duplicate it also makes in ~/.agents
+cua-driver skills install
+rm ~/.agents/skills/cua-driver
+```
+
+To debug, from a desktop terminal:
 
 ```sh
 cua-driver doctor
