@@ -1,8 +1,8 @@
 # T3 Code web server. The `t3` binary is the Bun global that
 # home-agents.nix keeps installed in the user's ~/.local/bin, so the
 # service waits for home-manager's activation on a first boot and
-# picks up whatever version the last rebuild left. Loopback only;
-# module-gateway.nix serves it as t3.<tailnet>.
+# picks up whatever version the last rebuild left. T3 loads assets
+# from `/`, so it keeps a port of its own instead of a gateway path.
 { pkgs, ... }:
 
 let
@@ -11,6 +11,10 @@ let
   baseDir = "/var/lib/t3";
 in
 {
+  imports = [ ./option-tailnet.nix ];
+
+  local.tailnet.https."3773" = "http://127.0.0.1:3773";
+
   # The CLI (`t3 auth pairing create`, `t3 project ...`) defaults to
   # ~/.t3, a different store than the service reads, so tokens minted
   # there are "invalid" to the server. Point it at the same dir.

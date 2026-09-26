@@ -34,12 +34,12 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
 ├── module-cua-desktop.nix   # XFCE/X11 + Cua + noVNC on loopback
-├── module-slopbox.nix       # t3 code web server on loopback, exec'ing the
-│                            # npm global of home-agents.nix
+├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
+│                            # exec'ing the npm global of home-agents.nix
 ├── module-html-serving.nix  # ~/public directory index on loopback,
 │                            # Python server in packages/html-serving
-├── module-gateway.nix       # tailnet front door: nginx routes the node
-│                            # name and svc:t3 to the loopback services
+├── module-gateway.nix       # tailnet front door on 443: services index,
+│                            # nginx routes paths to the loopback services
 │                            # above (config in packages/gateway)
 ├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
@@ -353,8 +353,8 @@ to the iptables backend or trust `tailscale0` wholesale.
 | SSH | TCP 22 | Closed | Wildcard listener, interface firewall |
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
-| Gateway (agents) | Closed | HTTPS 443 + `svc:t3` via Serve | nginx 127.0.0.1:8080 |
-| T3 (agents) | Closed | `t3.<tailnet>` via gateway | 127.0.0.1:3773 |
+| Gateway (agents) | Closed | HTTPS 443 via Serve | nginx 127.0.0.1:8080 |
+| T3 (agents) | Closed | HTTPS 3773 via Serve | 127.0.0.1:3773 |
 | Desktop (agents) | Closed | `/desktop/` via gateway | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
 | HTML (agents) | Closed | `/public/` via gateway | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
@@ -374,15 +374,14 @@ explicitly publish on a Tailscale address, never an unspecified address.
 Service modules import `option-tailnet.nix` and declare their routes:
 
 ```nix
-local.tailnet.https."443" = "http://127.0.0.1:8080";
+local.tailnet.https."3773" = "http://127.0.0.1:3773";
 local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
-local.tailnet.services.t3 = "http://127.0.0.1:8080";
 ```
 
-On agents, web apps don't declare routes themselves: they bind
-loopback and `packages/gateway/nginx.conf` routes to them. Services
-(`svc:<name>`) must exist in the admin console first; see
-`packages/gateway/README.md`.
+Serve listens on the tailnet address only, so a backend on loopback can
+share the port number. On agents, web apps that work under a path skip
+their own route: they bind loopback and `packages/gateway/nginx.conf`
+serves them on 443.
 
 The thin wrapper generates one oneshot unit per port. Tailscaled handles
 traffic; stopping a unit removes only its listener. Removing a declaration
@@ -393,9 +392,7 @@ one map; Tailscale validates the port and target when applying the route.
 
 The pinned upstream `services.tailscale.serve` module targets named
 Tailscale Services and couples the frontend and backend web protocols.
-It also replaces all Serve config at once (`set-config --all`). Keep this
-wrapper for HTTPS-to-HTTP routes, on the machine address and on
-Services alike.
+Keep this wrapper for HTTPS-to-HTTP routes on the existing machine address.
 
 Mac and desktop Ollama stay loopback-only. Apple-managed SSH, mDNS and the
 macOS firewall are not configured by this repo; their LAN restrictions
@@ -404,6 +401,6 @@ own the distro firewall.
 
 Rebuild each managed host to apply these changes. Existing Incus preseed
 state has its HTTPS address explicitly cleared. The Serve route on 443 is
-updated in place (now the gateway), the old 8444/8445 routes are
-removed; unrelated Serve routes and Docker
+updated in place (now the gateway, T3 moves to 3773), the old
+8444/8445 routes are removed; unrelated Serve routes and Docker
 stacks are preserved. Apply the SSH restriction from the LAN or console.
