@@ -10,6 +10,7 @@
     ./module-browser.nix
     ./module-slopbox.nix
     ./module-html-serving.nix
+    ./module-projects-smb.nix
     ./module-iperf.nix
     ./platform-vm.nix
     ./hardware-vm.nix
@@ -29,6 +30,7 @@
   # agent-browser from module-browser.nix, t3 web server from
   # module-slopbox.nix, iperf3 server from module-iperf.nix,
   # HTML directory serving from module-html-serving.nix,
+  # tailnet project sharing from module-projects-smb.nix,
   # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents
   # are npm globals in the home layer (home-agents.nix, wired in
   # flake.nix).
