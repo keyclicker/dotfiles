@@ -307,42 +307,35 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 ## Agents desktop
 
-`agents` runs a persistent XFCE/X11 session on TigerVNC. Cua Driver uses
-its official prebuilt installer; Nix provides its runtime libraries through
-`nix-ld` and starts `~/.local/bin/cua-driver` with the desktop. Do not use
-Cua's source-building flake on this VM. The driver binary is installed
-manually, outside Nix; a fresh machine needs the step below. Keep this
-manual installation until a suitable prebuilt Nix package is available.
+`agents` runs a persistent XFCE/X11 desktop for computer use. TigerVNC
+supplies the virtual display; the `vnc-desktop` user service starts it at
+boot through lingering, and viewer disconnects leave it running.
 
-Install the prebuilt driver once as the desktop user:
+Open it in a browser while on the tailnet:
+
+```text
+https://<tailnet-hostname>:8445/vnc.html?autoconnect=true&resize=remote
+```
+
+Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
+rules are the only login gate: VNC has no password and never leaves
+loopback, X11 uses a private cookie and no TCP listener.
+
+Cua Driver is the one manual step. Nix has no prebuilt package, and Cua's
+own flake compiles from source, so install the official binary once as
+the desktop user:
 
 ```sh
 curl -fsSL https://cua.ai/driver/install.sh -o /tmp/cua-install.sh
 bash /tmp/cua-install.sh --no-modify-path
 ```
 
-After updating Cua, restart it with `systemctl --user restart cua-driver`.
-
-Open `https://<tailnet-hostname>:8445/vnc.html?autoconnect=true&resize=remote`
-in a browser while connected to the tailnet. noVNC is the browser client;
-TigerVNC supplies the virtual X11 display. Websockify serves noVNC and
-bridges its WebSocket connection to the local VNC server.
-
-`local.tailnet.https` exposes the loopback-only web service through
-Tailscale Serve. Tailnet access rules are the login gate; no separate VNC
-password is required. Raw VNC stays on loopback. X11 clients use a private
-session cookie, and X11's TCP listener is disabled.
-
-The `vnc-desktop` user service starts at boot through user lingering;
-`xinit` manages the X server and desktop together. Cua starts with the
-graphical session, using the same display and accessibility bus. Viewer
-disconnects leave the desktop running. No Proxmox display changes needed.
-
-From a terminal in the desktop session:
+Nix supplies its libraries through `nix-ld` and starts
+`~/.local/bin/cua-driver` with the graphical session. After an update:
+`systemctl --user restart cua-driver`. To debug, from a desktop terminal:
 
 ```sh
 cua-driver doctor
-cua-driver status
 systemctl --user status vnc-desktop cua-driver
 ```
 

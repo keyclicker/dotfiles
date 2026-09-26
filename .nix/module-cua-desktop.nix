@@ -5,13 +5,20 @@
   ...
 }:
 
+let
+  display = ":1";
+  vncPort = "5901";
+  webPort = "6080";
+  xauthority = "%t/vnc-desktop/Xauthority";
+in
 {
   imports = [ ./option-tailnet.nix ];
 
-  local.tailnet.https."8445" = "http://127.0.0.1:6080";
+  local.tailnet.https."8445" = "http://127.0.0.1:${webPort}";
 
   services.xserver = {
     enable = true;
+    # vnc-desktop below starts the session; no login screen.
     displayManager.lightdm.enable = false;
     desktopManager.xfce = {
       enable = true;
@@ -20,14 +27,10 @@
     };
   };
 
-  services.gnome.at-spi2-core.enable = true;
-  environment.systemPackages = [ pkgs.tigervnc ];
-  # Cua's official prebuilt installer uses the standard Linux loader.
-  programs.nix-ld.libraries = with pkgs; [
-    libX11
-    libXi
-    libxkbcommon
-  ];
+  # Default fonts come with X; noto covers the rest of the web.
+  fonts.packages = [ pkgs.noto-fonts ];
+
+  # Start the desktop at boot, not at the first login.
   users.users.keyclicker.linger = true;
 
   # xinit owns both processes: restarting the service restarts the session.
@@ -35,30 +38,40 @@
     description = "XFCE desktop on TigerVNC";
     wantedBy = [ "default.target" ];
     environment = {
-      XAUTHORITY = "%t/vnc-desktop/Xauthority";
+      XAUTHORITY = xauthority;
       XDG_SESSION_TYPE = "x11";
       XDG_CURRENT_DESKTOP = "XFCE";
     };
     preStart = ''
       umask 077
-      ${pkgs.xauth}/bin/xauth -f "$XAUTHORITY" add :1 . \
+      ${pkgs.xauth}/bin/xauth add ${display} . \
         "$(${pkgs.util-linux}/bin/mcookie)"
     '';
     serviceConfig = {
       RuntimeDirectory = "vnc-desktop";
-      ExecStart = builtins.concatStringsSep " " [
+      ExecStart = toString [
         "${pkgs.xinit}/bin/xinit"
         config.services.displayManager.sessionData.wrapper
         "${pkgs.xfce4-session}/bin/startxfce4"
-        "-- ${pkgs.tigervnc}/bin/Xvnc :1"
-        "-auth %t/vnc-desktop/Xauthority"
-        "-geometry 1440x900 -depth 24 -s 0 -nolisten tcp"
-        "-localhost -SecurityTypes None -AlwaysShared"
+        "-- ${pkgs.tigervnc}/bin/Xvnc ${display}"
+        "-auth ${xauthority} -nolisten tcp"
+        "-rfbport ${vncPort} -localhost -SecurityTypes None -AlwaysShared"
+        "-geometry 1440x900 -depth 24 -s 0"
       ];
       Restart = "always";
       RestartSec = 3;
     };
   };
+
+  # Cua reads windows through the accessibility bus.
+  services.gnome.at-spi2-core.enable = true;
+
+  # Cua's official prebuilt installer uses the standard Linux loader.
+  programs.nix-ld.libraries = with pkgs; [
+    libX11
+    libXi
+    libxkbcommon
+  ];
 
   # Inherit the display and session bus imported by the X11 session wrapper.
   systemd.user.services.cua-driver = {
@@ -78,10 +91,10 @@
     description = "Browser access to the XFCE desktop";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = builtins.concatStringsSep " " [
+      ExecStart = toString [
         "${pkgs.python3Packages.websockify}/bin/websockify"
         "--web ${pkgs.novnc}/share/webapps/novnc"
-        "127.0.0.1:6080 127.0.0.1:5901"
+        "127.0.0.1:${webPort} 127.0.0.1:${vncPort}"
       ];
       DynamicUser = true;
       NoNewPrivileges = true;
@@ -92,9 +105,4 @@
       RestartSec = 3;
     };
   };
-
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-color-emoji
-  ];
 }
