@@ -36,11 +36,10 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-cua-desktop.nix   # XFCE/X11 + Cua + noVNC on loopback
 ├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
 │                            # exec'ing the npm global of home-agents.nix
-├── module-html-serving.nix  # ~/public directory index on loopback,
-│                            # Python server in packages/html-serving
 ├── module-gateway.nix       # tailnet front door on 443: services index,
 │                            # nginx routes paths to the loopback services
-│                            # above (config in packages/gateway)
+│                            # above, ~/public directory server (config in
+│                            # packages/gateway, packages/html-serving)
 ├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
@@ -114,7 +113,7 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + html-serving + gateway + iperf + vm + hardware; home dotfiles + agents |
+| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + gateway + iperf + vm + hardware; home dotfiles + agents |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container; home dotfiles       |
