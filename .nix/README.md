@@ -316,7 +316,7 @@ boot through lingering, and viewer disconnects leave it running.
 Open it in a browser while on the tailnet:
 
 ```text
-https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=remote
+https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale
 ```
 
 Websockify serves noVNC and bridges it to loopback VNC. Tailnet access

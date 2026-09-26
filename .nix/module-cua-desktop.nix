@@ -11,6 +11,10 @@ let
   vncPort = "5901";
   webPort = "6080";
   xauthority = "%t/vnc-desktop/Xauthority";
+
+  # 4:3 and fixed: agents click in screenshot pixels, so the frame must not
+  # follow whoever's browser window is open. noVNC scales it instead.
+  geometry = "1280x960";
 in
 {
   services.xserver = {
@@ -53,7 +57,7 @@ in
         "-- ${pkgs.tigervnc}/bin/Xvnc ${display}"
         "-auth ${xauthority} -nolisten tcp"
         "-rfbport ${vncPort} -localhost -SecurityTypes None -AlwaysShared"
-        "-geometry 1440x900 -depth 24 -s 0"
+        "-geometry ${geometry} -AcceptSetDesktopSize=0 -depth 24 -s 0"
       ];
       Restart = "always";
       RestartSec = 3;
