@@ -12,10 +12,6 @@ let
   python = pkgs.python3.withPackages (packages: [ packages.jinja2 ]);
 in
 {
-  imports = [ ./option-tailnet.nix ];
-
-  local.tailnet.https."8444" = "http://127.0.0.1:8765";
-
   systemd.tmpfiles.rules = [ "d ${public} 0755 keyclicker users -" ];
 
   systemd.services.html-serving = {
@@ -35,6 +31,25 @@ in
       Restart = "on-failure";
       RestartSec = 3;
       NoNewPrivileges = true;
+    };
+  };
+
+  # Own this Serve port; leave unrelated routes alone.
+  systemd.services.html-serving-tailnet = {
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "tailscaled.service" ];
+    after = [
+      "tailscaled.service"
+      "html-serving.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --yes --https=8444 http://127.0.0.1:8765";
+      ExecStop = "${pkgs.tailscale}/bin/tailscale serve --https=8444 off";
+      TimeoutStartSec = 30;
+      Restart = "on-failure";
+      RestartSec = 15;
     };
   };
 }

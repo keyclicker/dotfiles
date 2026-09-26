@@ -1,12 +1,7 @@
 # Passwordless project access for devices allowed through the tailnet ACLs.
-{ config, ... }:
+{ config, pkgs, ... }:
 
 {
-  imports = [ ./option-tailnet.nix ];
-
-  # Samba ignores point-to-point interfaces; Serve owns the tailnet listener.
-  local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
-
   services.samba = {
     enable = true;
     openFirewall = false;
@@ -30,6 +25,25 @@
         "guest ok" = "yes";
         "guest only" = "yes";
       };
+    };
+  };
+
+  # Samba stays on loopback; own only the tailnet TCP 445 listener.
+  systemd.services.projects-smb-tailnet = {
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "tailscaled.service" ];
+    after = [
+      "tailscaled.service"
+      "samba-smbd.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.tailscale}/bin/tailscale serve --bg --yes --tcp=445 tcp://127.0.0.1:445";
+      ExecStop = "${pkgs.tailscale}/bin/tailscale serve --tcp=445 off";
+      TimeoutStartSec = 30;
+      Restart = "on-failure";
+      RestartSec = 15;
     };
   };
 }
