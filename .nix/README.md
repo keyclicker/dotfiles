@@ -392,7 +392,9 @@ module to it and drop this section.
 XFCE autostart starts `cua-driver@N` once its window manager is up: Cua
 picks its overlay visual at startup and, started before the compositor,
 its agent cursor stays invisible. The same step hands the session's
-`DISPLAY` and bus addresses to the unit.
+`DISPLAY`, bus address and Chromium profile to the unit. It is the only
+thing that starts Cua: a desktop restart stops Cua, and the new session
+starts it again.
 
 Then hand it to the agents. `~/.claude.json` and `~/.codex/config.toml`
 are mutable app state, so the MCP server is registered by hand. Restart
