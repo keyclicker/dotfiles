@@ -21,7 +21,7 @@
 
     # Editors and dev
     vscode
-    emacs-pgtk # .doom.d
+    emacs-pgtk # .config/doom
     imhex
 
     # Media

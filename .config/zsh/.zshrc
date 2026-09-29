@@ -33,10 +33,9 @@ export LC_ALL=en_US.UTF-8
 
 export EDITOR='nvim'
 
-export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$CARGO_HOME/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 
 export GPG_TTY=$(tty)
@@ -56,7 +55,8 @@ export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=
 # =========================================================
 #
 ## History file configuration
-HISTFILE="$HOME/.zsh_history"
+mkdir -p "$XDG_STATE_HOME/zsh"
+HISTFILE="$XDG_STATE_HOME/zsh/history"
 HISTSIZE=50000
 SAVEHIST=10000
 
@@ -114,11 +114,11 @@ alias cddot="cd ~/.dotfiles"
 alias cdvim="cd ~/.dotfiles/.config/nvim"
 
 alias udex="cd ~/Root/Programming/udex; pwd"
-alias zsrc='source ~/.dotfiles/.zshrc'
+alias zsrc='source "$ZDOTDIR/.zshrc"'
 
 vdot() { cd ~/.dotfiles && nvim .; }
 vvim() { cd ~/.dotfiles/.config/nvim && nvim .; }
-vzsh() { cd ~/.dotfiles && nvim .zshrc; }
+vzsh() { nvim "$ZDOTDIR/.zshrc"; }
 
 # dr - drill: mkdir -p then cd into it
 dr() {
@@ -176,7 +176,8 @@ export PATH="$HOME/.local/bin:$PATH"
 #                       Completion
 # =========================================================
 
-autoload -Uz compinit && compinit
+mkdir -p "$XDG_CACHE_HOME/zsh"
+autoload -Uz compinit && compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
 
 setopt complete_in_word always_to_end
 # case-insensitive (lower matches upper), then partial-word/substring fallback
@@ -265,7 +266,7 @@ if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
 fi
 
 # opencode
-export PATH=/Users/keyclicker/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # dotfiles drift warning: local checks, fetches origin in the background
 if command -v dots >/dev/null; then dots warn; fi

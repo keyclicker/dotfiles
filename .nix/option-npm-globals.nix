@@ -6,7 +6,7 @@
 #
 # How it works:
 #
-#   - ~/.npmrc (a dotfile, linked on every host) points npm's global
+#   - ~/.config/npm/npmrc (a dotfile, linked on every host) points npm's global
 #     prefix at ~/.local, so bins land in ~/.local/bin (on PATH via
 #     .zshrc) and libraries in ~/.local/lib/node_modules. No PATH
 #     plumbing of its own.
@@ -28,7 +28,6 @@
 
 let
   cfg = config.local.npmGlobals;
-  prefix = "${config.home.homeDirectory}/.local";
 in
 {
   options.local.npmGlobals.packages = lib.mkOption {
@@ -54,12 +53,10 @@ in
       pkgs.stdenv.cc
     ];
 
-    # .zshrc puts ~/.local/bin on PATH for shells; this covers whatever
-    # gets hm-session-vars.sh instead of a shell.
-    home.sessionPath = [ "${prefix}/bin" ];
-
-    home.activation.npmGlobals = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    home.activation.npmGlobals = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       run ${pkgs.coreutils}/bin/timeout --kill-after=10s 2m \
+        ${pkgs.coreutils}/bin/env \
+        NPM_CONFIG_USERCONFIG=${lib.escapeShellArg "${config.xdg.configHome}/npm/npmrc"} \
         ${pkgs.nodejs}/bin/npm install --global --no-audit --no-fund \
         ${lib.escapeShellArgs cfg.packages} \
         || warnEcho "npm globals: install failed (exit $?); retry: npm install -g ${toString cfg.packages}"

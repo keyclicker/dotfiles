@@ -4,3 +4,4 @@
 ; via home-manager), so installers never fall back to a prefix of
 ; their own (~/.npm-global) that no shell looks in.
 prefix=${HOME}/.local
+cache=${HOME}/.cache/npm
