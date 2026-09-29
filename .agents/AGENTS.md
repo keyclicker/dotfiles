@@ -121,15 +121,17 @@ Please notify me, if anything is broken and needs nix config patch.
 #### GUI desktop
 
 An XFCE desktop runs on X11 display `:1`, driven by the `cua-driver`
-daemon.
+daemon on `~/.cache/cua-driver/desktop-1.sock`.
 
 - You MAY operate GUI apps there through the `cua-driver` MCP tools.
   The `cua-driver` skill covers the observe, act, verify loop.
 - The desktop is shared between agents: one controller at a time.
-- Use the `cua-driver` CLI for diagnostics (`status`, `call health_report`).
-  `doctor` warns about a missing `DISPLAY` in agent shells; that's expected.
-- I can watch the desktop at `https://<node>/desktop/`.
-- OpenGL is GPU-accelerated (virgl); Vulkan is not available.
+- You MUST pass `delivery_mode: "foreground"` to input tools. Background
+  mode has no route on this X server: clicks refuse and non-ASCII typing
+  is silently dropped.
+- Use the `cua-driver` CLI for diagnostics:
+  `cua-driver --socket ~/.cache/cua-driver/desktop-1.sock call health_report`.
+- I can watch the desktop at `https://<node>/desktop/` (index link).
 - Audio is virtual. Hear apps with
   `pw-record -P '{ stream.capture.sink = true }' --target agents-speaker`,
   speak into them with `pw-play --target agents-mic`.

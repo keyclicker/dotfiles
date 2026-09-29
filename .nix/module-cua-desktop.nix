@@ -1,5 +1,10 @@
-# Persistent XFCE/X11 desktop for Cua, shared through Tailnet-only noVNC
-# (module-gateway.nix serves it at /desktop/).
+# Agent desktops: XFCE on Xvnc, driven by Cua, watched through Tailnet-only
+# noVNC (module-gateway.nix serves it at /desktop/).
+#
+# Each desktop is a slot N: display `:N`, VNC on 5900+N (Xvnc's default),
+# its own session bus (so Cua's accessibility view stays inside it), a
+# `cua-driver@N` daemon on its own socket, and noVNC token `N`. One slot
+# runs today; more slots are more numbers in `desktops`.
 {
   lib,
   pkgs,
@@ -7,42 +12,53 @@
 }:
 
 let
-  vncPort = "5901";
+  desktops = [ 1 ];
   webPort = "6080";
+
+  # noVNC connects with `?token=N`; websockify maps it to the slot's VNC.
+  tokens = pkgs.writeText "agent-desktop-tokens" (
+    lib.concatMapStrings (n: "${toString n}: 127.0.0.1:${toString (5900 + n)}\n") desktops
+  );
+
+  # The X client xinit runs: XFCE on a session bus of its own. NixOS's
+  # session config lists every package's D-Bus services (at-spi).
+  session = pkgs.writeShellScript "agent-desktop-session" ''
+    exec ${pkgs.dbus}/bin/dbus-run-session \
+      --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon \
+      --config-file=/etc/dbus-1/session.conf \
+      -- ${sessionOnBus}
+  '';
+
+  # The desktop's accessibility bus runs on dbus-broker, which activates
+  # the at-spi registry through the systemd user manager, outside this
+  # session, and fails. Start the registry here, before any app registers.
+  sessionOnBus = pkgs.writeShellScript "agent-desktop-session-bus" ''
+    ${pkgs.at-spi2-core}/libexec/at-spi2-registryd &
+    exec ${pkgs.xfce4-session}/bin/startxfce4
+  '';
+
+  # Run from XFCE autostart, i.e. after its window manager and compositor
+  # are up: Cua picks its overlay visual once at startup, and started any
+  # earlier its cursor stays invisible. Hands the session's environment to
+  # `cua-driver@N`, which cannot inherit it through systemd.
+  startCua = pkgs.writeShellScript "agent-desktop-cua" ''
+    # DISPLAY is ":N.0" under xinit.
+    n=''${DISPLAY#:}
+    n=''${n%.*}
+    printf '%s\n' \
+      "DISPLAY=$DISPLAY" \
+      "XAUTHORITY=$XAUTHORITY" \
+      "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
+      "PATH=$PATH" \
+      > "$XDG_RUNTIME_DIR/agent-desktop/$n.env"
+    exec ${pkgs.systemd}/bin/systemctl --user start "cua-driver@$n.service"
+  '';
 in
 {
+  # XFCE and the X11 bits it needs; no display manager, no local X server.
   services.xserver = {
     enable = true;
-
-    # Real Xorg on the virtio GPU: glamor and GLX render through virgl on
-    # the Proxmox host. A real server also hot-plugs Cua's virtual input
-    # devices; Xvnc cannot.
-    videoDrivers = [ "modesetting" ];
-
-    # 4:3 and fixed: agents click in screenshot pixels, so the frame must
-    # not follow the EDID's preferred mode. noVNC scales it instead.
-    # Nobody sits at this screen, so never blank what VNC and Cua look at;
-    # with DPMS, xfce4-power-manager turns the output off after 15 min.
-    monitorSection = ''
-      Option "PreferredMode" "1280x960"
-      Option "DPMS" "false"
-    '';
-    serverFlagsSection = ''
-      Option "BlankTime" "0"
-      Option "StandbyTime" "0"
-      Option "SuspendTime" "0"
-      Option "OffTime" "0"
-    '';
-
-    displayManager.lightdm = {
-      enable = true;
-      greeter.enable = false;
-      # `:1`, the display the agents' docs (.agents/AGENTS.md) point at.
-      extraConfig = ''
-        minimum-display-number = 1
-      '';
-    };
-
+    displayManager.lightdm.enable = false;
     desktopManager.xfce = {
       enable = true;
       # The server account has no password to unlock a screensaver.
@@ -50,16 +66,8 @@ in
     };
   };
 
-  services.displayManager = {
-    defaultSession = "xfce";
-    autoLogin = {
-      enable = true;
-      user = "keyclicker";
-    };
-  };
-
-  # Mesa's virgl driver for the virtio GPU.
-  hardware.graphics.enable = true;
+  # Start the desktops at boot, not at the first login.
+  users.users.keyclicker.linger = true;
 
   # Audio without hardware: apps play into a virtual speaker, agents
   # play into a virtual mic that apps record from. Sound cards the VM may
@@ -115,10 +123,6 @@ in
   # Realtime scheduling for pipewire.
   security.rtkit.enable = true;
 
-  # Use NixOS's restricted uinput group, not a world-writable device.
-  hardware.uinput.enable = true;
-  users.users.keyclicker.extraGroups = [ "uinput" ];
-
   fonts.packages = [ pkgs.noto-fonts ];
   services.gnome.at-spi2-core.enable = true;
 
@@ -132,59 +136,89 @@ in
     libxkbcommon
   ];
 
-  # XFCE runs application autostarts after its window manager is ready.
-  # Starting at graphical-session.target races the compositor: Cua chooses
-  # its overlay visual once at startup, leaving the cursor invisible.
-  environment.etc."xdg/autostart/cua-desktop.desktop".text = ''
+  environment.etc."xdg/autostart/agent-desktop-cua.desktop".text = ''
     [Desktop Entry]
     Type=Application
-    Name=Cua desktop services
-    Exec=${pkgs.systemd}/bin/systemctl --user start cua-driver.service desktop-vnc.service
+    Name=Cua for this desktop
+    Exec=${startCua}
     OnlyShowIn=XFCE;
     Terminal=false
     StartupNotify=false
   '';
 
-  systemd.user.services.cua-driver = {
-    description = "Cua desktop automation";
-    after = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
+  # ---- Slot templates ------------------------------------------------------
 
-    # Preserve the graphical session's PATH for apps launched through Cua.
+  systemd.user.services = {
+    # xinit owns Xvnc and the session: restarting the unit restarts both.
+    # 1280x960 and fixed: agents click in screenshot pixels, so the frame must
+    # not follow whoever's browser is open; noVNC scales it instead.
+    "agent-desktop@" = {
+      description = "Agent desktop :%i";
+      environment = {
+        XAUTHORITY = "%t/agent-desktop/%i.xauth";
+        XDG_SESSION_TYPE = "x11";
+        XDG_CURRENT_DESKTOP = "XFCE";
+
+        # The user manager's login PATH (and XDG_DATA_DIRS) reach the apps.
+        PATH = lib.mkForce null;
+      };
+      preStart = ''
+        umask 077
+        mkdir -p "$XDG_RUNTIME_DIR/agent-desktop"
+        rm -f "$XAUTHORITY"
+        ${pkgs.xauth}/bin/xauth -f "$XAUTHORITY" add ":$SLOT" . \
+          "$(${pkgs.util-linux}/bin/mcookie)"
+      '';
+      serviceConfig = {
+        Environment = "SLOT=%i";
+        ExecStart = toString [
+          "${pkgs.xinit}/bin/xinit ${session}"
+          "-- ${pkgs.tigervnc}/bin/Xvnc :%i"
+          "-auth %t/agent-desktop/%i.xauth -nolisten tcp"
+          "-localhost -SecurityTypes None -AlwaysShared"
+          "-geometry 1280x960 -AcceptSetDesktopSize=0 -depth 24 -s 0"
+        ];
+        Restart = "always";
+        RestartSec = 3;
+      };
+    };
+
+    "cua-driver@" = {
+      description = "Cua desktop automation on :%i";
+      # Stop with its desktop; never start one (a typo'd N would).
+      partOf = [ "agent-desktop@%i.service" ];
+      requisite = [ "agent-desktop@%i.service" ];
+      after = [ "agent-desktop@%i.service" ];
+
+      # PATH and the rest come from the desktop session (startCua above).
+      environment.PATH = lib.mkForce null;
+
+      serviceConfig = {
+        EnvironmentFile = "%t/agent-desktop/%i.env";
+        ExecStart = "%h/.local/bin/cua-driver serve --socket %h/.cache/cua-driver/desktop-%i.sock";
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+    };
+  }
+  # One enabled instance per slot.
+  // lib.genAttrs (map (n: "agent-desktop@${toString n}") desktops) (_: {
+    overrideStrategy = "asDropin";
+    wantedBy = [ "default.target" ];
     environment.PATH = lib.mkForce null;
+  });
 
-    serviceConfig = {
-      ExecStart = "%h/.local/bin/cua-driver serve";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-  };
-
-  # Export the existing Xorg desktop; viewer disconnects leave it running.
-  # DISPLAY and XAUTHORITY come from the NixOS X11 session wrapper.
-  systemd.user.services.desktop-vnc = {
-    description = "Share the XFCE desktop over loopback VNC";
-    after = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      ExecStart = toString [
-        "${pkgs.tigervnc}/bin/x0vncserver"
-        "-rfbport ${vncPort} -localhost -SecurityTypes None -AlwaysShared"
-        "-AcceptSetDesktopSize=0"
-      ];
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-  };
-
+  # One websockify for every slot: serves the noVNC client and bridges
+  # `?token=N` WebSockets to that slot's loopback VNC.
   systemd.services.novnc = {
-    description = "Browser access to the XFCE desktop";
+    description = "Browser access to the agent desktops";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       ExecStart = toString [
         "${pkgs.python3Packages.websockify}/bin/websockify"
         "--web ${pkgs.novnc}/share/webapps/novnc"
-        "127.0.0.1:${webPort} 127.0.0.1:${vncPort}"
+        "--token-plugin TokenFile --token-source ${tokens}"
+        "127.0.0.1:${webPort}"
       ];
       DynamicUser = true;
       NoNewPrivileges = true;
