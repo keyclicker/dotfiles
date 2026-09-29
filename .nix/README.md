@@ -79,6 +79,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # ...); OS-bound entries check the platform
 ├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
 │                            # settings.ini, cursor), xdg user dirs
+├── home-user-dirs.nix       # standard folders under ~/Files on Linux
+│                            # desktops, including agents
 ├── home-agents.nix          # AI coding agent CLIs (claude, codex, opencode)
 │                            # and t3 code as npm globals
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
