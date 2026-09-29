@@ -317,8 +317,12 @@ in
       description = "Cua desktop automation on :%i";
       # Stop with its desktop, but never restart with it (as PartOf= and
       # Requisite= would): only startCua starts Cua, once the new session
-      # is up. Without its desktop's env file, Cua fails to start.
-      unitConfig.StopPropagatedFrom = [ "agent-desktop@%i.service" ];
+      # is up. Until then its desktop's env file is missing, so any other
+      # start (a rebuild restarting the unit) is skipped, not failed.
+      unitConfig = {
+        StopPropagatedFrom = [ "agent-desktop@%i.service" ];
+        ConditionPathExists = "%t/agent-desktop/%i.env";
+      };
       after = [ "agent-desktop@%i.service" ];
 
       # PATH and the rest come from the desktop session (startCua above).

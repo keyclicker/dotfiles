@@ -138,6 +138,16 @@ daemon on `~/.cache/cua-driver/desktop-2.sock`. Display `:1` is mine.
   and visible control is authorized. Do not retry partial actions blindly.
 - Use the `cua-driver` CLI for diagnostics:
   `cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report`.
+  Plain `cua-driver doctor` runs outside the desktop session and reports
+  no display.
+- Known Cua bugs (upstream, driver 0.30.4):
+  - Background `type_text` mangles non-ASCII: `é—ü` lands as `üüü`
+    through key events and gets truncated through AT-SPI. Paste it
+    instead: `clipboard_write`, then `ctrl+v`.
+  - Background `alt+F4` never closes the window. Use the app's own
+    shortcut (`ctrl+q`, `ctrl+shift+w`); `kill_app` loses unsaved data.
+  - `browser_prepare` without `pid` refuses on NixOS. Launch `chromium`
+    first, then pass its `pid` with an isolated `profile`.
 - I can watch the desktop at `https://<node>/desktops` (Agents tab).
 - Audio is virtual. Hear apps with
   `pw-record -P '{ stream.capture.sink = true }' --target agents-speaker`,
