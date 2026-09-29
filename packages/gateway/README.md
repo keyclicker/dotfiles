@@ -5,7 +5,8 @@ One tailnet entry point for the agents box: open it, click through.
 ```text
 https://agents.<tailnet>.ts.net/          services index
                                /public/   ~/public listing (../html-serving)
-                               /desktop/  agent desktops over noVNC
+                               /desktops  tabs: your desktop, the agents'
+                               /desktop/  one desktop over noVNC
                                           (`path=desktop/websockify?token=N`)
                                /t3        → :3773, T3 Code
                                /udex      → :8443, Udex preview

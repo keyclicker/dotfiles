@@ -120,18 +120,20 @@ Please notify me, if anything is broken and needs nix config patch.
 
 #### GUI desktop
 
-An XFCE desktop runs on X11 display `:1`, driven by the `cua-driver`
-daemon on `~/.cache/cua-driver/desktop-1.sock`.
+Your XFCE desktop runs on X11 display `:2`, driven by the `cua-driver`
+daemon on `~/.cache/cua-driver/desktop-2.sock`. Display `:1` is mine.
 
-- You MAY operate GUI apps there through the `cua-driver` MCP tools.
+- You MAY operate GUI apps on `:2` through the `cua-driver` MCP tools.
   The `cua-driver` skill covers the observe, act, verify loop.
+- You MUST NOT touch display `:1` in any way (`DISPLAY=:1`, its VNC,
+  its session): it is my desktop.
 - The desktop is shared between agents: one controller at a time.
 - You MUST pass `delivery_mode: "foreground"` to input tools. Background
   mode has no route on this X server: clicks refuse and non-ASCII typing
   is silently dropped.
 - Use the `cua-driver` CLI for diagnostics:
-  `cua-driver --socket ~/.cache/cua-driver/desktop-1.sock call health_report`.
-- I can watch the desktop at `https://<node>/desktop/` (index link).
+  `cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report`.
+- I can watch the desktop at `https://<node>/desktops` (Agents tab).
 - Audio is virtual. Hear apps with
   `pw-record -P '{ stream.capture.sink = true }' --target agents-speaker`,
   speak into them with `pw-play --target agents-mic`.
