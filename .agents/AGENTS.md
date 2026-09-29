@@ -125,8 +125,9 @@ daemon on `~/.cache/cua-driver/desktop-2.sock`. Display `:1` is mine.
 
 - You MAY operate GUI apps on `:2` through the `cua-driver` MCP tools.
   The `cua-driver` skill covers the observe, act, verify loop.
-- You MUST NOT touch display `:1` in any way (`DISPLAY=:1`, its VNC,
-  its session): it is my desktop.
+- You SHOULD NOT use display `:1` (`DISPLAY=:1`, its VNC, its session)
+  by default: it is my desktop. You MAY use it when I explicitly ask
+  you to use my desktop.
 - The desktop is shared between agents: one controller at a time.
 - You MUST pass `delivery_mode: "foreground"` to input tools. Background
   mode has no route on this X server: clicks refuse and non-ASCII typing
