@@ -27,6 +27,15 @@ let
 
   webPort = "6080";
 
+  # noVNC hides its sidebar 2s after connecting, with no setting to stop
+  # it; keep it open until its handle closes it.
+  novnc = pkgs.novnc.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace app/ui.js --replace-fail \
+        "UI.closeControlbarTimeout = setTimeout(UI.closeControlbar, 2000);" ""
+    '';
+  });
+
   # noVNC connects with `?token=N`; websockify maps it to the slot's VNC.
   tokens = pkgs.writeText "agent-desktop-tokens" (
     lib.concatMapStrings (n: "${toString n}: 127.0.0.1:${toString (5900 + n)}\n") desktops
@@ -247,7 +256,7 @@ in
     serviceConfig = {
       ExecStart = toString [
         "${pkgs.python3Packages.websockify}/bin/websockify"
-        "--web ${pkgs.novnc}/share/webapps/novnc"
+        "--web ${novnc}/share/webapps/novnc"
         "--token-plugin TokenFile --token-source ${tokens}"
         "127.0.0.1:${webPort}"
       ];
