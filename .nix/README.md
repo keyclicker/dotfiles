@@ -33,7 +33,9 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # XFCE/X11 + Cua + noVNC on loopback
+├── module-cua-desktop.nix   # agent desktop slots: XFCE on Xvnc + Cua
+│                            # (installed by hand) + virtual audio +
+│                            # noVNC on loopback
 ├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
 │                            # exec'ing the npm global of home-agents.nix
 ├── module-gateway.nix       # tailnet front door on 443: services index,
@@ -309,39 +311,85 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 ## Agents desktop
 
-`agents` runs a persistent XFCE/X11 desktop for computer use. TigerVNC
-supplies the virtual display; the `vnc-desktop` user service starts it at
-boot through lingering, and viewer disconnects leave it running.
+`agents` runs XFCE desktops for computer use, one per **slot** `N`:
 
-Open it in a browser while on the tailnet:
+| per slot | |
+| --- | --- |
+| X server | Xvnc on display `:N`, 1280×960, framebuffer in RAM |
+| VNC | loopback `5900+N` (Xvnc's default), no password |
+| session | XFCE on its own D-Bus session and accessibility bus |
+| Cua | `cua-driver@N`, socket `~/.cache/cua-driver/desktop-N.sock` |
+| noVNC | token `N` on the one websockify behind `/desktop/` |
+
+`desktops` in `module-cua-desktop.nix` lists the slots that start at
+boot (lingering): only `1` today. The pieces are templates
+(`agent-desktop@N`, `cua-driver@N`) so that more slots, one per agent, are
+more numbers there; handing each agent session its own slot is the
+planned next step.
+
+Watch slot 1 in a browser while on the tailnet (the gateway index links
+it):
 
 ```text
-https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale
+https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale&path=desktop/websockify%3Ftoken%3D1
 ```
 
-Websockify serves noVNC and bridges it to loopback VNC. Tailnet access
-rules are the only login gate: VNC has no password and never leaves
-loopback, X11 uses a private cookie and no TCP listener.
+Websockify serves noVNC and maps `token=N` to that slot's loopback VNC.
+Tailnet access rules are the only login gate: VNC has no password and
+never leaves loopback, X11 uses a private cookie and no TCP listener.
 
-Cua Driver is the manual part. Nix has no prebuilt package, and Cua's
-own flake compiles from source, so install the official binary once as
-the desktop user:
+Why Xvnc and not a GPU or a real Xorg: noVNC only sees what the VNC
+server captures. On the virgl GPU every capture is a readback from the
+host (~30 fps cap, 2D 15× slower), and llvmpipe beats virgl at most GL
+here anyway. A real Xorg gives Cua's MPX/uinput background input, but
+uinput devices are machine-wide: with several X servers every desktop
+would receive every agent's keystrokes.
+
+So agents drive their desktop with `delivery_mode: "foreground"`: Cua
+activates the window and injects through XTEST, per X server. Background
+mode has no uinput here: clicks refuse, typing falls back to AT-SPI
+`InsertText`, which upstream (0.30.4) feeds a character count instead of
+a UTF-8 byte length, so non-ASCII text is silently dropped.
+
+Audio is virtual. PipeWire has no sound cards, only a null sink and a
+loopback: apps play into the default `agents-speaker`, and whatever
+agents play into `agents-mic` comes out of the default "Agents mic"
+source. A VM audio device, if attached, is ignored. All slots share it.
 
 ```sh
-curl -fsSL https://cua.ai/driver/install.sh -o /tmp/cua-install.sh
+# hear what apps play (pulse clients: agents-speaker.monitor)
+pw-record -P '{ stream.capture.sink = true }' --target agents-speaker out.wav
+# speak into apps
+pw-play --target agents-mic in.wav
+```
+
+Cua Driver is the manual part. nixpkgs has no package, and Cua's own
+flake compiles Rust from source, again after every nixpkgs bump. Install
+upstream's prebuilt release once as the desktop user instead; NixOS has
+no `/bin/bash`, so run the Rust installer that `install.sh` would exec:
+
+```sh
+curl -fsSL https://cua.ai/driver/_install-rust.sh -o /tmp/cua-install.sh
 bash /tmp/cua-install.sh --no-modify-path
 ```
 
-Nix supplies its libraries through `nix-ld` and starts
-`~/.local/bin/cua-driver` with the graphical session. After an update:
-`systemctl --user restart cua-driver`.
+Nix supplies its libraries through `nix-ld`. Update with
+`cua-driver update --apply`, then `systemctl --user restart
+cua-driver@1`. When nixpkgs gains a `cua-driver` package, switch the
+module to it and drop this section.
+
+XFCE autostart starts `cua-driver@N` once its window manager is up: Cua
+picks its overlay visual at startup and, started before the compositor,
+its agent cursor stays invisible. The same step hands the session's
+`DISPLAY` and bus addresses to the unit.
 
 Then hand it to the agents. `~/.claude.json` and `~/.codex/config.toml`
-are mutable app state, so the MCP server is registered by hand:
+are mutable app state, so the MCP server is registered by hand. Restart
+the agent's MCP connection after restarting the daemon:
 
 ```sh
 cua=~/.local/bin/cua-driver
-sock=~/.cache/cua-driver/cua-driver.sock
+sock=~/.cache/cua-driver/desktop-1.sock
 
 # --socket is required: without it, `mcp` runs its own runtime in the
 # agent's process, which has no X11 access and sees 0 windows
@@ -354,11 +402,12 @@ cua-driver skills install
 rm ~/.agents/skills/cua-driver
 ```
 
-To debug, from a desktop terminal:
+To debug:
 
 ```sh
-cua-driver doctor
-systemctl --user status vnc-desktop cua-driver
+cua-driver --socket ~/.cache/cua-driver/desktop-1.sock call health_report
+systemctl --user status agent-desktop@1 cua-driver@1
+journalctl --user -u agent-desktop@1 -u cua-driver@1
 ```
 
 ## Service exposure
@@ -374,7 +423,7 @@ to the iptables backend or trust `tailscale0` wholesale.
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
 | Gateway (agents) | Closed | HTTPS 443 via Serve | nginx 127.0.0.1:8080 |
 | T3 (agents) | Closed | HTTPS 3773 via Serve | 127.0.0.1:3773 |
-| Desktop (agents) | Closed | `/desktop/` via gateway | Web 127.0.0.1:6080; VNC 127.0.0.1:5901 |
+| Desktops (agents) | Closed | `/desktop/` via gateway | Web 127.0.0.1:6080; VNC 127.0.0.1:5900+N |
 | HTML (agents) | Closed | `/public/` via gateway | 127.0.0.1:8765 |
 | iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
