@@ -129,7 +129,7 @@ picks its own.
 ## Design
 
 - **Home-manager owns the dotfile symlinks**: `home-dotfiles.nix`
-  maps each repo file (`~/.dotfiles/.zshrc`, `.config/nvim`, ...) to
+  maps each repo file (`~/.dotfiles/.config/zsh/.zshrc`, `.config/nvim`, ...) to
   its `$HOME` target with `mkOutOfStoreSymlink`, pointing at the live
   checkout — edits apply immediately, no rebuild. Every host links
   everything; only entries bound to one OS (macOS preferences, the
@@ -181,7 +181,7 @@ picks its own.
   `home-agents.nix` lists them in `local.npmGlobals.packages`;
   `option-npm-globals.nix` runs one `npm install --global` per
   activation, so a rebuild is an update and nothing is pinned, like
-  casks and flatpaks. `~/.npmrc` is a dotfile on every host and points
+  casks and flatpaks. `~/.config/npm/npmrc` is a dotfile on every host and points
   the global prefix at `~/.local`, so `npm install -g` by hand, with
   whatever node a box has, lands on the same PATH. State stays in
   `$HOME`: `npm update -g` by hand works the same.
@@ -287,8 +287,8 @@ instead of failing the activation. After the first successful switch:
 find ~ ~/.config ~/.claude ~/.codex ~/.gnupg -maxdepth 1 -name '*.hm-bak'
 ```
 
-Verify with `readlink -f ~/.zshrc` — it should resolve to
-`~/.dotfiles/.zshrc` (via one store-path indirection, which is how
+Verify with `readlink -f ~/.config/zsh/.zshrc` — it should resolve to
+`~/.dotfiles/.config/zsh/.zshrc` (via one store-path indirection, which is how
 `mkOutOfStoreSymlink` works).
 
 ## Desktop QEMU on Apple silicon

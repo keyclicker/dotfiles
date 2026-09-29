@@ -8,6 +8,14 @@
   ...
 }:
 
+let
+  # Keep the running T3 installation in place; only its cache moves.
+  bunEnvironment = {
+    BUN_INSTALL_GLOBAL_DIR = "${config.home.homeDirectory}/.bun/install/global";
+    BUN_INSTALL_BIN = "${config.home.homeDirectory}/.local/bin";
+    BUN_INSTALL_CACHE_DIR = "${config.xdg.cacheHome}/bun";
+  };
+in
 {
   imports = [ ./option-npm-globals.nix ];
 
@@ -23,11 +31,8 @@
   # the Bun setup and T3 activation hook below. Keep tracking latest.
   programs.bun.enable = true;
 
-  # Bun reads this even when activation has no XDG_CONFIG_HOME.
-  home.file.".bunfig.toml".text = ''
-    [install]
-    globalBinDir = "${config.home.homeDirectory}/.local/bin"
-  '';
+  home.sessionVariables = bunEnvironment;
+  systemd.user.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux bunEnvironment;
 
   home.extraActivationPath = [ pkgs.bun ];
 
@@ -35,7 +40,9 @@
   # deadline so their combined runtime stays below activation's timeout.
   home.activation.t3 = lib.hm.dag.entryAfter [ "npmGlobals" "linkGeneration" ] ''
     run ${pkgs.coreutils}/bin/timeout --kill-after=10s 2m \
-      ${pkgs.bun}/bin/bun add --global t3@latest \
+      ${pkgs.coreutils}/bin/env \
+        ${lib.escapeShellArgs (lib.mapAttrsToList (name: value: "${name}=${value}") bunEnvironment)} \
+        ${pkgs.bun}/bin/bun add --global t3@latest \
       || warnEcho "T3: install failed (exit $?); retry: bun add --global t3@latest"
   '';
 }

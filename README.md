@@ -5,7 +5,7 @@ installs all of it on every machine I use: MacBook, NixOS desktop, agent
 sandbox VM, throwaway guests, Ubuntu boxes.
 
 Home-manager symlinks the files here into `$HOME`. The links point at the
-checkout, not the nix store, so editing `.zshrc` takes effect in the next
+checkout, not the nix store, so editing `.config/zsh/.zshrc` takes effect in the next
 shell without a rebuild. Rebuild only for packages and system settings.
 
 ## Install
@@ -61,7 +61,7 @@ dots list            # flake targets, * marks this machine
 dots set desktop-vm  # pin host when autodetect is wrong; `unset` reverts
 ```
 
-`.zshrc` runs `dots warn` at startup: one line if the checkout is behind
+`.config/zsh/.zshrc` runs `dots warn` at startup: one line if the checkout is behind
 origin or the nixpkgs pin is older than two weeks.
 
 ## Layout
@@ -69,25 +69,54 @@ origin or the nixpkgs pin is older than two weeks.
 ```
 .nix/          the flake, one output per host. Has its own README
 install.sh     first switch, one function per platform
-.zshrc         zsh: history, keybinds, aliases, prompt, plugin hooks
-.zshenv        env for non-interactive shells
-.zprofile      homebrew on PATH (mac)
-.tmux.conf     tmux, plugins from nixpkgs, no tpm
-.vimrc         plain vim for machines that only have vim
-.gitconfig     identity, gpg signing, machine-local include
+.zshenv        bootstrap XDG paths and non-interactive shell environment
 .gnupg/        gpg and gpg-agent config
 Brewfile       mac packages homebrew owns instead of nix
-.config/       nvim (kickstart-based), ghostty, yazi, mc, mpv, qalculate,
+.config/       zsh, tmux, git, npm, vim, doom, nvim (kickstart-based), ghostty, yazi, mc, mpv, qalculate,
                sway + waybar + fuzzel + mako (linux),
                yabai + skhd + karabiner + linearmouse (mac)
 .claude/       Claude Code: CLAUDE.md, skills
 .codex/        Codex: AGENTS.md, skills
 .agents/       shared agent instructions and skills; .claude and .codex link here
-.doom.d/       doom emacs
-.scripts/      dots, small utilities
+.scripts/      dots and utilities; linked into ~/.local/bin
 packages/      subprojects: agents gateway, html-serving,
                InputSourceSelector (source of .scripts/input)
 ```
+
+## Home layout
+
+`home-xdg.nix` sets the application paths. Configuration lives in
+`~/.config`, disposable caches in `~/.cache`, installed toolchains and
+package data in `~/.local/share`, and history/session saves in
+`~/.local/state`. Shells load Home Manager's environment from `.zshenv`;
+npm and Bun activation hooks receive their paths explicitly.
+
+Git's machine-local overrides belong in `~/.config/git/local`.
+Agent homes remain unchanged, including Bun's global T3 installation.
+
+When deploying an unmerged worktree, set the Home Manager option
+`local.dotfilesDirectory` to that checkout so live links resolve there.
+The default remains `~/.dotfiles`.
+
+Existing data needs a one-time move before using the new environment:
+
+| Old path | New path |
+| --- | --- |
+| `.cargo` | `.local/share/cargo` |
+| `.rustup` | `.local/share/rustup` |
+| `go` | `.local/share/go` |
+| `go/pkg/mod` | `.cache/go/mod` |
+| `.docker` | `.config/docker` |
+| `.npm` | `.cache/npm` |
+| `.bun/install/cache` | `.cache/bun` |
+| `.zsh_history` | `.local/state/zsh/history` |
+| `.zcompdump` | `.cache/zsh/zcompdump` |
+| `.tmux/resurrect` | `.local/state/tmux/resurrect` |
+| `.gitconfig.local` | `.config/git/local` |
+
+Stop writers first, preserve existing destination contents, and start new
+shells after switching. Home Manager relocates the managed config links;
+it does not move these mutable directories automatically.
 
 ## Migrating from old dotfiles
 
@@ -102,7 +131,7 @@ find ~ ~/.config ~/.claude ~/.codex ~/.gnupg -maxdepth 1 -name '*.hm-bak'
 A link is correct when it resolves to the checkout through one store path:
 
 ```sh
-readlink -f ~/.zshrc   # ~/.dotfiles/.zshrc
+readlink -f ~/.config/zsh/.zshrc   # ~/.dotfiles/.config/zsh/.zshrc
 ```
 
 ## License
