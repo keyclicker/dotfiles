@@ -137,7 +137,7 @@ let
       "DISPLAY=$DISPLAY" \
       "XAUTHORITY=$XAUTHORITY" \
       "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
-      "PATH=$PATH" \
+      "PATH=${pkgs.ffmpeg-full}/bin:$PATH" \
       "CHROME_CONFIG_HOME=$CHROME_CONFIG_HOME" \
       > "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.env"
     exec ${pkgs.systemd}/bin/systemctl --user start \
@@ -321,6 +321,8 @@ in
 
       # PATH and the rest come from the desktop session (startCua above).
       environment.PATH = lib.mkForce null;
+      # PID-selected launches bypass Chromium's wrapper.
+      environment.CHROME_DEVEL_SANDBOX = "${pkgs.chromium.sandbox}/bin/${pkgs.chromium.sandboxExecutableName}";
 
       serviceConfig = {
         EnvironmentFile = "%t/agent-desktop/%i.env";
