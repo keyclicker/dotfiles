@@ -138,6 +138,7 @@ let
       "XAUTHORITY=$XAUTHORITY" \
       "ICEAUTHORITY=$ICEAUTHORITY" \
       "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
+      "GNOME_KEYRING_CONTROL=$GNOME_KEYRING_CONTROL" \
       "PATH=${pkgs.ffmpeg-full}/bin:$PATH" \
       "CHROME_CONFIG_HOME=$CHROME_CONFIG_HOME" \
       > "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.env"
@@ -262,6 +263,8 @@ in
       description = "Agent desktop :%i";
       environment = {
         XAUTHORITY = "%t/agent-desktop/%i.xauth";
+        # Each desktop's D-Bus activation must reach its own keyring daemon.
+        GNOME_KEYRING_CONTROL = "%t/agent-desktop/keyring-%i";
         ICEAUTHORITY = "%t/agent-desktop/%i.iceauth";
         XDG_SESSION_TYPE = "x11";
         XDG_CURRENT_DESKTOP = "XFCE";

@@ -313,6 +313,17 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 ## Agents desktop
 
+Chromium uses GNOME's `login` keyring. `browser-keyring.service` unseals
+`/var/lib/browser-keyring/password.cred` into private RAM-backed storage;
+the browser wrapper feeds it to `gnome-keyring-daemon --unlock`.
+Provision that systemd credential with `--name=password --with-key=tpm2
+--tpm2-pcrs=7`; keep the TPM state and a secure recovery copy.
+For the existing encrypted keyring, stop Chromium and the keyring daemons,
+rename `~/.local/share/keyrings/Default_Keyring.keyring` to `login.keyring`,
+and set the `default` file beside it to `login`. Keep the sealed password
+unchanged: the existing Chromium key and cookies need no conversion.
+Apply the configuration and restart the desktop sessions afterward.
+
 `agents` runs XFCE desktops for computer use, one per **slot** `N`:
 
 | per slot | |
