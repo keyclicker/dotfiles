@@ -7,11 +7,7 @@
 { pkgs, ... }:
 
 {
-  # ~/Pictures for screenshots and the rest of the standard set.
-  xdg.userDirs = {
-    enable = true;
-    createDirectories = true;
-  };
+  imports = [ ./home-user-dirs.nix ];
 
   dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
 

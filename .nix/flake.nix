@@ -120,6 +120,7 @@
               users.keyclicker.imports = [
                 ./home-dotfiles.nix
                 ./home-agents.nix
+                ./home-user-dirs.nix
               ];
             };
           }
