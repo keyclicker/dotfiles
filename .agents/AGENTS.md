@@ -31,6 +31,10 @@ I never vibecode blindly.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
+- For interactive computer use with CUA driver, prefer connected MCP tools.
+  Use the CLI for shell workflows or when MCP is unavailable. This preference
+  overrides the official cua-driver skill's CLI-first default; keep the
+  installed skill unchanged.
 
 ## HTML
 
