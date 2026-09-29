@@ -149,6 +149,7 @@ in
   security.rtkit.enable = true;
 
   fonts.packages = [ pkgs.noto-fonts ];
+  environment.systemPackages = [ pkgs.ghostty ];
   services.gnome.at-spi2-core.enable = true;
 
   # Cua Driver is installed by hand from upstream's prebuilt release
