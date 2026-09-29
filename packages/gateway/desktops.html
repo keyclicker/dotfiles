@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>desktops</title>
     <style>
+      /* Always dark: it frames desktops, not a page. */
       :root {
+        color-scheme: dark;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #2c3532;
+        color: #d7dcd9;
         background: #1e2221;
         font-size: 13px;
       }
@@ -26,22 +28,22 @@
       nav {
         display: flex;
         gap: 4px;
-        padding: 4px 8px;
-        background: #fafaf8;
-        border-bottom: 1px solid #e3e5e1;
+        padding: 2px 8px;
+        background: #262b29;
+        border-bottom: 1px solid #343a37;
       }
 
       nav a {
-        padding: 4px 12px;
-        color: #69716c;
+        padding: 2px 12px;
+        color: #8f9893;
         font-weight: 500;
         text-decoration: none;
         border-radius: 6px;
       }
 
       nav a[aria-current] {
-        color: #35635b;
-        background: #e6efec;
+        color: #a8d5ca;
+        background: #33423e;
       }
 
       nav .home {
@@ -62,16 +64,18 @@
   <body>
     <!-- One live noVNC per desktop (slots in .nix/module-cua-desktop.nix);
          the tabs only toggle which one shows, so switching never
-         reconnects. -->
+         reconnects. The agents' desktop opens view-only (noVNC's panel
+         toggles it); `view_only` is explicit on both, so the toggle
+         never leaks across them via noVNC's saved settings. -->
     <nav>
       <a href="#you">You · 1</a>
       <a href="#agents">Agents · 2</a>
       <a class="home" href="/">index</a>
     </nav>
     <iframe id="you" title="Your desktop"
-      src="desktop/vnc.html?autoconnect=true&amp;reconnect=true&amp;resize=scale&amp;path=desktop/websockify%3Ftoken%3D1"></iframe>
+      src="desktop/vnc.html?autoconnect=true&amp;reconnect=true&amp;resize=scale&amp;view_only=false&amp;path=desktop/websockify%3Ftoken%3D1"></iframe>
     <iframe id="agents" title="Agents desktop" hidden
-      src="desktop/vnc.html?autoconnect=true&amp;reconnect=true&amp;resize=scale&amp;path=desktop/websockify%3Ftoken%3D2"></iframe>
+      src="desktop/vnc.html?autoconnect=true&amp;reconnect=true&amp;resize=scale&amp;view_only=true&amp;path=desktop/websockify%3Ftoken%3D2"></iframe>
 
     <script>
       // Show the desktop named by the hash; keys go to the one on screen.
