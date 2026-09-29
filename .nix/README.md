@@ -318,20 +318,31 @@ channel; a basic Cocoa window does not provide SPICE integration.
 | X server | Xvnc on display `:N`, 1280×960, framebuffer in RAM |
 | VNC | loopback `5900+N` (Xvnc's default), no password |
 | session | XFCE on its own D-Bus session and accessibility bus |
-| Cua | `cua-driver@N`, socket `~/.cache/cua-driver/desktop-N.sock` |
 | noVNC | token `N` on the one websockify behind `/desktop/` |
+| Cua (agent slots) | `cua-driver@N`, socket `~/.cache/cua-driver/desktop-N.sock` |
+| Chromium (agent slots) | own profile, `~/.local/state/agent-desktop/N` |
 
 `desktops` in `module-cua-desktop.nix` lists the slots that start at
-boot (lingering): only `1` today. The pieces are templates
-(`agent-desktop@N`, `cua-driver@N`) so that more slots, one per agent, are
-more numbers there; handing each agent session its own slot is the
-planned next step.
+boot (lingering), `agentDesktops` the ones agents drive:
 
-Watch slot 1 in a browser while on the tailnet (the gateway index links
-it):
+- **1, yours**: no Cua, so agents' MCP tools cannot reach it.
+- **2, the agents'**: Cua, and a Chromium profile of its own. Chromium
+  hands new windows to the running instance of a profile, so a shared
+  one would open the agents' browser windows on your desktop.
+
+Separate X servers and session buses keep input, clipboard and the
+accessibility tree apart. It is not a security boundary: both desktops
+run as the same user, whom agents have a shell (and sudo) as; AGENTS.md
+tells them to stay off `:1`. XFCE settings and the audio devices are
+shared. The pieces are templates (`agent-desktop@N`, `cua-driver@N`), so
+one slot per agent session is more numbers plus a way to hand them out.
+
+Watch both on the tailnet at `https://<tailnet-hostname>/desktops`: a
+tab per desktop, both connected, so switching is instant. One desktop
+alone:
 
 ```text
-https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale&path=desktop/websockify%3Ftoken%3D1
+https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale&path=desktop/websockify%3Ftoken%3DN
 ```
 
 Websockify serves noVNC and maps `token=N` to that slot's loopback VNC.
@@ -375,7 +386,7 @@ bash /tmp/cua-install.sh --no-modify-path
 
 Nix supplies its libraries through `nix-ld`. Update with
 `cua-driver update --apply`, then `systemctl --user restart
-cua-driver@1`. When nixpkgs gains a `cua-driver` package, switch the
+cua-driver@2`. When nixpkgs gains a `cua-driver` package, switch the
 module to it and drop this section.
 
 XFCE autostart starts `cua-driver@N` once its window manager is up: Cua
@@ -389,7 +400,7 @@ the agent's MCP connection after restarting the daemon:
 
 ```sh
 cua=~/.local/bin/cua-driver
-sock=~/.cache/cua-driver/desktop-1.sock
+sock=~/.cache/cua-driver/desktop-2.sock
 
 # --socket is required: without it, `mcp` runs its own runtime in the
 # agent's process, which has no X11 access and sees 0 windows
@@ -405,9 +416,9 @@ rm ~/.agents/skills/cua-driver
 To debug:
 
 ```sh
-cua-driver --socket ~/.cache/cua-driver/desktop-1.sock call health_report
-systemctl --user status agent-desktop@1 cua-driver@1
-journalctl --user -u agent-desktop@1 -u cua-driver@1
+cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report
+systemctl --user status agent-desktop@2 cua-driver@2
+journalctl --user -u agent-desktop@2 -u cua-driver@2
 ```
 
 ## Service exposure

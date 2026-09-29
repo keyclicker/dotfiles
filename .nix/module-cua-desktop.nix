@@ -2,9 +2,10 @@
 # noVNC (module-gateway.nix serves it at /desktop/).
 #
 # Each desktop is a slot N: display `:N`, VNC on 5900+N (Xvnc's default),
-# its own session bus (so Cua's accessibility view stays inside it), a
-# `cua-driver@N` daemon on its own socket, and noVNC token `N`. One slot
-# runs today; more slots are more numbers in `desktops`.
+# its own session bus (so Cua's accessibility view stays inside it) and
+# noVNC token `N`. Agent slots also get a `cua-driver@N` daemon on its own
+# socket and their own Chromium profile. Slot 1 is the user's, slot 2 the
+# agents'.
 {
   lib,
   pkgs,
@@ -12,7 +13,18 @@
 }:
 
 let
-  desktops = [ 1 ];
+  desktops = [
+    1
+    2
+  ];
+  agentDesktops = [ 2 ];
+
+  # Chromium hands a new window to the running instance of its profile,
+  # which may sit on another desktop: one profile per agent slot keeps
+  # agents' browsers on their own screen. Set for the session and for Cua,
+  # which launches apps with its own environment.
+  agentChromeProfile = "%h/.local/state/agent-desktop/%i";
+
   webPort = "6080";
 
   # noVNC connects with `?token=N`; websockify maps it to the slot's VNC.
@@ -45,6 +57,13 @@ let
     # DISPLAY is ":N.0" under xinit.
     n=''${DISPLAY#:}
     n=''${n%.*}
+
+    # No Cua, so no agent input, on the user's desktops.
+    case " ${toString agentDesktops} " in
+      *" $n "*) ;;
+      *) exit 0 ;;
+    esac
+
     printf '%s\n' \
       "DISPLAY=$DISPLAY" \
       "XAUTHORITY=$XAUTHORITY" \
@@ -191,7 +210,10 @@ in
       after = [ "agent-desktop@%i.service" ];
 
       # PATH and the rest come from the desktop session (startCua above).
-      environment.PATH = lib.mkForce null;
+      environment = {
+        PATH = lib.mkForce null;
+        CHROME_CONFIG_HOME = agentChromeProfile;
+      };
 
       serviceConfig = {
         EnvironmentFile = "%t/agent-desktop/%i.env";
@@ -202,11 +224,21 @@ in
     };
   }
   # One enabled instance per slot.
-  // lib.genAttrs (map (n: "agent-desktop@${toString n}") desktops) (_: {
-    overrideStrategy = "asDropin";
-    wantedBy = [ "default.target" ];
-    environment.PATH = lib.mkForce null;
-  });
+  // lib.listToAttrs (
+    map (
+      n:
+      lib.nameValuePair "agent-desktop@${toString n}" {
+        overrideStrategy = "asDropin";
+        wantedBy = [ "default.target" ];
+        environment = {
+          PATH = lib.mkForce null;
+        }
+        // lib.optionalAttrs (lib.elem n agentDesktops) {
+          CHROME_CONFIG_HOME = agentChromeProfile;
+        };
+      }
+    ) desktops
+  );
 
   # One websockify for every slot: serves the noVNC client and bridges
   # `?token=N` WebSockets to that slot's loopback VNC.
