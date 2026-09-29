@@ -9,6 +9,7 @@ https://agents.<tailnet>.ts.net/          services index
                                /desktop/  one desktop over noVNC
                                           (`path=desktop/websockify?token=N`)
                                /t3        → :3773, T3 Code
+                               /hermes-webui → :8787, Hermes WebUI
                                /udex      → :8443, Udex preview
 ```
 
@@ -22,7 +23,7 @@ Tailscale terminates HTTPS on 443 and forwards it to nginx on
   html-serving directory server and declares the 443 route via
   `option-tailnet.nix`.
 
-Apps that load assets from `/` (T3, Udex) can't live under a path, so
+Apps that load assets from `/` (T3, Hermes WebUI, Udex) can't live under a path, so
 they keep their own tailnet ports; the index links to them through
 short redirects.
 
