@@ -9,9 +9,9 @@
 }:
 
 let
-  # Keep the running T3 installation in place; only its cache moves.
+  # Keep installed packages separate from disposable downloads.
   bunEnvironment = {
-    BUN_INSTALL_GLOBAL_DIR = "${config.home.homeDirectory}/.bun/install/global";
+    BUN_INSTALL_GLOBAL_DIR = "${config.xdg.dataHome}/bun/install/global";
     BUN_INSTALL_BIN = "${config.home.homeDirectory}/.local/bin";
     BUN_INSTALL_CACHE_DIR = "${config.xdg.cacheHome}/bun";
   };

@@ -261,6 +261,7 @@ in
       description = "Agent desktop :%i";
       environment = {
         XAUTHORITY = "%t/agent-desktop/%i.xauth";
+        ICEAUTHORITY = "%t/agent-desktop/%i.iceauth";
         XDG_SESSION_TYPE = "x11";
         XDG_CURRENT_DESKTOP = "XFCE";
 
