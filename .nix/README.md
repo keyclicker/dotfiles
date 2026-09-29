@@ -33,7 +33,7 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
 ├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # agent desktop slots: XFCE on Xvnc + Cua
+├── module-cua-desktop.nix   # agent desktop slots: XFCE on Xorg/Xvnc + Cua
 │                            # (installed by hand) + virtual audio +
 │                            # noVNC on loopback
 ├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
@@ -315,8 +315,8 @@ channel; a basic Cocoa window does not provide SPICE integration.
 
 | per slot | |
 | --- | --- |
-| X server | Xvnc on display `:N`, 1280×960, framebuffer in RAM |
-| VNC | loopback `5900+N` (Xvnc's default), no password |
+| X server | agent: headless Xorg; user: Xvnc; display `:N`, 1280×960 |
+| VNC | loopback `5900+N`, `x0vncserver` for Xorg, no password |
 | session | XFCE on its own D-Bus session and accessibility bus |
 | noVNC | token `N` on the one websockify behind `/desktop/` |
 | Cua (agent slots) | `cua-driver@N`, socket `~/.cache/cua-driver/desktop-N.sock` |
@@ -330,12 +330,12 @@ boot (lingering), `agentDesktops` the ones agents drive:
   hands new windows to the running instance of a profile, so a shared
   one would open the agents' browser windows on your desktop.
 
-Separate X servers and session buses keep input, clipboard and the
+Separate X servers, input routing and session buses keep clipboard and the
 accessibility tree apart. It is not a security boundary: both desktops
 run as the same user, whom agents have a shell (and sudo) as; AGENTS.md
 tells them to stay off `:1`. XFCE settings and the audio devices are
-shared. The pieces are templates (`agent-desktop@N`, `cua-driver@N`), so
-one slot per agent session is more numbers plus a way to hand them out.
+shared. The pieces are templates (`agent-desktop@N`, `cua-driver@N`); additional
+agent slots also need distinct uinput routing.
 
 Watch both on the tailnet at `https://<tailnet-hostname>/desktops`: a
 tab per desktop, both connected, so switching is instant. One desktop
@@ -349,18 +349,20 @@ Websockify serves noVNC and maps `token=N` to that slot's loopback VNC.
 Tailnet access rules are the only login gate: VNC has no password and
 never leaves loopback, X11 uses a private cookie and no TCP listener.
 
-Why Xvnc and not a GPU or a real Xorg: noVNC only sees what the VNC
-server captures. On the virgl GPU every capture is a readback from the
-host (~30 fps cap, 2D 15× slower), and llvmpipe beats virgl at most GL
-here anyway. A real Xorg gives Cua's MPX/uinput background input, but
-uinput devices are machine-wide: with several X servers every desktop
-would receive every agent's keystrokes.
+The agent slot uses headless Xorg with a dummy 1280×960 display. Cua's
+MPX/uinput route can send real pointer and keyboard events to background
+windows. `x0vncserver` exports that display to the existing noVNC endpoint;
+viewer resize requests remain disabled. The user slot stays on Xvnc.
 
-So agents drive their desktop with `delivery_mode: "foreground"`: Cua
-activates the window and injects through XTEST, per X server. Background
-mode has no uinput here: clicks refuse, typing falls back to AT-SPI
-`InsertText`, which upstream (0.30.4) feeds a character count instead of
-a UTF-8 byte length, so non-ASCII text is silently dropped.
+Uinput devices are machine-wide. Udev assigns only Cua devices (`CUA *`)
+to `cua-agent`, and the agent Xorg runs with `-seat cua-agent`. Its input
+classes reject unrelated devices. The configuration permits one agent
+Xorg slot: adding another requires per-slot device routing first. User
+Xvnc slots do not consume kernel input devices.
+
+Prefer accessibility actions and background input, then inspect the result.
+Use `delivery_mode: "foreground"` only when the target rejects background
+input and visible control is authorized. Keep one controller per desktop.
 
 Audio is virtual. PipeWire has no sound cards, only a null sink and a
 loopback: apps play into the default `agents-speaker`, and whatever
