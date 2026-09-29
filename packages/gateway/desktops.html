@@ -81,7 +81,11 @@
           frame.hidden = frame.id !== name;
         }
         for (const tab of document.querySelectorAll("nav a[href^='#']")) {
-          tab.toggleAttribute("aria-current", tab.hash === "#" + name);
+          if (tab.hash === "#" + name) {
+            tab.setAttribute("aria-current", "true");
+          } else {
+            tab.removeAttribute("aria-current");
+          }
         }
         document.getElementById(name).focus();
       }

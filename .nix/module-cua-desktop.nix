@@ -21,8 +21,8 @@ let
 
   # Chromium hands a new window to the running instance of its profile,
   # which may sit on another desktop: one profile per agent slot keeps
-  # agents' browsers on their own screen. Set for the session and for Cua,
-  # which launches apps with its own environment.
+  # agents' browsers on their own screen. Set for the session; Cua gets
+  # it with the rest of the session's environment (startCua).
   agentChromeProfile = "%h/.local/state/agent-desktop/%i";
 
   webPort = "6080";
@@ -54,13 +54,9 @@ let
   # earlier its cursor stays invisible. Hands the session's environment to
   # `cua-driver@N`, which cannot inherit it through systemd.
   startCua = pkgs.writeShellScript "agent-desktop-cua" ''
-    # DISPLAY is ":N.0" under xinit.
-    n=''${DISPLAY#:}
-    n=''${n%.*}
-
     # No Cua, so no agent input, on the user's desktops.
     case " ${toString agentDesktops} " in
-      *" $n "*) ;;
+      *" $SLOT "*) ;;
       *) exit 0 ;;
     esac
 
@@ -69,8 +65,9 @@ let
       "XAUTHORITY=$XAUTHORITY" \
       "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
       "PATH=$PATH" \
-      > "$XDG_RUNTIME_DIR/agent-desktop/$n.env"
-    exec ${pkgs.systemd}/bin/systemctl --user start "cua-driver@$n.service"
+      "CHROME_CONFIG_HOME=$CHROME_CONFIG_HOME" \
+      > "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.env"
+    exec ${pkgs.systemd}/bin/systemctl --user start "cua-driver@$SLOT.service"
   '';
 in
 {
@@ -188,6 +185,10 @@ in
         ${pkgs.xauth}/bin/xauth -f "$XAUTHORITY" add ":$SLOT" . \
           "$(${pkgs.util-linux}/bin/mcookie)"
       '';
+      # The session's env for Cua (startCua) dies with the session.
+      postStop = ''
+        rm -f "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.env"
+      '';
       serviceConfig = {
         Environment = "SLOT=%i";
         ExecStart = toString [
@@ -204,16 +205,14 @@ in
 
     "cua-driver@" = {
       description = "Cua desktop automation on :%i";
-      # Stop with its desktop; never start one (a typo'd N would).
-      partOf = [ "agent-desktop@%i.service" ];
-      requisite = [ "agent-desktop@%i.service" ];
+      # Stop with its desktop, but never restart with it (as PartOf= and
+      # Requisite= would): only startCua starts Cua, once the new session
+      # is up. Without its desktop's env file, Cua fails to start.
+      unitConfig.StopPropagatedFrom = [ "agent-desktop@%i.service" ];
       after = [ "agent-desktop@%i.service" ];
 
       # PATH and the rest come from the desktop session (startCua above).
-      environment = {
-        PATH = lib.mkForce null;
-        CHROME_CONFIG_HOME = agentChromeProfile;
-      };
+      environment.PATH = lib.mkForce null;
 
       serviceConfig = {
         EnvironmentFile = "%t/agent-desktop/%i.env";
