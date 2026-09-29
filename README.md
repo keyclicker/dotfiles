@@ -92,7 +92,8 @@ package data in `~/.local/share`, and history/session saves in
 npm and Bun activation hooks receive their paths explicitly.
 
 Git's machine-local overrides belong in `~/.config/git/local`.
-Agent homes remain unchanged, including Bun's global T3 installation.
+Agent homes remain unchanged. Bun's global packages live in
+`~/.local/share/bun/install/global`, with executables in `~/.local/bin`.
 
 When deploying an unmerged worktree, set the Home Manager option
 `local.dotfilesDirectory` to that checkout so live links resolve there.
@@ -109,6 +110,7 @@ Existing data needs a one-time move before using the new environment:
 | `.docker` | `.config/docker` |
 | `.npm` | `.cache/npm` |
 | `.bun/install/cache` | `.cache/bun` |
+| `.bun/install/global` | `.local/share/bun/install/global` |
 | `.zsh_history` | `.local/state/zsh/history` |
 | `.zcompdump` | `.cache/zsh/zcompdump` |
 | `.tmux/resurrect` | `.local/state/tmux/resurrect` |
