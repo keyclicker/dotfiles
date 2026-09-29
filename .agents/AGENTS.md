@@ -129,6 +129,10 @@ daemon.
 - Use the `cua-driver` CLI for diagnostics (`status`, `call health_report`).
   `doctor` warns about a missing `DISPLAY` in agent shells; that's expected.
 - I can watch the desktop at `https://<node>/desktop/`.
+- OpenGL is GPU-accelerated (virgl); Vulkan is not available.
+- Audio is virtual. Hear apps with
+  `pw-record -P '{ stream.capture.sink = true }' --target agents-speaker`,
+  speak into them with `pw-play --target agents-mic`.
 
 #### HTML serving
 
