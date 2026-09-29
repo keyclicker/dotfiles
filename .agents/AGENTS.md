@@ -133,9 +133,9 @@ daemon on `~/.cache/cua-driver/desktop-2.sock`. Display `:1` is mine.
   by default: it is my desktop. You MAY use it when I explicitly ask
   you to use my desktop.
 - The desktop is shared between agents: one controller at a time.
-- You MUST pass `delivery_mode: "foreground"` to input tools. Background
-  mode has no route on this X server: clicks refuse and non-ASCII typing
-  is silently dropped.
+- Prefer background input on the agent Xorg desktop. Verify every action;
+  use `delivery_mode: "foreground"` when background delivery is refused
+  and visible control is authorized. Do not retry partial actions blindly.
 - Use the `cua-driver` CLI for diagnostics:
   `cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report`.
 - I can watch the desktop at `https://<node>/desktops` (Agents tab).

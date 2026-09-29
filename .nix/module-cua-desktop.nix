@@ -1,4 +1,4 @@
-# Agent desktops: XFCE on Xvnc, driven by Cua, watched through Tailnet-only
+# Agent desktops: XFCE on Xorg/Xvnc, watched through Tailnet-only
 # noVNC (module-gateway.nix serves it at /desktop/).
 #
 # Each desktop is a slot N: display `:N`, VNC on 5900+N (Xvnc's default),
@@ -26,6 +26,70 @@ let
   agentChromeProfile = "%h/.local/state/agent-desktop/%i";
 
   webPort = "6080";
+
+  # Only the agent Xorg seat admits Cua's machine-wide uinput devices.
+  xorgConfig = pkgs.writeText "cua-xorg.conf" ''
+    Section "ServerFlags"
+      Option "AutoAddDevices" "true"
+      Option "DontVTSwitch" "true"
+    EndSection
+    Section "Files"
+      ModulePath "${pkgs.xorg-server}/lib/xorg/modules"
+      ModulePath "${pkgs.xf86-video-dummy}/lib/xorg/modules"
+      ModulePath "${pkgs.xf86-input-libinput}/lib/xorg/modules"
+    EndSection
+    Section "Device"
+      Identifier "dummy"
+      Driver "dummy"
+      VideoRam 256000
+    EndSection
+    Section "Monitor"
+      Identifier "monitor"
+      HorizSync 5.0-1000.0
+      VertRefresh 5.0-200.0
+      Modeline "1280x960" 108.00 1280 1376 1488 1800 960 961 964 1000 +HSync +VSync
+    EndSection
+    Section "Screen"
+      Identifier "screen"
+      Device "dummy"
+      Monitor "monitor"
+      DefaultDepth 24
+      SubSection "Display"
+        Depth 24
+        Modes "1280x960"
+      EndSubSection
+    EndSection
+    Section "InputClass"
+      Identifier "Ignore non-Cua devices"
+      MatchDevicePath "/dev/input/event*"
+      Option "Ignore" "true"
+    EndSection
+    Section "InputClass"
+      Identifier "Cua virtual devices"
+      MatchProduct "CUA "
+      MatchDevicePath "/dev/input/event*"
+      Driver "libinput"
+      Option "Ignore" "false"
+    EndSection
+  '';
+
+  # xinit supplies :N; SLOT comes from the instance unit, never the caller.
+  xserver = pkgs.writeShellScript "agent-desktop-xserver" ''
+    case " ${toString agentDesktops} " in
+      *" $SLOT "*)
+        exec ${pkgs.xorg-server}/bin/Xorg "$@" \
+          -config ${xorgConfig} -seat cua-agent \
+          -auth "$XAUTHORITY" -nolisten tcp -noreset -novtswitch -sharevts \
+          -logfile "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.xorg.log"
+        ;;
+      *)
+        exec ${pkgs.tigervnc}/bin/Xvnc "$@" \
+          -auth "$XAUTHORITY" -nolisten tcp -localhost \
+          -SecurityTypes None -AlwaysShared -geometry 1280x960 \
+          -AcceptSetDesktopSize=0 -depth 24 -s 0
+        ;;
+    esac
+  '';
 
   # noVNC hides its sidebar 2s after connecting, with no setting to stop
   # it; keep it open until its handle closes it.
@@ -76,11 +140,26 @@ let
       "PATH=$PATH" \
       "CHROME_CONFIG_HOME=$CHROME_CONFIG_HOME" \
       > "$XDG_RUNTIME_DIR/agent-desktop/$SLOT.env"
-    exec ${pkgs.systemd}/bin/systemctl --user start "cua-driver@$SLOT.service"
+    exec ${pkgs.systemd}/bin/systemctl --user start \
+      "agent-vnc@$SLOT.service" "cua-driver@$SLOT.service"
   '';
 in
 {
-  # XFCE and the X11 bits it needs; no display manager, no local X server.
+  # The Cua protocol currently gives all its uinput devices one seat.
+  assertions = [
+    {
+      assertion = builtins.length agentDesktops == 1;
+      message = "Cua Xorg input supports one agent seat; keep user slots on Xvnc.";
+    }
+  ];
+
+  boot.kernelModules = [ "uinput" ];
+  services.udev.extraRules = ''
+    SUBSYSTEM=="misc", KERNEL=="uinput", OWNER="keyclicker", MODE="0600"
+    SUBSYSTEM=="input", ATTRS{name}=="CUA *", OWNER="keyclicker", MODE="0600", ENV{ID_SEAT}="cua-agent", TAG+="seat"
+  '';
+
+  # XFCE and the X11 bits it needs; each slot owns its X server.
   services.xserver = {
     enable = true;
     displayManager.lightdm.enable = false;
@@ -175,7 +254,7 @@ in
   # ---- Slot templates ------------------------------------------------------
 
   systemd.user.services = {
-    # xinit owns Xvnc and the session: restarting the unit restarts both.
+    # xinit owns the X server and session: restarting the unit restarts both.
     # 1280x960 and fixed: agents click in screenshot pixels, so the frame must
     # not follow whoever's browser is open; noVNC scales it instead.
     "agent-desktop@" = {
@@ -203,13 +282,32 @@ in
         Environment = "SLOT=%i";
         ExecStart = toString [
           "${pkgs.xinit}/bin/xinit ${session}"
-          "-- ${pkgs.tigervnc}/bin/Xvnc :%i"
-          "-auth %t/agent-desktop/%i.xauth -nolisten tcp"
-          "-localhost -SecurityTypes None -AlwaysShared"
-          "-geometry 1280x960 -AcceptSetDesktopSize=0 -depth 24 -s 0"
+          "-- ${xserver} :%i"
         ];
         Restart = "always";
         RestartSec = 3;
+      };
+    };
+
+    # Start from XFCE autostart after the X server is ready, like Cua.
+    "agent-vnc@" = {
+      description = "VNC view of agent Xorg desktop :%i";
+      unitConfig.StopPropagatedFrom = [ "agent-desktop@%i.service" ];
+      after = [ "agent-desktop@%i.service" ];
+      environment = {
+        DISPLAY = ":%i";
+        XAUTHORITY = "%t/agent-desktop/%i.xauth";
+      };
+      serviceConfig = {
+        Environment = "SLOT=%i";
+        ExecStart = "${pkgs.writeShellScript "agent-desktop-vnc" ''
+          exec ${pkgs.tigervnc}/bin/x0vncserver \
+            -display "$DISPLAY" -rfbport "$((5900 + SLOT))" \
+            -localhost -SecurityTypes None -AlwaysShared \
+            -AcceptSetDesktopSize=0
+        ''}";
+        Restart = "on-failure";
+        RestartSec = 2;
       };
     };
 
