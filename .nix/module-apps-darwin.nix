@@ -25,7 +25,7 @@
       "chatgpt"
       "claude"
       "t3-code"
-      "muse"
+      # "muse" # cask url is broken
 
       "postico"
       "postman"
