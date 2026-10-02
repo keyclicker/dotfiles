@@ -10,8 +10,11 @@ let
       echo "Enroll the login keyring first" >&2
       exit 1
     }
-    ${keyring} --unlock --control-directory="$GNOME_KEYRING_CONTROL" \
-      < /run/browser-keyring/password >/dev/null || exit 1
+    # --unlock starts a daemon; it cannot unlock an existing one.
+    if ! test -S "$GNOME_KEYRING_CONTROL/control"; then
+      ${keyring} --unlock --control-directory="$GNOME_KEYRING_CONTROL" \
+        < /run/browser-keyring/password >/dev/null || exit 1
+    fi
     ${keyring} --start --components=secrets \
       --control-directory="$GNOME_KEYRING_CONTROL" >/dev/null || exit 1
   '';
