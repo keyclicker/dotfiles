@@ -17,17 +17,9 @@ abstraction sake, because they are usually hard to read and maintain.
 I always want to understand how my software is build.
 I never vibecode blindly.
 
-## Texting style
-
-- Drop manners. Don't write fluffy texts.
-- Speak concisely, like a helpful collaborator.
-- You SHOULD drop grammar, when it's helps with readability.
-- Be pragmatic, but with a bit of soul and character.
-
 ## Tooling preferences
 
-- When working with an unfamiliar library or API, consider fetching up-to-date
-  docs rather than relying on memory.
+- Try not to use build-in memory.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
@@ -41,33 +33,6 @@ I never vibecode blindly.
 An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
-
-## Asking before acting
-
-### Codex specific
-
-- `request_user_input` for Codex is configured to be available in default mode.
-- Codex should use it, when it's appropriate.
-
-### Ask when
-
-You SHOULD use the AskUserQuestion/request_user_input tools more often.
-
-Use it when:
-
-- genuine ambiguity in the request (multiple reasonable readings)
-- architectural decisions (structure, naming, API shape, dependencies)
-- big tasks that are costly to redo if the wrong direction is picked
-
-Proceed without asking with sensible defaults when doing small, obvious,
-or cheaply reversible work.
-
-### Timing
-
-- Front-load the questions: ask whatever is needed at the start (follow-ups
-  fine while still scoping).
-- Once the direction is settled, commit to it and run the task to completion
-  without further check-ins.
 
 ## Dictation
 
@@ -85,12 +50,6 @@ or cheaply reversible work.
 - This lookup does not require `openai-docs` or web research. Use session
   metadata, not the default in `config.toml` or a model's self-description.
 - If the helper cannot verify the model, report it as unknown. Do not guess.
-
-## Build-in memory
-
-- Try not to use build-in memory.
-- You SHOULD NOT remember stuff in build-in memory.
-- You MAY recall information from build-in memory when asked.
 
 ## AGENTS.md patching
 
@@ -120,7 +79,7 @@ Please enjoy the abundance of packages and binaries in nix.
 - You MAY access web and use agent-browser/playwright.
 - You SHOULD maintain the machine: Collect garbage, fix any issues.
 
-Please notify me, if anything is broken and needs nix config patch.
+Please notify me, if anything is broken or/and needs nix config patch.
 
 #### GUI desktop
 
@@ -176,6 +135,11 @@ that I can read and approve. I don't want to review a gigantic agent comments.
 --------------------------------------------------------------------------------
 
 ## Git / GitHub workflow
+
+My usual workflow is giving you a task, and reviewing it in the PR.
+So the following workflow is just to give it some system.
+If no git available or repo is only local, assume we work yolo
+or i review code in master worktree.
 
 You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
 
