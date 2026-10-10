@@ -1,21 +1,4 @@
-## RFC 2119
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL"
-in this document are to be interpreted as described in RFC 2119.
-
-## Note from user
-
-Hi, my name is Nick. I am software engineer trying to build a good
-readable software.
-
-I like to write a non-bullshit, yet beautifully engineered software.
-I value a simple and readable code with simple abstractions.
-I tend to dislike over-engineered abstractions that exist only for
-abstraction sake, because they are usually hard to read and maintain.
-
-I always want to understand how my software is build.
-I never vibecode blindly.
+This doc feature RFC 2119.
 
 ## Tooling preferences
 
@@ -23,10 +6,8 @@ I never vibecode blindly.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
-- For interactive computer use with CUA driver, prefer connected MCP tools.
-  Use the CLI for shell workflows or when MCP is unavailable. This preference
-  overrides the official cua-driver skill's CLI-first default; keep the
-  installed skill unchanged.
+- For interactive computer use with CUA driver.
+- Prefer agent-browser over other browser tools. Fallback: Playwright and CUA.
 
 ## HTML
 
@@ -36,10 +17,7 @@ only when the task calls for them. Prioritize the content and readability.
 
 ## Dictation
 
-- User may dictate messages, and transcription may be incorrect.
-- If wording sounds very strange or conflicts with context, assume a
-  transcription error is likely. Infer intended meaning from context when
-  possible; otherwise ask a clarifying question.
+- I may dictate messages. Transcription may be incorrect.
 
 ## Model name (for Codex)
 
@@ -49,15 +27,6 @@ only when the task calls for them. Prioritize the content and readability.
 - Run its local helper each time: the active model may change between turns.
 - This lookup does not require `openai-docs` or web research. Use session
   metadata, not the default in `config.toml` or a model's self-description.
-- If the helper cannot verify the model, report it as unknown. Do not guess.
-
-## AGENTS.md patching
-
-When you see that your behaiviour does not match user expectations, advise
-user to patch `AGENTS.md`/`CLAUDE.md`.
-For example: user always ask you to behave a certain way, or user always
-corrects you after you finish a turn.
-You should notice that, and help user to help you understand him better.
 
 ## Host computer
 
@@ -322,12 +291,12 @@ conventions like Google docstrings or tsdoc.
 The code should generally be 80 chars wide (unless some language specific exception)
 
 Always give a code some space to breath. A tightly written code is unreadable.
-Use good vertical spacing between logical blocks.
+Use good vertical spacing between logical blocks (function bodies included).
 Comment logical blocks when they need it.
 
 Always try to keep the spirit of the given programming language best practices.
 
-I'm not Uncle Bob. Big functions are ok. But smaller functions are better
+I'm not Uncle Bob. Medium sized functions are ok. But smaller functions are better
 if they don't compromise on readability, conventions or performance.
 
 ### Secrets & personal info
@@ -347,39 +316,5 @@ problem, that ignores underlying architectural issues.
 Usually introduced to be a temporary fix, but often it stays as a
 permanent technical debt.
 
-Kostyls are enemy.
+Kostyls are enemies.
 NEVER write kostyls yourself, offer to fix them if you see one.
-
-### LURK page (WARNING: IRONY)
-
-A **kostyl** *(scientific term: **palliative**; Wikipedian term:
-**workaround**)* is a way to add missing functionality or fix serious flaws
-without properly redesigning the system. Every kostyl makes further
-development more difficult. When a kostyl eliminates unintended
-functionality, it is called a **patch**.
-
-There are many so-called **kostyls** in this world. There is no precise
-definition, but generally speaking, a kostyl is something attached to
-something else to solve a problem that has arisen—or to add
-functionality—instead of redesigning that “something,” possibly from
-scratch.
-
-When a kostyl works perfectly and causes problems neither for users nor for
-developers, it may be considered a piece of **technological fastening
-hardware**.
-
-#### The essence
-
-Kostyls may be created because a developer is incapable of producing a more
-fundamental solution, or because a critical bug needs to be fixed quickly
-and there is not enough time to implement a more elegant solution.
-
-Such kostyls are called **temporary solutions**, but as the saying goes:
-
-> Nothing is more permanent than a temporary solution.
-
-A small kostyl is called a **dirty hack** or a **snot patch**. Like larger
-kostyls, these can create problems later.
-
-A synonym for code consisting almost entirely of kostyls is **Indian
-code**.

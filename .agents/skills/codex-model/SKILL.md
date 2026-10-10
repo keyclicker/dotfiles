@@ -27,3 +27,5 @@ Do not invent an attribution; continue work that does not need it.
 
 Reasoning effort is separate from Fast mode. This helper does not determine
 the service tier.
+
+If the helper cannot verify the model, report it as unknown. Do not guess.
