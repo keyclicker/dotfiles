@@ -25,7 +25,7 @@
       "chatgpt"
       "claude"
       "t3-code"
-      # "muse" # cask url is broken
+      # "muse" # cask disabled 2026-10-01: needs a signed download URL
 
       "postico"
       "postman"
@@ -36,10 +36,12 @@
       "utm"
 
       "spotify"
+      "prismlauncher"
 
       "obs"
       "grandperspective"
       "blender"
+      "freecad"
       "adobe-creative-cloud"
 
       "obsidian"
@@ -57,6 +59,7 @@
   environment.systemPackages = with pkgs; [
     # Desktop apps
     imhex
+    mpv
     qbittorrent
     xld
 
