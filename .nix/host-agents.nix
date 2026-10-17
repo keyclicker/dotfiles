@@ -13,6 +13,7 @@
     ./module-gateway.nix
     ./module-projects-smb.nix
     ./module-iperf.nix
+    ./module-interactive-priority.nix
     ./platform-vm.nix
     ./hardware-vm.nix
   ];
@@ -34,6 +35,8 @@
   # the tailnet front door for all of them plus ~/public serving from
   # module-gateway.nix,
   # tailnet project sharing from module-projects-smb.nix,
+  # disk/CPU priority for interactive services from
+  # module-interactive-priority.nix,
   # Proxmox/QEMU guest bits from platform-vm.nix. The AI coding agents
   # are npm globals in the home layer (home-agents.nix, wired in
   # flake.nix).
