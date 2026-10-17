@@ -118,6 +118,10 @@ let
   # the at-spi registry through the systemd user manager, outside this
   # session, and fails. Start the registry here, before any app registers.
   sessionOnBus = pkgs.writeShellScript "agent-desktop-session-bus" ''
+    # Claim this session's socket before XFCE's keyring autostart runs.
+    ${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --unlock \
+      --components=secrets --control-directory="$GNOME_KEYRING_CONTROL" \
+      < /run/browser-keyring/password >/dev/null
     ${pkgs.at-spi2-core}/libexec/at-spi2-registryd &
     exec ${pkgs.xfce4-session}/bin/startxfce4
   '';
