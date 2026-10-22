@@ -1,5 +1,5 @@
 # Interactive tools and dev toolchains for every machine somebody works in
-# (mac, agents, desktops, foreign Linux), on top of module-core.nix.
+# (mac, agents, desktops), on top of module-core.nix.
 # Generic guests skip this layer to keep their stores small.
 { pkgs, ... }:
 

@@ -1,29 +1,33 @@
-# Foreign (non-NixOS) Linux hosts: the system stays with the distro
-# (apt, systemd, nix daemon), nix provides only the user
-# environment via standalone home-manager: the dotfile links plus the
-# same shell tools every NixOS/darwin machine has.
-{ lib, pkgs, ... }:
+# Foreign (non-NixOS) Linux hosts: the distro owns the system and the
+# machine is managed imperatively (apt, npm, ...). Nix only links the
+# dotfiles and adds the tools they call or need newer than a distro
+# ships. Everything else is the distro's job.
+{ pkgs, ... }:
 
-let
-  # System packages become user packages. The imported modules must
-  # stay plain { pkgs, ... } functions for this to keep working; the
-  # moment one needs config/lib, extract its list into shared data.
-  packagesOf = module: (import module { inherit pkgs; }).environment.systemPackages;
-in
 {
   imports = [ ./home-dotfiles.nix ];
 
-  # The full stack a NixOS/darwin machine gets, not the guest floor.
-  home.packages =
-    lib.concatMap packagesOf [
-      ./module-core.nix
-      ./module-workstation.nix
-    ]
-    ++ [
-      # Terminfo for terminals the distro's ncurses doesn't know yet;
-      # picked up via TERMINFO_DIRS exported in .zshenv.
-      pkgs.ghostty.terminfo
-    ];
+  home.packages = with pkgs; [
+    # Workspace: configs assume current releases
+    zsh
+    tmux
+    neovim
+    tree-sitter # nvim
+
+    # Called by the zsh, git and tmux configs
+    fzf # `fzf --zsh` needs >= 0.48
+    carapace
+    delta
+    yazi
+
+    # nvim pickers and agents; Ubuntu ships `fd` as `fdfind`
+    ripgrep
+    fd
+
+    # Terminfo for terminals the distro's ncurses doesn't know yet;
+    # picked up via TERMINFO_DIRS exported in .zshenv.
+    ghostty.terminfo
+  ];
 
   # User-level equivalent of the nix settings in module-core.nix
   # (whose nix.* options are system-scoped and don't apply here).
