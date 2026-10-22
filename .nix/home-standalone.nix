@@ -23,6 +23,9 @@
     ripgrep
     fd
 
+    # GitHub CLI: distro builds lag behind GitHub's API
+    gh
+
     # Terminfo for terminals the distro's ncurses doesn't know yet;
     # picked up via TERMINFO_DIRS exported in .zshenv.
     ghostty.terminfo
