@@ -2,7 +2,7 @@
 # machine is managed imperatively (apt, npm, ...). Nix only links the
 # dotfiles and adds the tools they call or need newer than a distro
 # ships, plus the system monitors. Everything else is the distro's
-# job: install `ripgrep` and `fd-find` with apt.
+# job.
 { pkgs, ... }:
 
 {
@@ -18,6 +18,10 @@
     # Called by the zsh, git and tmux configs
     fzf # `fzf --zsh` needs >= 0.48
     carapace
+
+    # nvim pickers and agents; Ubuntu ships `fd` as `fdfind`
+    ripgrep
+    fd
 
     # System monitors
     htop
