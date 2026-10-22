@@ -25,7 +25,7 @@
 
     # System monitors
     htop
-    btop
+    btop-rocm # plain btop can't dlopen librocm_smi64: no AMD GPU
 
     # GitHub CLI: distro builds lag behind GitHub's API
     gh
