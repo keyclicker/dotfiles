@@ -1,7 +1,8 @@
 # Foreign (non-NixOS) Linux hosts: the distro owns the system and the
 # machine is managed imperatively (apt, npm, ...). Nix only links the
 # dotfiles and adds the tools they call or need newer than a distro
-# ships. Everything else is the distro's job.
+# ships, plus the system monitors. Everything else is the distro's
+# job: install `ripgrep` and `fd-find` with apt.
 { pkgs, ... }:
 
 {
@@ -17,11 +18,10 @@
     # Called by the zsh, git and tmux configs
     fzf # `fzf --zsh` needs >= 0.48
     carapace
-    delta
 
-    # nvim pickers and agents; Ubuntu ships `fd` as `fdfind`
-    ripgrep
-    fd
+    # System monitors
+    htop
+    btop
 
     # GitHub CLI: distro builds lag behind GitHub's API
     gh

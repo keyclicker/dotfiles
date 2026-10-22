@@ -196,9 +196,12 @@ return { -- Fuzzy Finder (files, lsp, etc)
     -------------------------------------------------------
     -- Oil is the default file explorer, so selecting a dir (:edit <path>) opens it.
     vim.keymap.set('n', '<leader>o', function()
+      -- Debian and Ubuntu ship `fd` as `fdfind`
+      local fd = vim.fn.executable 'fd' == 1 and 'fd' or 'fdfind'
+
       builtin.find_files {
         prompt_title = 'Open Dir in Oil',
-        find_command = { 'fd', '--type', 'd', '--hidden', '--exclude', '.git' },
+        find_command = { fd, '--type', 'd', '--hidden', '--exclude', '.git' },
       }
     end, { desc = 'Open dir in Oil' })
 
