@@ -23,7 +23,8 @@ in
   # Runs as keyclicker so the agents it spawns see the user's ~/.claude,
   # ~/.codex and dotfiles. t3 resolves the environment for those from
   # the user's login shell (`zsh -ilc`) itself, so the service PATH
-  # below is only what t3's own startup needs.
+  # below is only what t3's own startup needs: tar + gzip unpack the
+  # release binary the launcher downloads.
   systemd.services.t3 = {
     description = "T3 Code server";
     wantedBy = [ "multi-user.target" ];
@@ -34,6 +35,8 @@ in
     wants = [ "network-online.target" ];
     path = [
       pkgs.bash
+      pkgs.gnutar
+      pkgs.gzip
       pkgs.nodejs
     ];
     serviceConfig = {
