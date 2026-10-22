@@ -1,4 +1,4 @@
-# Every machine (darwin + NixOS + foreign Linux): nix settings and the
+# Every darwin and NixOS machine: nix settings and the
 # CLI floor a box is administered with over ssh. Generic guests (vm,
 # container) stop here so their store stays small; every other
 # machine stacks module-workstation.nix on top.
@@ -34,8 +34,7 @@
     openssh
     git
 
-    # Shell (NixOS hosts also set programs.zsh.enable in profile-server.nix;
-    # foreign hosts get the binary from here)
+    # Shell (NixOS hosts also set programs.zsh.enable in profile-server.nix)
     zsh
 
     # Userland the dotfiles assume. NixOS lists the same store paths in

@@ -83,8 +83,8 @@ a layer when it grows past ~5 files is a pure `git mv`.
 │                            # desktops, including agents
 ├── home-agents.nix          # AI coding agent CLIs (claude, codex, opencode)
 │                            # and t3 code as npm globals
-├── home-standalone.nix      # foreign (non-NixOS) Linux: the shell user
-│                            # environment, nothing system-level
+├── home-standalone.nix      # foreign (non-NixOS) Linux: dotfile links
+│                            # and the few tools they need, nothing else
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
 ├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
@@ -217,16 +217,13 @@ picks its own.
   parsers and queries prebuilt by nixpkgs, so a guest never compiles a
   grammar. What remains is git-clone only: a first start is seconds,
   not the minutes a slow VM spends in gcc.
-- **Foreign Linux gets the shell environment, 1:1**:
-  `home-standalone.nix` feeds the `environment.systemPackages` of
-  `module-core.nix` and `module-workstation.nix` into
-  `home.packages` by importing each module as a plain function, so an
-  Ubuntu shell has exactly the tools a NixOS one has. Nothing
-  system-level is emulated: hostname, nix daemon, services stay with
-  the distro; only the nix store gc is ours, as a user timer. This
-  works while the imported modules stay plain `{ pkgs, ... }`
-  functions; the moment one needs config/lib, extract the package
-  list into shared data instead.
+- **Foreign Linux gets the dotfiles, not a NixOS emulation**:
+  `home-standalone.nix` links the dotfiles and adds only the tools
+  they call or need newer than the distro ships (zsh, tmux, neovim,
+  fzf, ...). The machine itself stays imperative: apt, npm and
+  services are the distro's, and the box documents its own state
+  (e.g. `~/MACHINE.md`). Only the nix store gc is ours, as a user
+  timer.
 - **Pins**: one `nixpkgs` (`nixos-unstable`) for every host, mac
   included; nix-darwin, home-manager and disko follow it.
 
