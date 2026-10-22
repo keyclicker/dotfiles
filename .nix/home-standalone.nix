@@ -18,7 +18,6 @@
     fzf # `fzf --zsh` needs >= 0.48
     carapace
     delta
-    yazi
 
     # nvim pickers and agents; Ubuntu ships `fd` as `fdfind`
     ripgrep
