@@ -9,6 +9,12 @@ This doc feature RFC 2119.
 - For interactive computer use with CUA driver.
 - Prefer agent-browser over other browser tools. Fallback: Playwright and CUA.
 
+## Infrastructure language
+
+Go is the main infrastructure language. New servers, daemons and
+machine tooling SHOULD be written in Go, unless the project they live
+in already uses another language.
+
 ## HTML
 
 An HTML request means a static page by default, with a clear layout and
