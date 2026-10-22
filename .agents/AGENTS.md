@@ -160,6 +160,23 @@ If changes requested after PR was made - check if PR is merged.
 
 If requested changes to the PR are very big - offer to make stacked PR.
 
+### Dotfiles `local-master`
+
+Home-manager links point at the `~/.dotfiles` main worktree, so its
+checkout is live config. It may run `local-master`: temporary local
+state that activates dotfiles in place.
+
+- It stays local: you MUST NOT push it or open a PR from it. Block
+  pushes with `git config branch.local-master.pushRemote no_push`.
+- After opening a dotfiles PR, merge its branch into `local-master`,
+  so it's live before upstream merges it. Re-merge when it changes.
+- Don't commit on it directly: patches arrive as merged branches.
+- Sync it periodically: `git fetch origin && git merge origin/master`.
+  Once `git diff origin/master local-master` is empty, move it back:
+  `git reset --hard origin/master`.
+- It tracks `origin/master`, so `dots status` reports drift.
+  `dots upgrade` fails while it diverges (`git pull --ff-only`).
+
 ## Commits, Issues and PRs
 
 We use Conventional Commits.
