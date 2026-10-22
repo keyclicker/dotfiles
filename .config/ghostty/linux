@@ -1,0 +1,14 @@
+# Included as `platform` on Linux (see the end of `config`)
+
+# 1pt = 1.33px here (96 dpi base): 10.5pt matches the mac's 14px
+font-size = 10.5
+
+# No blur on X11 or most compositors: see-through text is noise
+background-opacity = 1
+
+# Tabs in the header bar, like `macos-titlebar-style = tabs`
+gtk-titlebar-style = tabs
+
+# Ubuntu's launchers pass `--shell-integration-features=ssh-env`,
+# which resets the other flags to defaults. Restate ours.
+shell-integration-features = no-cursor,ssh-env,ssh-terminfo
