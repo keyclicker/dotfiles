@@ -1,5 +1,4 @@
 font-family = JetBrainsMono
-font-size = 14
 font-feature = -calt
 
 theme = light:TokyoNight Day,dark:TokyoNight Moon
@@ -9,9 +8,6 @@ window-decoration = auto
 macos-titlebar-style = tabs
 macos-window-shadow = false
 macos-option-as-alt = true
-
-background-opacity = 0.75
-background-blur = 20
 
 window-padding-balance = true
 window-padding-x = 4
@@ -34,3 +30,7 @@ quick-terminal-screen = mouse
 quick-terminal-autohide = true
 quick-terminal-animation-duration = 0
 keybind = global:alt+space=toggle_quick_terminal
+
+# Per-OS look: home-manager links `platform` to `macos` or `linux`.
+# Includes load after CLI flags, so their keys beat launcher flags.
+config-file = ?platform

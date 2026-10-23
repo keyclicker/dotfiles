@@ -1,0 +1,7 @@
+# Included as `platform` on macOS (see the end of `config`)
+
+# 1pt = 1px here (72 dpi base)
+font-size = 14
+
+background-opacity = 0.75
+background-blur = 20

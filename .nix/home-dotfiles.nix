@@ -89,7 +89,9 @@ in
 
       # GUI tools that run on both platforms
       ".config/doom".source = link ".config/doom";
-      ".config/ghostty".source = link ".config/ghostty";
+      ".config/ghostty/config".source = link ".config/ghostty/config";
+      ".config/ghostty/platform".source =
+        link ".config/ghostty/${if isDarwin then "macos" else "linux"}";
       ".config/mpv/input.conf".source = link ".config/mpv/input.conf";
       ".config/mpv/mpv.conf".source = link ".config/mpv/mpv.conf";
       ".config/qalculate".source = link ".config/qalculate";
