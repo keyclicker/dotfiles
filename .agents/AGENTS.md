@@ -36,6 +36,30 @@ only when the task calls for them. Prioritize the content and readability.
 - If the host is already known in the current context (earlier check,
   summary, system prompt), do NOT check again.
 
+### MACHINE.md
+
+`~/MACHINE.md`, if present, describes this machine: what it is, its
+workflow, and its current state and config. It is machine-local and
+not in this repo.
+
+- You MUST read it at session start, together with this file, and
+  re-read it whenever machine state matters.
+- Agents own and maintain it. You MUST update it in the same change
+  whenever you modify the machine's configuration (packages, services,
+  users, sudo, nix, dotfiles target, workarounds), or when you find
+  it wrong or stale.
+- Its `Workflow` section holds my workflow and rules. Change it only
+  when I tell you to.
+- Keep it declarative and concise: facts only, no history or
+  narration. Another agent should be able to recreate the machine
+  from it.
+- List only what deviates from defaults: the distro's, the tools',
+  and this repo's. Naming the distro implies its standard behaviour;
+  repo docs cover the dotfiles.
+- Keep pending maintenance (upgrades, firmware, fixes to do) in its
+  `To-do` list. Remove items once done.
+- Its facts override general host guidance in this file.
+
 ### Agents box (host `agents`)
 
 It's agents owned virtual machine.
