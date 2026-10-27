@@ -6,7 +6,9 @@
 # they get a bare shell. Also skipped inside tmux, without a tty (t3's
 # `zsh -ilc`, editor snapshots) and in the quick terminal. Not exec'd:
 # detaching lands in this shell instead of ending the ssh session/tab.
+# TMUX_AUTOATTACH=0 opts out, e.g. `env` in ~/.config/ghostty/local.
 if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] \
+    && [[ ${TMUX_AUTOATTACH:-1} != 0 ]] \
     && [[ -n $SSH_TTY || $TERM_PROGRAM == ghostty ]] && command -v tmux >/dev/null; then
   # Finder's "New Ghostty Tab Here" only sets the start dir: open a tmux
   # window there, then attach like any other tab. Exiting instead would
