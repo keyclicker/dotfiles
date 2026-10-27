@@ -21,6 +21,8 @@ direct my attention where it needs to be.
   not found, then use alternatives.)
 - Browser tasks: agent-browser. Fallback: the `x11-computer-use` skill.
 - Computer use: the `x11-computer-use` skill.
+- `pkill -f`/`pgrep -f` also match your own `sh -c` wrapper: bracket a
+  char (`'[q]emu'`) or use `-x`/PIDs.
 
 ## HTML
 
