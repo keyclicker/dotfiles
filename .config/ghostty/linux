@@ -6,8 +6,10 @@ font-size = 10.5
 # No blur on X11 or most compositors: see-through text is noise
 background-opacity = 1
 
-# Tabs in the header bar, like `macos-titlebar-style = tabs`
+# Tabs in the header bar, like `macos-titlebar-style = tabs`, painted
+# in the terminal's colors instead of libadwaita's white
 gtk-titlebar-style = tabs
+window-theme = ghostty
 
 # Ubuntu's launchers pass `--shell-integration-features=ssh-env`,
 # which resets the other flags to defaults. Restate ours.
