@@ -11,11 +11,12 @@ what each member looks like as a shell command on X11. Use what's helpful.
 ## Display
 
 Where `desk` exists (agentu), work on your own disposable display. The
-user watches it view-only at `/desktops`; it dies with your process.
+user watches it view-only at `/desktops`; it records itself and dies
+with your process.
 
 ```sh
 desk new [-size 1920x1080]  # → :10 (1280x960, GPU)
-desk rm :10                 # when done, after stopping the recording
+desk rm :10                 # when done; prints the finished video
 ```
 
 Too sluggish or broken there? Use the user's `:0`, claimed first:
@@ -32,17 +33,20 @@ Elsewhere, use the display you were given.
 
 ## Record by default
 
+Send the video unless the user opted out:
+`![recording](/absolute/path.mp4)` (T3 Code plays it), else the path.
+
+`desk` displays record themselves. Elsewhere (`:0` too), record it:
+
 ```sh
 V=~/public/recordings/$(date +%F-%H%M%S).mp4; mkdir -p "${V%/*}"
-nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -i :10 \
+nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -i :0 \
   -c:v libx264 -preset veryfast -pix_fmt yuv420p "$V" >/dev/null 2>&1 &
 echo $! > "$V.pid"; echo "$V"
 ```
 
 At the end: `kill -INT` the PID, wait for ffmpeg to exit (the file is
-broken until then), delete the `.pid`. Send the video unless the user
-opted out: `![recording](/absolute/path.mp4)` (T3 Code plays it), else
-the path.
+broken until then), delete the `.pid`.
 
 ## Quick map
 | Member | X11 equivalent |
