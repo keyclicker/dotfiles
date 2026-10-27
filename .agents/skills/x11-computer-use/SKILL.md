@@ -7,8 +7,7 @@ description: Use when you need computer use on X11 — your own display, screens
 
 ## 1. Get a display
 
-Where `desk` exists (agentu), take your own disposable display, never
-the user's `:0`:
+Where `desk` exists (agentu), prefer your own disposable display:
 
 ```sh
 desk new                   # prints e.g. :10 (1280x960, GPU-accelerated)
@@ -18,8 +17,18 @@ desk rm :10                # when done, after stopping the recording
 
 The display is yours: it closes when your agent process exits, and
 other agents can't `desk rm` it. Use only displays you created. The
-user watches them live, view-only, on the `/desktops` page. Elsewhere,
-use the display you were given.
+user watches them live, view-only, on the `/desktops` page.
+
+If an app is too sluggish or breaks there and needs the real GPU
+desktop, use the user's `:0`, but claim it first:
+
+```sh
+desk claim                 # exit 3: the user is active, ask them first,
+desk claim -force          #   then claim after their yes
+desk release               # when done; close the windows you opened
+```
+
+Elsewhere, use the display you were given.
 
 - Shell state doesn't persist between commands: prefix each one,
   `DISPLAY=:10 xdotool …`
