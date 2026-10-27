@@ -16,7 +16,7 @@ with your process.
 
 ```sh
 desk new [-size 1920x1080]  # → :10 (1280x960, GPU)
-desk rm :10                 # when done; prints the finished video
+desk rm :10                 # when done; prints the video path and URL
 ```
 
 Too sluggish or broken there? Use the user's `:0`, claimed first:
@@ -34,7 +34,8 @@ Elsewhere, use the display you were given.
 ## Record by default
 
 Send the video unless the user opted out:
-`![recording](/absolute/path.mp4)` (T3 Code plays it), else the path.
+`![recording](/absolute/path.mp4)` (T3 Code plays it), else its URL
+(on agentu, `~/public/X` is `https://<node>/files/X`).
 
 `desk` displays record themselves. Elsewhere (`:0` too), record it:
 
