@@ -11,6 +11,10 @@ background-opacity = 1
 gtk-titlebar-style = tabs
 window-theme = ghostty
 
+# Always dark here: Xfce has no dark/light switch for the pair in
+# `config` to follow, and the GTK chrome takes the terminal's colors
+theme = TokyoNight Moon
+
 # Ubuntu's launchers pass `--shell-integration-features=ssh-env`,
 # which resets the other flags to defaults. Restate ours.
 shell-integration-features = no-cursor,ssh-env,ssh-terminfo
