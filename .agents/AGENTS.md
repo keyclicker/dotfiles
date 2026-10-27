@@ -6,9 +6,8 @@ This doc feature RFC 2119.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
-- Browser tasks: agent-browser. Fallback: the `x11-computer-use` skill,
-  then the CUA driver.
-- Computer use: the `x11-computer-use` skill. Fallback: the CUA driver.
+- Browser tasks: agent-browser. Fallback: the `x11-computer-use` skill.
+- Computer use: the `x11-computer-use` skill.
 
 ## HTML
 
