@@ -15,7 +15,7 @@ user watches it view-only at `/desktops`; it records itself and dies
 with your process.
 
 ```sh
-desk new [-size 1920x1080]  # → :10 (1280x960, GPU)
+desk new                    # → :10 (1280x960, GPU)
 desk rm :10                 # when done; prints the video path and URL
 ```
 
