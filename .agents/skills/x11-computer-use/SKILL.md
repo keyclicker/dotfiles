@@ -1,14 +1,55 @@
 ---
 name: x11-computer-use
-description: Use when you need computer use on X11 — screenshots, clicks, typing, keys, scrolling and drags via xdotool, scrot and ImageMagick.
+description: Use when you need computer use on X11 — your own display, screenshots, clicks, typing, keys, scrolling and drags via xdotool, scrot and ImageMagick, recorded to a video.
 ---
 
-# Computer toolset → X11 cheatsheet
+# Computer use on X11
 
-You already know the toolset schema from the inside. This is just the other side:
-what each member looks like as a shell command on X11. Use what's helpful.
+## 1. Get a display
 
-## Quick map
+Where `desk` exists (agentu), take your own disposable display, never
+the user's `:0`:
+
+```sh
+desk new                   # prints e.g. :10 (1280x800, GPU-accelerated)
+desk new -size 1920x1080
+desk rm :10                # when done, after stopping the recording
+```
+
+The user watches it live, view-only, on the `/desktops` page. Elsewhere,
+use the display you were given.
+
+- Shell state doesn't persist between commands: prefix each one,
+  `DISPLAY=:10 xdotool …`
+- Start apps detached: `DISPLAY=:10 setsid -f xterm`
+- Never open Ghostty: it joins the user's tmux session, so your keys
+  land in their shell. Use `xterm`
+- Give browsers a fresh profile (`--user-data-dir=$(mktemp -d)`),
+  else they may reuse the user's running instance and open on `:0`
+
+## 2. Record by default
+
+Start before the first action:
+
+```sh
+mkdir -p ~/public/recordings
+V=~/public/recordings/$(date +%F-%H%M%S).mp4
+nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -i :10 \
+  -c:v libx264 -preset veryfast -pix_fmt yuv420p "$V" >/dev/null 2>&1 &
+echo $! > "$V.pid"; echo "$V"
+```
+
+After the last action, stop it with `kill -INT` on the saved PID, wait
+until it exits (the file is broken until then), and delete the `.pid`.
+Then send the video: embed `![recording](/absolute/path.mp4)` in your
+reply (T3 Code plays it), else give the path. Skip only if the user
+says so.
+
+## 3. Toolset → X11
+
+You already know the toolset schema from the inside. This is the other
+side: what each member looks like as a shell command.
+
 | Member | X11 equivalent |
 |---|---|
 | screenshot | `scrot -o /tmp/s.png` (or `import -window root`) |
