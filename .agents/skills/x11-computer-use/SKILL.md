@@ -11,12 +11,14 @@ Where `desk` exists (agentu), take your own disposable display, never
 the user's `:0`:
 
 ```sh
-desk new                   # prints e.g. :10 (1280x800, GPU-accelerated)
+desk new                   # prints e.g. :10 (1280x960, GPU-accelerated)
 desk new -size 1920x1080
 desk rm :10                # when done, after stopping the recording
 ```
 
-The user watches it live, view-only, on the `/desktops` page. Elsewhere,
+The display is yours: it closes when your agent process exits, and
+other agents can't `desk rm` it. Use only displays you created. The
+user watches them live, view-only, on the `/desktops` page. Elsewhere,
 use the display you were given.
 
 - Shell state doesn't persist between commands: prefix each one,
