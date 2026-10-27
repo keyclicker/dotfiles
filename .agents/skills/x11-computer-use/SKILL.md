@@ -40,8 +40,9 @@ Send the video unless the user opted out:
 
 ```sh
 V=~/public/recordings/$(date +%F-%H%M%S).mp4; mkdir -p "${V%/*}"
-nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -i :0 \
-  -c:v libx264 -preset veryfast -pix_fmt yuv420p "$V" >/dev/null 2>&1 &
+nohup ffmpeg -nostdin -loglevel error -vaapi_device /dev/dri/renderD128 \
+  -f x11grab -framerate 30 -i :0 -vf hwupload,scale_vaapi=format=nv12 \
+  -c:v h264_vaapi -qp 28 "$V" >/dev/null 2>&1 &
 echo $! > "$V.pid"; echo "$V"
 ```
 
