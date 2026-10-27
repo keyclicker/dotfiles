@@ -37,6 +37,10 @@ Send the video unless the user opted out:
 `![recording](/absolute/path.mp4)` (T3 Code plays it), else its URL
 (on agentu, `~/public/X` is `https://<node>/files/X`).
 
+Never delete recordings, yours included: they're the user's history of
+what agents did, never noise. A recording the user won't need: just
+don't send it.
+
 `desk` displays record themselves. Elsewhere (`:0` too), record it:
 
 ```sh
