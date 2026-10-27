@@ -1,12 +1,48 @@
 ---
 name: x11-computer-use
-description: Use when you need computer use on X11 — screenshots, clicks, typing, keys, scrolling and drags via xdotool, scrot and ImageMagick.
+description: Use when you need computer use on X11 — your own display, screenshots, clicks, typing, keys, scrolling and drags via xdotool, scrot and ImageMagick, recorded to a video.
 ---
 
 # Computer toolset → X11 cheatsheet
 
 You already know the toolset schema from the inside. This is just the other side:
 what each member looks like as a shell command on X11. Use what's helpful.
+
+## Display
+
+Where `desk` exists (agentu), work on your own disposable display. The
+user watches it view-only at `/desktops`; it dies with your process.
+
+```sh
+desk new [-size 1920x1080]  # → :10 (1280x960, GPU)
+desk rm :10                 # when done, after stopping the recording
+```
+
+Too sluggish or broken there? Use the user's `:0`, claimed first:
+`desk claim` (exit 3 = user active: ask, then `desk claim -force`),
+`desk release` and close your windows when done.
+
+Elsewhere, use the display you were given.
+
+- Prefix every command: `DISPLAY=:10 …` (shell state doesn't persist)
+- Start apps detached: `DISPLAY=:10 setsid -f xterm`
+- Never open Ghostty: it joins the user's tmux, your keys hit their shell
+- Browsers: fresh profile (`--user-data-dir=$(mktemp -d)`), else they
+  may open in the user's running instance on `:0`
+
+## Record by default
+
+```sh
+V=~/public/recordings/$(date +%F-%H%M%S).mp4; mkdir -p "${V%/*}"
+nohup ffmpeg -nostdin -loglevel error -f x11grab -framerate 10 -i :10 \
+  -c:v libx264 -preset veryfast -pix_fmt yuv420p "$V" >/dev/null 2>&1 &
+echo $! > "$V.pid"; echo "$V"
+```
+
+At the end: `kill -INT` the PID, wait for ffmpeg to exit (the file is
+broken until then), delete the `.pid`. Send the video unless the user
+opted out: `![recording](/absolute/path.mp4)` (T3 Code plays it), else
+the path.
 
 ## Quick map
 | Member | X11 equivalent |
