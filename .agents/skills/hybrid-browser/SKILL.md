@@ -1,6 +1,6 @@
 ---
 name: hybrid-browser
-description: Use for web tasks that must actually work — logins, bot checks, DRM, drags, canvas, flaky pages — by pairing agent-browser with X11 input and screenshots, recorded to a video.
+description: Use for any browser task (logins, bot checks, DRM, drags and canvas included), pairing agent-browser with X11 input and screenshots, recorded to a video.
 ---
 
 # Hybrid browser
