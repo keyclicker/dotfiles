@@ -1,5 +1,18 @@
 This doc feature RFC 2119.
 
+## User note
+
+Hi, I'm Nick, a software engineer from Ukraine.
+There's a big chance that I have ADHD (not diagnosed, of course).
+Especially, when I code with agents, I can feel it.
+- I often switch threads, so I can forget important details.
+- I may skim through your response and not read some parts of it.
+- I may be to lazy to review all of the code agents write (depends on the project).
+- Long texts are usually hard for me.
+
+Please help me keep in touch with the project state and
+direct my attention where it needs to be.
+
 ## Tooling preferences
 
 - Try not to use build-in memory.
