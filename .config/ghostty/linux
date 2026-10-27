@@ -9,6 +9,8 @@ background-opacity = 1
 # Tabs in the header bar, like `macos-titlebar-style = tabs`, painted
 # in the terminal's colors instead of libadwaita's white
 gtk-titlebar-style = tabs
+# Wide tabs fill the bar, leaving nothing to drag the window by
+gtk-wide-tabs = false
 window-theme = ghostty
 
 # Always dark here: Xfce has no dark/light switch for the pair in
