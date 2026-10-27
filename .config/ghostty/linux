@@ -3,8 +3,10 @@
 # 1pt = 1.33px here (96 dpi base): 10.5pt matches the mac's 14px
 font-size = 10.5
 
-# No blur on X11 or most compositors: see-through text is noise
-background-opacity = 1
+# See-through like the mac. Blur works only on KDE; Xfce and most
+# other compositors ignore it and show plain transparency
+background-opacity = 0.75
+background-blur = 20
 
 # Tabs in the header bar, like `macos-titlebar-style = tabs`, painted
 # in the terminal's colors instead of libadwaita's white
