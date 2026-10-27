@@ -34,3 +34,6 @@ keybind = global:alt+space=toggle_quick_terminal
 # Per-OS look: home-manager links `platform` to `macos` or `linux`.
 # Includes load after CLI flags, so their keys beat launcher flags.
 config-file = ?platform
+
+# Machine-local overrides, not in the dotfiles: ~/.config/ghostty/local
+config-file = ?local
