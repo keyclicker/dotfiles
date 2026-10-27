@@ -22,6 +22,17 @@ direct my attention where it needs to be.
 - Browser tasks: agent-browser. Fallback: the `x11-computer-use` skill.
 - Computer use: the `x11-computer-use` skill.
 
+### Killing processes
+
+Agent harnesses run your command as `sh -c '<whole command>'`, so any
+`pkill -f`/`pgrep -f` pattern also matches that parent shell. `pkill`
+SIGTERMs it, and the rest of the call never runs (`Exit code 143/144`).
+`pgrep -f` reports the shell as a "still running" false positive.
+
+- Prefer PIDs you own: `$!`, a pidfile, `systemctl --user stop`.
+- `pkill -x <name>` is safe, but names over 15 chars never match.
+- With `-f`, you MUST bracket a character: `pkill -f '[q]emu-system'`.
+
 ## HTML
 
 An HTML request means a static page by default, with a clear layout and
