@@ -30,6 +30,10 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
+Where `~/public/` is served to me (MACHINE.md gives its URL), that's how
+I want HTML: put the page and its assets in `~/public/` and send me the
+URL. Prefer it over inline previews (e.g. T3 Code's HTML render).
+
 ## Dictation
 
 - I may dictate messages. Transcription may be incorrect.
