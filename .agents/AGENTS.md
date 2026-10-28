@@ -22,9 +22,10 @@ direct my attention where it needs to be.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
-- Browser tasks: the host's browser skill if any (`hybrid-browser`),
-  else `agent-browser`. Computer use: likewise (`x11-computer-use`),
-  else built-in tools.
+- Browser tasks: the host's browser skill (`hybrid-browser`), else
+  `agent-browser`.
+- Computer use: the host's CU skill (`x11-computer-use`), else
+  built-in tools.
 - `pkill -f`/`pgrep -f` also match your own `sh -c` wrapper: bracket a
   char (`'[q]emu'`) or use `-x`/PIDs.
 
