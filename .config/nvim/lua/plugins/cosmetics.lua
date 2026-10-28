@@ -61,26 +61,34 @@ return {
       },
     },
 
+    -- Follow the terminal, not the OS: over ssh the OS is the remote
+    -- box, but the colors are the local terminal's. Nvim asks the
+    -- terminal (OSC 11, answered by tmux for the attached client) and
+    -- sets 'background'; pick the matching style. Plain `tokyonight`
+    -- would force 'background' back to its own style instead.
     init = function()
-      vim.cmd.colorscheme 'tokyonight-moon'
-    end,
-  },
+      local function apply()
+        local light = vim.o.background == 'light'
+        vim.cmd.colorscheme(light and 'tokyonight-day' or 'tokyonight-moon')
+      end
 
-  {
-    'f-person/auto-dark-mode.nvim',
-    -- Polls the OS theme; a guest reached over ssh has none.
-    enabled = not vim.g.minimal,
-    opts = {
-      update_interval = 1000,
-      fallback = 'dark',
-      set_dark_mode = function()
-        vim.o.background = 'dark'
-        vim.cmd.colorscheme 'tokyonight-moon'
-      end,
-      set_light_mode = function()
-        vim.o.background = 'light'
-        vim.cmd.colorscheme 'tokyonight-day'
-      end,
-    },
+      local group = vim.api.nvim_create_augroup('terminal-theme', {})
+
+      vim.api.nvim_create_autocmd('OptionSet', {
+        group = group,
+        pattern = 'background',
+        callback = apply,
+      })
+
+      -- Re-ask on focus: catches the terminal switching light/dark
+      vim.api.nvim_create_autocmd('FocusGained', {
+        group = group,
+        callback = function()
+          vim.api.nvim_ui_send '\027]11;?\007'
+        end,
+      })
+
+      apply()
+    end,
   },
 }
