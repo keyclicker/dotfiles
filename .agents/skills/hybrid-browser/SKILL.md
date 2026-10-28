@@ -11,18 +11,22 @@ what it can't and shows the truth. 3x faster than either alone.
 ## Setup
 
 ```sh
-D=$(desk new)                       # records itself
-agent-chromium start -display $D    # prints 9222
-agent-browser connect 9222
+D=$(desk new)                          # records itself
+P=$(agent-chromium start -display $D)  # prints its port
+agent-browser connect $P
 # ...work...
-agent-chromium stop                 # before desk rm
+agent-chromium stop $P
 desk rm $D
 ```
 
-`agent-chromium` (agentu) is the logged-in browser that passes bot
-checks and plays DRM. Elsewhere: `DISPLAY=$D agent-browser --headed`.
+`agent-chromium` (agentu) is the browser that passes bot checks and
+plays DRM. Elsewhere: `DISPLAY=$D agent-browser --headed`.
 
-- One agent at a time: if `start` refuses, wait or ask
+- Default: a fresh temp profile, deleted on stop. Agents run in
+  parallel
+- `-profile main`: the user's own Chromium, with their accounts.
+  Only when the user asks for it. One at a time: if `start` refuses,
+  wait or ask the user to close theirs
 - Logged out, captcha, 2FA: ask the user
 
 ## Rules
