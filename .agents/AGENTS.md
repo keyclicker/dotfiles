@@ -108,6 +108,9 @@ or i review code in master worktree.
 
 You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
 
+When you mention a commit that is on GitHub, link it:
+`https://github.com/<owner>/<repo>/commit/<sha>`.
+
 ### Worktrees and branching
 
 We work only in feature branches and separate worktrees, unless the user
