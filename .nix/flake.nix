@@ -106,27 +106,6 @@
         ];
       };
 
-      # $ sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
-      nixosConfigurations."agents" = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./host-agents.nix
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              backupFileExtension = "hm-bak";
-              users.keyclicker.imports = [
-                ./home-dotfiles.nix
-                ./home-agents.nix
-                ./home-user-dirs.nix
-              ];
-            };
-          }
-        ];
-      };
-
       # Desktop VM (#35): generic like vm, but with home-manager, since
       # the sway session is made of dotfiles.
 

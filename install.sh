@@ -6,8 +6,8 @@
 #   curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- <target>
 #
 #   mac               MacBook (nix-darwin)
-#   iso <host>        fresh NixOS from the installer ISO: vm, agents, desktop-vm
-#   nixos <host>      NixOS already running: agents, desktop-vm, vm, container
+#   iso <host>        fresh NixOS from the installer ISO: vm, desktop-vm
+#   nixos <host>      NixOS already running: desktop-vm, vm, container
 #   standalone        Ubuntu and friends (home-manager)
 #
 # The configs enable flakes themselves; only the commands that run
@@ -62,7 +62,7 @@ mac() {
 }
 
 # ==========================================================
-#     NixOS from the installer ISO: vm, agents, desktop-vm
+#         NixOS from the installer ISO: vm, desktop-vm
 # ==========================================================
 
 iso() {
@@ -80,7 +80,7 @@ iso() {
   # No root password: root stays locked, keyclicker logs in by key
   # (profile-server.nix).
   sudo nixos-install --no-root-passwd --flake "$remote#$1"
-  # A host with home-manager (agents, desktop-vm) links into ~/.dotfiles;
+  # A host with home-manager (desktop-vm) links into ~/.dotfiles;
   # after the first boot `install.sh nixos <host>` clones it there.
 }
 
@@ -88,10 +88,10 @@ iso() {
 # target is booted into (ISO, cloud image, an old NixOS):
 #
 #   nix run github:nix-community/nixos-anywhere -- \
-#     --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
+#     --flake ~/.dotfiles/.nix#<host> --target-host root@<ip>
 
 # ==========================================================
-#      NixOS already running: agents, desktop-vm, vm, container
+#          NixOS already running: desktop-vm, vm, container
 # ==========================================================
 
 nixos() {

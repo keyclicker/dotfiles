@@ -37,7 +37,7 @@ Ubuntu and friends, home-manager only:
 curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh | sh -s -- standalone
 ```
 
-Hosts: `agents`, `desktop-vm`, `vm`, and `container` (nixos only). `iso`
+Hosts: `desktop-vm`, `vm`, and `container` (nixos only). `iso`
 wipes two disks after a typed `yes` and leaves no checkout, so run
 `nixos <host>` after first boot. `standalone` leaves the distro in charge
 of the system: nix links the dotfiles and adds the few tools they
@@ -46,7 +46,7 @@ need; the rest is installed with the distro's tools.
 Same install from another machine over ssh:
 
 ```sh
-nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
+nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#<host> --target-host root@<ip>
 ```
 
 ## Daily use
@@ -80,8 +80,7 @@ Brewfile       mac packages homebrew owns instead of nix
 .codex/        Codex: AGENTS.md, skills
 .agents/       shared agent instructions and skills; .claude and .codex link here
 .scripts/      dots and utilities; linked into ~/.local/bin
-packages/      subprojects: agents gateway, html-serving,
-               InputSourceSelector (source of .scripts/input)
+packages/      subprojects: InputSourceSelector (source of .scripts/input)
 ```
 
 ## Home layout

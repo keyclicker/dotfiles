@@ -32,17 +32,6 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── module-nvim-minimal.nix  # generic guests: nvim flagged minimal (no LSP,
 │                            # formatters, latex), tree-sitter parsers
 │                            # prebuilt by nixpkgs instead of compiled
-├── module-browser.nix       # headless chromium + agent-browser for agents
-├── module-cua-desktop.nix   # agent desktop slots: XFCE on Xorg/Xvnc + Cua
-│                            # (installed by hand) + virtual audio +
-│                            # noVNC on loopback
-├── module-slopbox.nix       # t3 code web server (HTTPS 3773, tailnet),
-│                            # exec'ing the npm global of home-agents.nix
-├── module-gateway.nix       # tailnet front door on 443: services index,
-│                            # nginx routes paths to the loopback services
-│                            # above, ~/public directory server (config in
-│                            # packages/gateway, packages/html-serving)
-├── module-iperf.nix         # iperf3 server (TCP/UDP 5201, tailnet)
 ├── module-incus.nix         # incus via local Unix socket (no web listener),
 │                            # nftables, docker/incus forwarding truce
 ├── module-ollama-desktop.nix # ollama on loopback only;
@@ -80,14 +69,13 @@ a layer when it grows past ~5 files is a pure `git mv`.
 ├── home-desktop-linux.nix   # the NixOS desktop's GTK look (dconf,
 │                            # settings.ini, cursor), xdg user dirs
 ├── home-user-dirs.nix       # standard folders under ~/Files on Linux
-│                            # desktops, including agents
+│                            # desktops
 ├── home-agents.nix          # AI coding agent CLIs (claude, codex, opencode)
 │                            # and t3 code as npm globals
 ├── home-standalone.nix      # foreign (non-NixOS) Linux: dotfile links
 │                            # and the few tools they need, nothing else
 │
 ├── host-mac.nix             # MacBook: nix-darwin, homebrew casks
-├── host-agents.nix          # pet VM on Proxmox: the agent sandbox
 ├── host-desktop-vm.nix      # aarch64 desktop on handwritten QEMU/HVF
 │                            # on the mac: virtio-blk disks, PL011 console
 ├── host-vm.nix              # generic VM, spawned N times, no identity
@@ -117,7 +105,6 @@ Outputs by leaf:
 | output                           | leaf                 | stack                                                                 |
 |----------------------------------|----------------------|-----------------------------------------------------------------------|
 | `mac`                            | `host-mac.nix`       | core + common + dev + desktop + desktop-darwin + ollama-desktop + apps-darwin; home dotfiles + agents |
-| `agents`                         | `host-agents.nix`    | core + common + dev + server + browser + slopbox + gateway + iperf + vm + hardware; home dotfiles + agents |
 | `desktop-vm`                     | `host-desktop-vm.nix`| core + common + dev + server + desktop + incus + desktop-linux + apps-linux + ollama-desktop + vm + hardware; home dotfiles + desktop-linux + agents |
 | `vm`                             | `host-vm.nix`        | core + nvim-minimal + server + incus + vm + hardware; home dotfiles |
 | `container`                      | `host-container.nix` | core + nvim-minimal + server + container; home dotfiles       |
@@ -246,16 +233,13 @@ curl -L https://raw.githubusercontent.com/keyclicker/dotfiles/master/install.sh 
 
 # the same from another machine, onto whatever the target booted (ISO,
 # cloud image, old NixOS)
-nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#agents --target-host root@<ip>
+nix run github:nix-community/nixos-anywhere -- --flake ~/.dotfiles/.nix#<host> --target-host root@<ip>
 
 # any machine (wraps the right rebuild command; `dots help` for more)
 dots rebuild
 
 # mac
 sudo darwin-rebuild switch --flake ~/.dotfiles/.nix#mac
-
-# agents VM
-sudo nixos-rebuild switch --flake ~/.dotfiles/.nix#agents
 
 # desktop VM (`iso desktop-vm` first, then `install.sh nixos desktop-vm` for
 # the checkout home-manager links into); aarch64 QEMU on Apple silicon
@@ -308,133 +292,6 @@ This formats both attached disks. After rebooting without the ISO, run
 The SPICE guest agent remains available if a QEMU client supplies its
 channel; a basic Cocoa window does not provide SPICE integration.
 
-## Agents desktop
-
-Chromium uses GNOME's `login` keyring. `browser-keyring.service` unseals
-`/var/lib/browser-keyring/password.cred` into private RAM-backed storage;
-the browser wrapper feeds it to `gnome-keyring-daemon --unlock`.
-Provision that systemd credential with `--name=password --with-key=tpm2
---tpm2-pcrs=7`; keep the TPM state and a secure recovery copy.
-For the existing encrypted keyring, stop Chromium and the keyring daemons,
-rename `~/.local/share/keyrings/Default_Keyring.keyring` to `login.keyring`,
-and set the `default` file beside it to `login`. Keep the sealed password
-unchanged: the existing Chromium key and cookies need no conversion.
-Apply the configuration and restart the desktop sessions afterward.
-
-`agents` runs XFCE desktops for computer use, one per **slot** `N`:
-
-| per slot | |
-| --- | --- |
-| X server | agent: headless Xorg; user: Xvnc; display `:N`, 1280×960 |
-| VNC | loopback `5900+N`, `x0vncserver` for Xorg, no password |
-| session | XFCE on its own D-Bus session and accessibility bus |
-| noVNC | token `N` on the one websockify behind `/desktop/` |
-| Cua (agent slots) | `cua-driver@N`, socket `~/.cache/cua-driver/desktop-N.sock` |
-| Chromium (agent slots) | own profile, `~/.local/state/agent-desktop/N` |
-
-`desktops` in `module-cua-desktop.nix` lists the slots that start at
-boot (lingering), `agentDesktops` the ones agents drive:
-
-- **1, yours**: no Cua, so agents' MCP tools cannot reach it.
-- **2, the agents'**: Cua, and a Chromium profile of its own. Chromium
-  hands new windows to the running instance of a profile, so a shared
-  one would open the agents' browser windows on your desktop.
-
-Separate X servers, input routing and session buses keep clipboard and the
-accessibility tree apart. It is not a security boundary: both desktops
-run as the same user, whom agents have a shell (and sudo) as; AGENTS.md
-tells them to stay off `:1`. XFCE settings and the audio devices are
-shared. The pieces are templates (`agent-desktop@N`, `cua-driver@N`); additional
-agent slots also need distinct uinput routing.
-
-Watch both on the tailnet at `https://<tailnet-hostname>/desktops`: a
-tab per desktop, both connected, so switching is instant. One desktop
-alone:
-
-```text
-https://<tailnet-hostname>/desktop/vnc.html?autoconnect=true&resize=scale&path=desktop/websockify%3Ftoken%3DN
-```
-
-Websockify serves noVNC and maps `token=N` to that slot's loopback VNC.
-Tailnet access rules are the only login gate: VNC has no password and
-never leaves loopback, X11 uses a private cookie and no TCP listener.
-
-The agent slot uses headless Xorg with a dummy 1280×960 display. Cua's
-MPX/uinput route can send real pointer and keyboard events to background
-windows. `x0vncserver` exports that display to the existing noVNC endpoint;
-viewer resize requests remain disabled. The user slot stays on Xvnc.
-
-Uinput devices are machine-wide. Udev assigns only Cua devices (`CUA *`)
-to `cua-agent`, and the agent Xorg runs with `-seat cua-agent`. Its input
-classes reject unrelated devices. The configuration permits one agent
-Xorg slot: adding another requires per-slot device routing first. User
-Xvnc slots do not consume kernel input devices.
-
-Prefer accessibility actions and background input, then inspect the result.
-Use `delivery_mode: "foreground"` only when the target rejects background
-input and visible control is authorized. Keep one controller per desktop.
-
-Audio is virtual. PipeWire has no sound cards, only a null sink and a
-loopback: apps play into the default `agents-speaker`, and whatever
-agents play into `agents-mic` comes out of the default "Agents mic"
-source. A VM audio device, if attached, is ignored. All slots share it.
-
-```sh
-# hear what apps play (pulse clients: agents-speaker.monitor)
-pw-record -P '{ stream.capture.sink = true }' --target agents-speaker out.wav
-# speak into apps
-pw-play --target agents-mic in.wav
-```
-
-Cua Driver is the manual part. nixpkgs has no package, and Cua's own
-flake compiles Rust from source, again after every nixpkgs bump. Install
-upstream's prebuilt release once as the desktop user instead; NixOS has
-no `/bin/bash`, so run the Rust installer that `install.sh` would exec:
-
-```sh
-curl -fsSL https://cua.ai/driver/_install-rust.sh -o /tmp/cua-install.sh
-bash /tmp/cua-install.sh --no-modify-path
-```
-
-Nix supplies its libraries through `nix-ld`. Update with
-`cua-driver update --apply`, then `systemctl --user restart
-cua-driver@2`. When nixpkgs gains a `cua-driver` package, switch the
-module to it and drop this section.
-
-XFCE autostart starts `cua-driver@N` once its window manager is up: Cua
-picks its overlay visual at startup and, started before the compositor,
-its agent cursor stays invisible. The same step hands the session's
-`DISPLAY`, bus address and Chromium profile to the unit. It is the only
-thing that starts Cua: a desktop restart stops Cua, and the new session
-starts it again.
-
-Then hand it to the agents. `~/.claude.json` and `~/.codex/config.toml`
-are mutable app state, so the MCP server is registered by hand. Restart
-the agent's MCP connection after restarting the daemon:
-
-```sh
-cua=~/.local/bin/cua-driver
-sock=~/.cache/cua-driver/desktop-2.sock
-
-# --socket is required: without it, `mcp` runs its own runtime in the
-# agent's process, which has no X11 access and sees 0 windows
-claude mcp add --scope user cua-driver -- $cua mcp --socket $sock
-codex mcp add cua-driver -- $cua mcp --socket $sock
-
-# links the skill into .agents/skills (gitignored), shared by both agents;
-# drop the duplicate it also makes in ~/.agents
-cua-driver skills install
-rm ~/.agents/skills/cua-driver
-```
-
-To debug:
-
-```sh
-cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report
-systemctl --user status agent-desktop@2 cua-driver@2
-journalctl --user -u agent-desktop@2 -u cua-driver@2
-```
-
 ## Service exposure
 
 The NixOS firewall uses native nftables. Its input chain still applies
@@ -446,11 +303,6 @@ to the iptables backend or trust `tailscale0` wholesale.
 | SSH | TCP 22 | Closed | Wildcard listener, interface firewall |
 | mDNS | UDP 5353 | Closed | systemd-resolved |
 | DNS resolver | Closed | Closed | Loopback TCP/UDP 53 |
-| Gateway (agents) | Closed | HTTPS 443 via Serve | nginx 127.0.0.1:8080 |
-| T3 (agents) | Closed | HTTPS 3773 via Serve | 127.0.0.1:3773 |
-| Desktops (agents) | Closed | `/desktop/` via gateway | Web 127.0.0.1:6080; VNC 127.0.0.1:5900+N |
-| HTML (agents) | Closed | `/public/` via gateway | 127.0.0.1:8765 |
-| iperf3 (agents) | Closed | TCP/UDP 5201 | Wildcard listener, interface firewall |
 | Ollama (desktops) | Closed | Closed | 127.0.0.1:11434 |
 | Incus (VM hosts) | Closed | Closed | Unix socket only |
 
@@ -464,36 +316,11 @@ New host services should allow ports on `tailscale0` or bind loopback and
 use Tailscale Serve. Docker port publishing bypasses the host input chain:
 explicitly publish on a Tailscale address, never an unspecified address.
 
-Service modules import `option-tailnet.nix` and declare their routes:
-
-```nix
-local.tailnet.https."3773" = "http://127.0.0.1:3773";
-local.tailnet.tcp."445" = "tcp://127.0.0.1:445";
-```
-
-Serve listens on the tailnet address only, so a backend on loopback can
-share the port number. On agents, web apps that work under a path skip
-their own route: they bind loopback and `packages/gateway/nginx.conf`
-serves them on 443.
-
-The thin wrapper generates one oneshot unit per port. Tailscaled handles
-traffic; stopping a unit removes only its listener. Removing a declaration
-and rebuilding therefore removes the route. Manual routes on other ports
-remain intact. Manual changes to managed ports are overwritten when their
-units restart, not continuously reconciled. Each port must appear in only
-one map; Tailscale validates the port and target when applying the route.
-
-The pinned upstream `services.tailscale.serve` module targets named
-Tailscale Services and couples the frontend and backend web protocols.
-Keep this wrapper for HTTPS-to-HTTP routes on the existing machine address.
-
 Mac and desktop Ollama stay loopback-only. Apple-managed SSH, mDNS and the
 macOS firewall are not configured by this repo; their LAN restrictions
 need verification on the Mac. Standalone home-manager likewise does not
 own the distro firewall.
 
 Rebuild each managed host to apply these changes. Existing Incus preseed
-state has its HTTPS address explicitly cleared. The Serve route on 443 is
-updated in place (now the gateway, T3 moves to 3773), the old
-8444/8445 routes are removed; unrelated Serve routes and Docker
-stacks are preserved. Apply the SSH restriction from the LAN or console.
+state has its HTTPS address explicitly cleared. Docker stacks are
+preserved. Apply the SSH restriction from the LAN or console.
