@@ -30,6 +30,10 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
+Where `~/public/` is served to me (MACHINE.md gives its URL), that's how
+I want HTML: put the page and its assets in `~/public/` and send me the
+URL. Prefer it over inline previews (e.g. T3 Code's HTML render).
+
 ## Dictation
 
 - I may dictate messages. Transcription may be incorrect.
@@ -74,58 +78,6 @@ not in this repo.
 - Keep pending maintenance (upgrades, firmware, fixes to do) in its
   `To-do` list. Remove items once done.
 - Its facts override general host guidance in this file.
-
-### Agents box (host `agents`)
-
-It's agents owned virtual machine.
-
-It runs nixos with config tailored for agents.
-Please enjoy the abundance of packages and binaries in nix.
-
-- You SHOULD install any packages you might need in the future in the nix profile.
-- You MAY use nix shell for any disposable package.
-- You MAY access web and use agent-browser/playwright.
-- You SHOULD maintain the machine: Collect garbage, fix any issues.
-
-Please notify me, if anything is broken or/and needs nix config patch.
-
-#### GUI desktop
-
-Your XFCE desktop runs on X11 display `:2`, driven by the `cua-driver`
-daemon on `~/.cache/cua-driver/desktop-2.sock`. Display `:1` is mine.
-
-- You MAY operate GUI apps on `:2` through the `cua-driver` MCP tools.
-  The `cua-driver` skill covers the observe, act, verify loop.
-- You SHOULD NOT use display `:1` (`DISPLAY=:1`, its VNC, its session)
-  by default: it is my desktop. You MAY use it when I explicitly ask
-  you to use my desktop.
-- The desktop is shared between agents: one controller at a time.
-- Prefer background input on the agent Xorg desktop. Verify every action;
-  use `delivery_mode: "foreground"` when background delivery is refused
-  and visible control is authorized. Do not retry partial actions blindly.
-- Use the `cua-driver` CLI for diagnostics:
-  `cua-driver --socket ~/.cache/cua-driver/desktop-2.sock call health_report`.
-  Plain `cua-driver doctor` runs outside the desktop session and reports
-  no display.
-- Known Cua bugs (upstream, driver 0.30.4):
-  - Background `type_text` mangles non-ASCII: `é—ü` lands as `üüü`
-    through key events and gets truncated through AT-SPI. Paste it
-    instead: `clipboard_write`, then `ctrl+v`.
-  - Background `alt+F4` never closes the window. Use the app's own
-    shortcut (`ctrl+q`, `ctrl+shift+w`); `kill_app` loses unsaved data.
-  - `browser_prepare` without `pid` refuses on NixOS. Launch `chromium`
-    first, then pass its `pid` with an isolated `profile`.
-- I can watch the desktop at `https://<node>/desktops` (Agents tab).
-- Audio is virtual. Hear apps with
-  `pw-record -P '{ stream.capture.sink = true }' --target agents-speaker`,
-  speak into them with `pw-play --target agents-mic`.
-
-#### HTML serving
-
-`~/public/` is served privately over Tailscale HTTPS at
-`https://<node>/public/`. Put HTML and assets directly in `~/public/`
-and share their URLs. Get `<node>` from `tailscale serve status`;
-serving is already configured.
 
 ### User's MacBook (host: `mac`)
 
