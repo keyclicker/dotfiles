@@ -142,7 +142,7 @@
                                     "key_code": "left_option",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "key_code": "f18" }],
+                                "to": [{ "key_code": "f18", "modifiers": ["left_control"] }],
                                 "type": "basic"
                             },
                             {
