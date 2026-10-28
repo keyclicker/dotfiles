@@ -117,14 +117,14 @@ alias v="nvim ."
 alias vp="nvim -c \"lua require('persistence').load()\""
 alias vg="nvim -c \"Neogit\""
 
-alias cddot="cd ~/.dotfiles"
-alias cdvim="cd ~/.dotfiles/.config/nvim"
+alias cddot='cd "${DOTFILES:-$HOME/.dotfiles}"'
+alias cdvim='cd "${DOTFILES:-$HOME/.dotfiles}/.config/nvim"'
 
 alias udex="cd ~/Root/Programming/udex; pwd"
 alias zsrc='source "$ZDOTDIR/.zshrc"'
 
-vdot() { cd ~/.dotfiles && nvim .; }
-vvim() { cd ~/.dotfiles/.config/nvim && nvim .; }
+vdot() { cd "${DOTFILES:-$HOME/.dotfiles}" && nvim .; }
+vvim() { cd "${DOTFILES:-$HOME/.dotfiles}/.config/nvim" && nvim .; }
 vzsh() { nvim "$ZDOTDIR/.zshrc"; }
 
 # dr - drill: mkdir -p then cd into it

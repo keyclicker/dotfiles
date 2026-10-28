@@ -10,7 +10,7 @@ shell without a rebuild. Rebuild only for packages and system settings.
 
 ## Install
 
-Installs nix if missing, clones to `~/.dotfiles` (the links depend on that
+Installs nix if missing, clones to `~/.dotfiles` (the links' default
 path), runs the first switch.
 
 MacBook, nix-darwin:
@@ -98,6 +98,18 @@ Agent homes remain unchanged. Bun's global packages live in
 When deploying an unmerged worktree, set the Home Manager option
 `local.dotfilesDirectory` to that checkout so live links resolve there.
 The default remains `~/.dotfiles`.
+
+A standalone home keeps its main checkout elsewhere through
+`~/.config/dots/local.nix`, outside the repo (`dots rebuild` adds
+`--impure` when it exists):
+
+```nix
+{ local.dotfilesDirectory = "/home/keyclicker/projects/dotfiles"; }
+```
+
+Move the checkout, write the file, then run
+`<new path>/.scripts/dots rebuild` once: the old links and `$DOTFILES`
+point at the old path until that switch.
 
 Existing data needs a one-time move before using the new environment:
 
