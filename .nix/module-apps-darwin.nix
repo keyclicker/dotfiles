@@ -51,6 +51,7 @@
       "mactex-no-gui"
 
       # To test:
+      "moonlight"
       "cmux"
     ];
   };
