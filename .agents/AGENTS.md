@@ -13,14 +13,15 @@ Especially, when I code with agents, I can feel it.
 Please help me keep in touch with the project state and
 direct my attention where it needs to be.
 
+- Number your questions to me Q1, Q2, … across the whole chat, never
+  restarting, so each has a unique ID I can answer by.
+
 ## Tooling preferences
 
 - Try not to use build-in memory.
 - When searching for text or files, prefer using rg or rg --files respectively
   because rg is much faster than alternatives like grep. (If the rg command is
   not found, then use alternatives.)
-- Browser tasks: the `hybrid-browser` skill.
-- Computer use: the `x11-computer-use` skill.
 - `pkill -f`/`pgrep -f` also match your own `sh -c` wrapper: bracket a
   char (`'[q]emu'`) or use `-x`/PIDs.
 
@@ -360,7 +361,8 @@ if they don't compromise on readability, conventions or performance.
 - NEVER commit secrets or personal info: private keys, API tokens,
   passwords, session cookies, email addresses beyond the git identity,
   hostnames/IPs of private machines, or machine-local paths that leak
-  them.
+  them. Tailnet names and private-range IPs are fine in my infra repos
+  (dotfiles, machine repos like agentu), never in general projects.
 - Before committing, check the diff for such data.
 
 --------------------------------------------------------------------------------

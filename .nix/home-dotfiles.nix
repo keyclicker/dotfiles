@@ -33,6 +33,22 @@ let
     resurrect
     continuum
   ];
+
+  # Skills: per-entry links into real dirs, so other repos (agentu) can
+  # add their own and agents' generated dirs (synced/, .system/) stay
+  # out of the checkout. readDir sees tracked files only.
+  skillNames = lib.attrNames (
+    lib.filterAttrs (name: type: type == "directory" && !lib.hasPrefix "." name) (
+      builtins.readDir ../.agents/skills
+    )
+  );
+  skillLinks =
+    dir:
+    lib.listToAttrs (
+      map (
+        name: lib.nameValuePair "${dir}/${name}" { source = link ".agents/skills/${name}"; }
+      ) skillNames
+    );
 in
 {
   imports = [ ./home-xdg.nix ];
@@ -83,15 +99,12 @@ in
       ".claude/CLAUDE.md".source = link ".claude/CLAUDE.md";
       ".claude/commands".source = link ".claude/commands";
       ".claude/agents".source = link ".claude/agents";
-      ".claude/skills".source = link ".claude/skills";
       ".codex/AGENTS.md".source = link ".codex/AGENTS.md";
-      ".codex/skills".source = link ".codex/skills";
 
       # GUI tools that run on both platforms
       ".config/doom".source = link ".config/doom";
       ".config/ghostty/config".source = link ".config/ghostty/config";
-      ".config/ghostty/platform".source =
-        link ".config/ghostty/${if isDarwin then "macos" else "linux"}";
+      ".config/ghostty/platform".source = link ".config/ghostty/${if isDarwin then "macos" else "linux"}";
       ".config/mpv/input.conf".source = link ".config/mpv/input.conf";
       ".config/mpv/mpv.conf".source = link ".config/mpv/mpv.conf";
       ".config/qalculate".source = link ".config/qalculate";
@@ -99,6 +112,8 @@ in
       # per-file: ~/.gnupg holds keys and must stay 700
       ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
     }
+    // skillLinks ".claude/skills"
+    // skillLinks ".codex/skills"
     // lib.optionalAttrs isDarwin {
       # brew shellenv
       ".config/zsh/.zprofile".source = link ".config/zsh/.zprofile";
