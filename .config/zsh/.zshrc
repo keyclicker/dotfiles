@@ -38,12 +38,17 @@ export EDITOR='nvim'
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 export PATH="$CARGO_HOME/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 
 export GPG_TTY=$(tty)
 export CLAUDE_CODE_NO_FLICKER=1
 export HISTORY_IGNORE="(ls|ll|la|l|pwd|cd|fg|jobs|history|exit|clear|vp|v|vi|vim|nvim|fzf)"
-export XDG_DATA_DIRS="/opt/homebrew/share"
+
+# Homebrew paths: on Linux they would replace XDG_DATA_DIRS' default
+# (/usr/share) and break GLib tools like fwupdmgr
+if [[ "$(uname -s)" == Darwin ]]; then
+  export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
+  export XDG_DATA_DIRS="/opt/homebrew/share"
+fi
 
 export LESS='-R'
 
