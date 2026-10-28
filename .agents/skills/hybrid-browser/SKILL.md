@@ -19,10 +19,14 @@ agent-chromium stop                 # before desk rm
 desk rm $D
 ```
 
-`agent-chromium` (agentu) is the logged-in browser that passes bot
-checks and plays DRM. Elsewhere: `DISPLAY=$D agent-browser --headed`.
+`agent-chromium` (agentu) is the browser that passes bot checks and
+plays DRM. Elsewhere: `DISPLAY=$D agent-browser --headed`.
 
-- One agent at a time: if `start` refuses, wait or ask
+- Default profile: the agents' own, disposable
+- `-profile main` (start, stop): the user's own Chromium, with their
+  accounts. Only when the task needs them
+- One browser per profile: if `start` refuses, wait or ask the user
+  to close theirs
 - Logged out, captcha, 2FA: ask the user
 
 ## Rules
