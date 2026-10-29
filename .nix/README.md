@@ -123,8 +123,10 @@ picks its own.
   checkout — edits apply immediately, no rebuild. Every host links
   everything; only entries bound to one OS (macOS preferences, the
   sway session) check the platform. The repo must be checked out at
-  `~/.dotfiles` on every host; `install.sh nixos <host>` clones it,
-  which is why an `iso` install is followed by that step.
+  `local.dotfilesDirectory` (default `~/.dotfiles`) on every host;
+  `install.sh nixos <host>` clones it, which is why an `iso` install
+  is followed by that step. Standalone homes may set the option in
+  `~/.config/dots/local.nix` (flake.nix `homeLocalModules`).
 - **System vs home**: same layer names, different module systems.
   `module-*`/`profile-*` evaluate in nix-darwin/NixOS, `home-*` in
   home-manager's — they cannot share files, so a layer that needs both

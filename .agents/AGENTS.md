@@ -161,9 +161,9 @@ If requested changes to the PR are very big - offer to make stacked PR.
 
 ### Dotfiles `local-master`
 
-Home-manager links point at the `~/.dotfiles` main worktree, so its
-checkout is live config. It may run `local-master`: temporary local
-state that activates dotfiles in place.
+Home-manager links point at the dotfiles main worktree (`$DOTFILES`,
+default `~/.dotfiles`), so its checkout is live config. It may run
+`local-master`: temporary local state that activates dotfiles in place.
 
 - It stays local: you MUST NOT push it or open a PR from it. Block
   pushes with `git config branch.local-master.pushRemote no_push`.

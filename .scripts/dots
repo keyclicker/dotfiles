@@ -1,10 +1,11 @@
 #!/bin/sh
-# dots — manage the ~/.dotfiles machine: status, rebuild, upgrade.
+# dots — manage the dotfiles machine: status, rebuild, upgrade.
 set -eu
 
-repo="$HOME/.dotfiles"
+repo="${DOTFILES:-$HOME/.dotfiles}" # home-manager exports DOTFILES
 flake="$repo/.nix"
 config="${XDG_CONFIG_HOME:-$HOME/.config}/dots/host"
+home_local="$HOME/.config/dots/local.nix" # standalone homes, flake.nix
 stamp="${XDG_CACHE_HOME:-$HOME/.cache}/dots.fetched"
 
 check_ttl_hours=6    # `warn` refreshes origin refs when the last fetch is older
@@ -189,6 +190,8 @@ cmd_rebuild() {
       if [ -e /etc/nixos/local.nix ]; then set -- --impure "$@"; fi
       exec sudo nixos-rebuild switch --flake "$flake#$target" "$@" ;;
     home)
+      # same for standalone homes and their local.nix
+      if [ -e "$home_local" ]; then set -- --impure "$@"; fi
       # -b: back up files home-manager wants to replace on first switch.
       if command -v home-manager >/dev/null 2>&1; then
         exec home-manager switch -b hm-bak --flake "$flake#$target" "$@"

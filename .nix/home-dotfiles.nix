@@ -1,6 +1,7 @@
-# Symlinks $HOME dotfiles to their live copies in ~/.dotfiles.
-# Out-of-store links: edits apply immediately, no rebuild needed.
-# Requires the repo checked out at ~/.dotfiles on every host. Every
+# Symlinks $HOME dotfiles to their live copies in the checkout,
+# `local.dotfilesDirectory` (default ~/.dotfiles, exported as
+# $DOTFILES). Out-of-store links: edits apply immediately, no rebuild
+# needed. Requires the repo checked out there on every host. Every
 # host links everything, a link is free; only entries bound to one
 # OS (macOS preferences, the sway session) check the platform.
 {
@@ -60,6 +61,9 @@ in
   };
 
   config = {
+    # dots and the zsh helpers find the checkout through this
+    home.sessionVariables.DOTFILES = dotfiles;
+
     home.file = {
       # Suppress the "Last login" banner in login shells
       ".hushlogin".text = "";

@@ -38,7 +38,7 @@
               name = "keyclicker@${name}-${system}";
               value = home-manager.lib.homeManagerConfiguration {
                 pkgs = nixpkgs.legacyPackages.${system};
-                modules = [ leaf ];
+                modules = [ leaf ] ++ homeLocalModules;
               };
             })
             [
@@ -75,6 +75,14 @@
       # imports it; `dots rebuild` passes the flag when the file
       # exists. Pets do not get this: their config is the repo.
       localModules = nixpkgs.lib.optional (builtins.pathExists /etc/nixos/local.nix) /etc/nixos/local.nix;
+
+      # Standalone homes' counterpart: ~/.config/dots/local.nix, e.g. a
+      # checkout outside ~/.dotfiles (local.dotfilesDirectory). Pure
+      # evaluation sees no HOME, so again only `--impure` imports it.
+      homeLocal = "${builtins.getEnv "HOME"}/.config/dots/local.nix";
+      homeLocalModules = nixpkgs.lib.optional (
+        builtins.getEnv "HOME" != "" && builtins.pathExists homeLocal
+      ) (/. + homeLocal);
     in
     {
       # Wiring only: one output per machine, each pointing at its
