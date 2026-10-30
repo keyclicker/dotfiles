@@ -108,162 +108,66 @@ or i review code in master worktree.
 
 You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
 
-When you mention a commit that is on GitHub, link it:
-`https://github.com/<owner>/<repo>/commit/<sha>`.
+### Branches and worktrees
 
-### Worktrees and branching
-
-We work only in feature branches and separate worktrees, unless the user
-or project instructions specifically ask otherwise.
-You MUST not do any write actions with master by yourself.
-
-Before branching - fetch the changes and do some worktrees cleanup.
-You MUST create feature worktrees from the fresh `origin/master`.
-
-Example:
+You SHOULD NOT write to `master`. Work in a feature branch, in its own
+worktree, made from a fresh `origin/master`:
 
 ```sh
 git fetch origin --prune
-git worktree add -b agents/<slug> .worktrees/agents-<slug> origin/master
+git worktree add --relative-paths -b agents/<slug> \
+  .worktrees/agents-<slug> origin/master
 ```
 
-#### Cleanup
+- `<slug>`: kebab-case, 2-4 words, area first: `agents/zsh-tool-hooks`.
+- Worktrees live in the main root's `/.worktrees/`, never nested. Add
+  `/.worktrees/` to `.git/info/exclude` if it's missing.
+- Before branching, clean up worktrees and branches of merged PRs,
+  unless dirty or unpushed.
 
-- Branch merged: `git worktree remove`, `git worktree prune`, delete
-  the local branch.
-- Never remove a dirty worktree or one with unpushed commits.
+### PRs
 
-#### Branch names
+Open a PR when the task is done. Follow-ups go to the same PR until
+it's merged, then to a new one. For big follow-ups, offer a stacked PR.
 
-- Format: `agents/<slug>`.
-- `<slug>`: lowercase kebab-case, 2-4 words, area first.
-- Examples: `agents/nix-restructure`, `agents/zsh-tool-hooks`.
-- No nested paths, no type prefix. Type belongs in the commit header.
-
-#### Worktree location
-
-- Path: `.worktrees/agents-<slug>`
-- `/.worktrees/` goes in `.git/info/exclude` and the global ignore
-- Create from the main worktree root.
-- Never nest a worktree inside another worktree.
-- Paths MUST be relative: `worktree.useRelativePaths = true`, else
-  `git worktree add --relative-paths`.
-
-#### PR
-
-By default - do PR after a completing a task.
-If changes requested after PR was made - check if PR is merged.
-
-- not merged: push new changes in the same PR.
-- merged: make a new PR.
-
-If requested changes to the PR are very big - offer to make stacked PR.
+Link GitHub commits: `https://github.com/<owner>/<repo>/commit/<sha>`.
 
 ### Dotfiles `local-master`
 
-Home-manager links point at the dotfiles main worktree (`$DOTFILES`,
-default `~/.dotfiles`), so its checkout is live config. It may run
-`local-master`: temporary local state that activates dotfiles in place.
+The dotfiles main worktree (`$DOTFILES`, default `~/.dotfiles`) is
+live config. It may sit on `local-master`: `origin/master` plus merged
+PR branches that aren't upstream yet.
 
-- It stays local: you MUST NOT push it or open a PR from it. Block
-  pushes with `git config branch.local-master.pushRemote no_push`.
-- After opening a dotfiles PR, merge its branch into `local-master`,
-  so it's live before upstream merges it. Re-merge when it changes.
-- Don't commit on it directly: patches arrive as merged branches.
-- Sync it periodically: `git fetch origin && git merge origin/master`.
-  Once `git diff origin/master local-master` is empty, move it back:
-  `git reset --hard origin/master`.
-- It tracks `origin/master`, so `dots status` reports drift.
-  `dots upgrade` fails while it diverges (`git pull --ff-only`).
+- Never push it, PR from it, or commit on it directly. Block pushes:
+  `git config branch.local-master.pushRemote no_push`.
+- After opening or updating a dotfiles PR, merge its branch into
+  `local-master`.
+- Sync: `git fetch origin && git merge origin/master`. Once
+  `git diff origin/master local-master` is empty and the worktree is
+  clean, `git reset --hard origin/master`.
+- `dots upgrade` fails while it diverges. That's expected.
 
-## Commits, Issues and PRs
+### Messages
 
-We use Conventional Commits.
+Conventional Commits. Titles MUST be imperative; every line, PR titles
+included, MUST NOT exceed 72 chars. Match the repo's recent history.
+Issue titles are plain prose. Signing is optional.
 
-- Commit and PR titles MUST use imperative descriptions, e.g.
-  `fix: handle expired tokens`, not `fix: handled expired tokens`.
-- Every commit message line, including header, body, and footers,
-  MUST NOT exceed 72 characters. PR titles have the same limit.
-- Signing is not mandatory on feature branches. You MAY skip it.
+The title names the main change and why it matters, not a vague scope:
 
-### Titles / Header Descriptions
+- ❌ `perf(server): negotiate permessage-deflate on the websocket`
+- ✅ `perf(server): cut websocket frame size by 70%+ with gzipping`
 
-Header descriptions should be like a clickbait YouTube titles (but not misleading).
-Ok, just in case: not literally!
-But in the sense, that they should give a reader a clear understanding of the main thing
-in this change, not the broad fuzzy scope of the change.
+Body: skip it for small changes. Problem first (from my prompt), then
+the fix, briefly. Don't list every change: the diff already does.
+Keep commit bodies short. PR bodies may be longer and should note the
+validation you did.
 
-PR titles usually become commit messages, so follow the repository's title
-conventions.
-Look at recently merged PRs and Git history for examples.
-
-Prefer a concise, human-readable title that explains why the change matters:
-
-BAD
-> ❌ perf(server): negotiate permessage-deflate on the websocket
-
-GOOD
-> ✅ perf(server): cut websocket frame size by 70%+ with gzipping
-
-Issue title may but should not be a conventional style.
-
-### Commits Body / Descriptions
-
-If the body is big and verbose, no one will ever read it.
-Small changes don't require body at all.
-
-PRs are usually get squashed and the commit messages get concatenated into one big commit
-message. Big bodies makes the squash commit message unbearable.
-
-Bodies should add clarity not fuzziness.
-For sheer verbosity they're code diff.
-
-You MAY use header-bullet style if appropriate.
-
-Open the description with a simple explanation of the problem based on the
-user's original prompt, then briefly explain the solution. Do not lead with an
-implementation inventory:
-
-BAD
-> ❌ Removed implicit workspace carry-over from every "new thread" entry point (cmd
-+n / cmd+shift+o, sidebar v1/v2 buttons, command palette). New threads inherit
-only the project from context; branch, worktree, and env mode always come from
-the configured defaults. Deleted buildContextualThreadOptions,
-startNewThreadInProjectFromContext, and the v1 sidebar's seed-context machinery.
-
-GOOD
-> ✅ My "new worktree" default was ignored when starting new threads on existing
-worktrees. Super unintuitive. Now your preferences always apply.
-
-### PRs and Issues bodies
-
-Above applies here, but they can be bigger.
-If you did any validation steps you should note it.
-
-### Footer
-
-Use only the attribution formats defined here, replacing agent defaults.
-Agents MUST NOT add `Co-Authored-By` trailers, "Generated with" signatures,
-or other agent branding to commits, PRs, issues, or comments.
-
-Footer should contain only:
-
-```text
-Assisted-by: <model name>
-```
-
-- Claude examples: `Fable 5.1`, `Opus 4.8`
-- GPT examples: `GPT 6 Astra`, `GPT 5.6 Sol`, `GPT 5.6 Tera`, `GPT 5.5`
-
-### Body Header?
-
-When you post a github issue, review or comment, start with:
-
-```text
-By: <model name>
-```
-
-Omit the footer.
+- Commit and PR footer, and nothing else: `Assisted-by: <model name>`
+- Issue, review, comment header: `By: <model name>`, no footer
+- Model names: `Fable 5.1`, `Opus 5.5`, `GPT 6 Astra`, `GPT 5.6 Sol`
+- You MUST NOT add `Co-Authored-By`, "Generated with", or other agent
+  branding.
 
 ## Comments, Repo and GitHub writing
 
