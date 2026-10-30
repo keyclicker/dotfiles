@@ -7,8 +7,8 @@ window-colorspace = srgb
 macos-option-as-alt = true
 
 # Tabs live in the titlebar: one row instead of titlebar + tab bar.
-# Retry alone: it broke tabs before together with the keys below.
-# Default (`transparent`) is the fallback if tabs vanish again.
+# Old Ghostty hid inactive tabs here with `background-opacity`;
+# if they vanish, update the app first
 macos-titlebar-style = tabs
 
 # window-decoration = auto
