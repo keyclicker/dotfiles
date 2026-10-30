@@ -27,6 +27,15 @@ direct my attention where it needs to be.
 - `pkill -f`/`pgrep -f` also match your own `sh -c` wrapper: bracket a
   char (`'[q]emu'`) or use `-x`/PIDs.
 
+## Scratch files
+
+- Scratch (downloads, screenshots, reports, builds, test output):
+  `~/tmp`. It survives reboots; create it if missing.
+- Truly throwaway files: `/tmp`. It is wiped on reboot.
+- You MUST NOT put scratch or throwaway files anywhere else: not `~`,
+  `~/.cache`, `~/Downloads`, or the repo. Tools' own output dirs
+  (`target/`, `node_modules/`) are fine.
+
 ## HTML
 
 An HTML request means a static page by default, with a clear layout and
