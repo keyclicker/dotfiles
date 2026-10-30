@@ -1,5 +1,7 @@
 # Ghostty windows and ssh logins land in the "main" tmux session: the
-# first one creates it, the rest attach (-A). Only those two: tmux dies
+# first one creates it, ssh logins attach (-A). Ghostty attaches only
+# while "main" has no client: one tab holds it, the rest stay raw
+# shells. Only those two: tmux dies
 # when clients of different heights share a session and a pane redraws
 # fullscreen (tmux/tmux#5268, open as of 3.7c). Autologin consoles
 # (80x24 tty1/ttyS0 on VMs) and IDE panes are exactly such clients, so
@@ -9,7 +11,8 @@
 # TMUX_AUTOATTACH=0 opts out, e.g. `env` in ~/.config/ghostty/local.
 if [[ -z $TMUX && -z $GHOSTTY_QUICK_TERMINAL && -t 0 ]] \
     && [[ ${TMUX_AUTOATTACH:-1} != 0 ]] \
-    && [[ -n $SSH_TTY || $TERM_PROGRAM == ghostty ]] && command -v tmux >/dev/null; then
+    && [[ -n $SSH_TTY || $TERM_PROGRAM == ghostty ]] && command -v tmux >/dev/null \
+    && [[ -n $SSH_TTY || -z $(tmux list-clients -t '=main' 2>/dev/null) ]]; then
   # Finder's "New Ghostty Tab Here" only sets the start dir: open a tmux
   # window there, then attach like any other tab. Exiting instead would
   # trip ghostty's "failed to launch" screen: on macOS any exit under
