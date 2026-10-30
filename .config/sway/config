@@ -1,254 +1,218 @@
-# Default config for sway
+# sway: what yabai + skhd do on the mac. $mod is Super; keyd
+# (module-desktop-linux.nix) puts it on the physical Alt key, where
+# cmd sits on a mac keyboard. Everything the bindings call is
+# installed by module-desktop-linux.nix; the bar is waybar, the
+# launcher fuzzel, the notifications mako, each with its own config
+# next to this one.
 #
-# Copy this to ~/.config/sway/config and edit it to your liking.
-#
-# Read `man 5 sway` for a complete reference.
+# `man 5 sway` for the reference.
 
 ### Variables
-#
-# Logo key. Use Mod1 for Alt.
+
 set $mod Mod4
 # Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
 set $right l
-# Your preferred terminal emulator
 set $term ghostty
-# Your preferred application launcher
-set $menu wofi --show drun
+set $menu fuzzel
 # Bindings by keycode, so they survive a switch to ua or ru
 set $bind bindsym --to-code
+# app_id of the scratchpad terminal below
+set $quick quick-terminal
 
-### Output configuration
-#
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg ~/Wallpapers/wallpaper.png fill
+### Look
 
-# output eDP-1 scale 1.25
+# TokyoNight Moon, ghostty's dark theme.
+set $bg      #1e2030
+set $bg_hi   #2f334d
+set $fg      #c8d3f5
+set $blue    #82aaff
+set $red     #ff757f
+set $comment #636da6
 
-#
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
+output * bg $bg solid_color
+font pango:JetBrains Mono 12
+default_border pixel 2
+gaps inner 5
+seat * xcursor_theme Adwaita 24
 
-### Idle configuration
-#
-# Example configuration:
+#                       border  bg      text     indicator child_border
+client.focused          $blue   $blue   $bg      $blue     $blue
+client.focused_inactive $bg_hi  $bg_hi  $fg      $bg_hi    $bg_hi
+client.unfocused        $bg     $bg     $comment $bg       $bg
+client.urgent           $red    $red    $bg      $red      $red
 
+### Session
+
+# Session half of the SPICE guest agent (host-desktop-vm.nix runs the
+# system half): clipboard and display resize. Exits at once where
+# there is no SPICE device.
+exec spice-vdagent
+exec mako
+
+# Screens off after ten idle minutes. No auto-lock: the user has no
+# password (keys only over ssh, users.mutableUsers = false), so
+# swaylock could never unlock. Set users.users.keyclicker.hashedPassword
+# in nix if you want the $mod+Shift+p lock below.
 exec swayidle -w \
-         timeout 300 'swaylock -f -c 000000' \
-         timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-         before-sleep 'swaylock -f -c 000000'
+    timeout 600 'swaymsg "output * power off"' \
+    resume 'swaymsg "output * power on"'
 
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
+$bind $mod+Shift+p exec swaylock -f -c 000000
 
-$bind $mod+Shift+p exec 'swaylock -f -c 000000'
+### Input
 
-### Input configuration
-#
-# Example configuration:
-#
-    input type:touchpad {
-        # dwt enabled
-        # tap enabled
-        natural_scroll enabled
-        scroll_factor 0.2
-        # middle_emulation enabled
-    }
+input type:touchpad {
+    natural_scroll enabled
+    scroll_factor 0.2
+}
 
-    input type:pointer {
-    }
+# yabai's focus_follows_mouse off / mouse_follows_focus on: focus
+# moves only by key or click, the pointer jumps to the window that
+# got it.
+focus_follows_mouse no
+mouse_warping container
 
-    input type:keyboard {
-        xkb_layout us,ua,ru
-        xkb_options grp:alt_shift_toggle
-    }
+# Same three layouts as the mac, on the same keys as skhd's
+# hyper+u/i/o.
+input type:keyboard {
+    xkb_layout us,ua,ru
+}
+$bind $mod+u input type:keyboard xkb_switch_layout 0
+$bind $mod+i input type:keyboard xkb_switch_layout 1
+$bind $mod+o input type:keyboard xkb_switch_layout 2
 
-    $bind $mod+u input type:keyboard xkb_switch_layout 0
-    $bind $mod+i input type:keyboard xkb_switch_layout 1
-    $bind $mod+o input type:keyboard xkb_switch_layout 2
+### Basics
 
-#
-# You can also configure each device individually.
-# Read `man 5 sway-input` for more information about this section.
+$bind $mod+Return exec $term
+$bind $mod+q kill
+$bind $mod+d exec $menu
 
-### Key bindings
-#
-# Basics:
-#
-    # Start a terminal
-    $bind $mod+Return exec $term
+# Quick terminal, the mac's alt+space dropdown: one floating ghostty
+# kept in the scratchpad and toggled with $mod+space. The first
+# press starts it; for_window parks it in the scratchpad and shows
+# it, later presses only toggle.
+for_window [app_id="$quick"] floating enable, resize set 1200 700, move position center, move scratchpad, scratchpad show
+$bind $mod+space exec swaymsg '[app_id="$quick"] scratchpad show' || $term --class=$quick
 
-    # Kill focused window
-    $bind $mod+q kill
+# Drag floating windows with $mod + left mouse button, resize with
+# $mod + right; works on tiled windows too.
+floating_modifier $mod normal
 
-    # Start your launcher
-    $bind $mod+d exec $menu
+$bind $mod+Shift+c reload
+$bind $mod+Shift+e exec swaynag -t warning -m 'Exit sway? This ends the Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
-    # Drag floating windows by holding down $mod and left mouse button.
-    # Resize them with right mouse button + $mod.
-    # Despite the name, also works for non-floating windows.
-    # Change normal to inverse to use left mouse button for resizing and right
-    # mouse button for dragging.
-    floating_modifier $mod normal
+### Screenshots
 
-    # Reload the configuration file
-    $bind $mod+Shift+c reload
+# Region to the clipboard; Shift+Print keeps the whole screen as a
+# file.
+$bind Print exec grim -g "$(slurp)" - | wl-copy
+$bind $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
+$bind Shift+Print exec grim ~/Pictures/$(date +%F_%H-%M-%S).png
 
-    # Exit sway (logs you out of your Wayland session)
-    $bind $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-#
-# Moving around:
-#
-    # Move your focus around
-    $bind $mod+$left focus left
-    $bind $mod+$down focus down
-    $bind $mod+$up focus up
-    $bind $mod+$right focus right
-    # Or use $mod+[up|down|left|right]
-    $bind $mod+Left focus left
-    $bind $mod+Down focus down
-    $bind $mod+Up focus up
-    $bind $mod+Right focus right
+### Moving around
 
-    # Move the focused window with the same, but add Shift
-    $bind $mod+Shift+$left move left
-    $bind $mod+Shift+$down move down
-    $bind $mod+Shift+$up move up
-    $bind $mod+Shift+$right move right
-    # Ditto, with arrow keys
-    $bind $mod+Shift+Left move left
-    $bind $mod+Shift+Down move down
-    $bind $mod+Shift+Up move up
-    $bind $mod+Shift+Right move right
-#
-# Workspaces:
-#
-    # Switch to workspace
-    $bind $mod+1 workspace number 1
-    $bind $mod+2 workspace number 2
-    $bind $mod+3 workspace number 3
-    $bind $mod+4 workspace number 4
-    $bind $mod+5 workspace number 5
-    $bind $mod+6 workspace number 6
-    $bind $mod+7 workspace number 7
-    $bind $mod+8 workspace number 8
-    $bind $mod+9 workspace number 9
-    $bind $mod+0 workspace number 10
-    # Move focused container to workspace
-    $bind $mod+Shift+1 move container to workspace number 1
-    $bind $mod+Shift+2 move container to workspace number 2
-    $bind $mod+Shift+3 move container to workspace number 3
-    $bind $mod+Shift+4 move container to workspace number 4
-    $bind $mod+Shift+5 move container to workspace number 5
-    $bind $mod+Shift+6 move container to workspace number 6
-    $bind $mod+Shift+7 move container to workspace number 7
-    $bind $mod+Shift+8 move container to workspace number 8
-    $bind $mod+Shift+9 move container to workspace number 9
-    $bind $mod+Shift+0 move container to workspace number 10
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
-#
-# Layout stuff:
-#
-    # You can "split" the current object of your focus with
-    # $mod+b or $mod+v, for horizontal and vertical splits
-    # respectively.
-    $bind $mod+b splith
-    $bind $mod+v splitv
+$bind $mod+$left focus left
+$bind $mod+$down focus down
+$bind $mod+$up focus up
+$bind $mod+$right focus right
+$bind $mod+Left focus left
+$bind $mod+Down focus down
+$bind $mod+Up focus up
+$bind $mod+Right focus right
 
-    # Switch the current container between different layout styles
-    $bind $mod+s layout stacking
-    $bind $mod+w layout tabbed
-    $bind $mod+e layout toggle split
+$bind $mod+Shift+$left move left
+$bind $mod+Shift+$down move down
+$bind $mod+Shift+$up move up
+$bind $mod+Shift+$right move right
+$bind $mod+Shift+Left move left
+$bind $mod+Shift+Down move down
+$bind $mod+Shift+Up move up
+$bind $mod+Shift+Right move right
 
-    # Make the current focus fullscreen
-    $bind $mod+f fullscreen
+### Workspaces
 
-    # Toggle the current focus between tiling and floating mode
-    $bind $mod+Shift+space floating toggle
+$bind $mod+1 workspace number 1
+$bind $mod+2 workspace number 2
+$bind $mod+3 workspace number 3
+$bind $mod+4 workspace number 4
+$bind $mod+5 workspace number 5
+$bind $mod+6 workspace number 6
+$bind $mod+7 workspace number 7
+$bind $mod+8 workspace number 8
+$bind $mod+9 workspace number 9
+$bind $mod+0 workspace number 10
 
-    # Swap focus between the tiling area and the floating area
-    $bind $mod+space focus mode_toggle
+$bind $mod+Shift+1 move container to workspace number 1
+$bind $mod+Shift+2 move container to workspace number 2
+$bind $mod+Shift+3 move container to workspace number 3
+$bind $mod+Shift+4 move container to workspace number 4
+$bind $mod+Shift+5 move container to workspace number 5
+$bind $mod+Shift+6 move container to workspace number 6
+$bind $mod+Shift+7 move container to workspace number 7
+$bind $mod+Shift+8 move container to workspace number 8
+$bind $mod+Shift+9 move container to workspace number 9
+$bind $mod+Shift+0 move container to workspace number 10
 
-    # Move focus to the parent container
-    $bind $mod+a focus parent
-#
-# Scratchpad:
-#
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
+### Layout
 
-    # Move the currently focused window to the scratchpad
-    $bind $mod+Shift+minus move scratchpad
+# Split the focused container horizontally / vertically
+$bind $mod+b splith
+$bind $mod+v splitv
 
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    $bind $mod+minus scratchpad show
-#
-# Resizing containers:
-#
+$bind $mod+s layout stacking
+$bind $mod+w layout tabbed
+$bind $mod+e layout toggle split
+
+$bind $mod+f fullscreen
+$bind $mod+Shift+space floating toggle
+# Focus between the tiling and floating layers
+$bind $mod+t focus mode_toggle
+$bind $mod+a focus parent
+
+### Scratchpad
+
+$bind $mod+Shift+minus move scratchpad
+$bind $mod+minus scratchpad show
+
+### Resizing
+
 mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
     $bind $left resize shrink width 10px
     $bind $down resize grow height 10px
     $bind $up resize shrink height 10px
     $bind $right resize grow width 10px
-
-    # Ditto, with arrow keys
     $bind Left resize shrink width 10px
     $bind Down resize grow height 10px
     $bind Up resize shrink height 10px
     $bind Right resize grow width 10px
 
-    # Return to default mode
     $bind Return mode "default"
     $bind Escape mode "default"
 }
 $bind $mod+r mode "resize"
-#
-# Utilities:
-#
-    # Special keys to adjust volume via PulseAudio
-    $bind --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
-    $bind --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
-    $bind --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
-    $bind --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
 
-    # Special keys to control media via playerctl
-    $bind --locked XF86AudioPlay exec playerctl play-pause
-    $bind --locked XF86AudioPause exec playerctl play-pause
-    $bind --locked XF86AudioPrev exec playerctl previous
-    $bind --locked XF86AudioNext exec playerctl next
-    $bind --locked XF86AudioStop exec playerctl stop
+### Media keys
 
-    # Special keys to adjust brightness via brightnessctl
-    $bind --locked XF86MonBrightnessDown exec brightnessctl set 5%-
-    $bind --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+$bind --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+$bind --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+$bind --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+$bind --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+$bind --locked XF86AudioPlay exec playerctl play-pause
+$bind --locked XF86AudioPause exec playerctl play-pause
+$bind --locked XF86AudioNext exec playerctl next
+$bind --locked XF86AudioPrev exec playerctl previous
+$bind --locked XF86AudioStop exec playerctl stop
+$bind --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+$bind --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
-    # Special key to take a screenshot with grim
-    # $bind Print exec grim
+### Bar
 
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
 bar {
     swaybar_command waybar
 }
 
-gaps inner 5
-default_border pixel 2
-
-font pango:JetBrains Mono 14
-
-
+# NixOS drops the dbus/systemd environment import here.
 include /etc/sway/config.d/*
