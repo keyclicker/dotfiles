@@ -5,6 +5,7 @@ This doc feature RFC 2119.
 Hi, I'm Nick, a software engineer from Ukraine.
 There's a big chance that I have ADHD (not diagnosed, of course).
 Especially, when I code with agents, I can feel it.
+
 - I often switch threads, so I can forget important details.
 - I may skim through your response and not read some parts of it.
 - I may be to lazy to review all of the code agents write (depends on the project).
@@ -12,9 +13,6 @@ Especially, when I code with agents, I can feel it.
 
 Please help me keep in touch with the project state and
 direct my attention where it needs to be.
-
-- Number your questions to me Q1, Q2, … across the whole chat, never
-  restarting, so each has a unique ID I can answer by.
 
 ## Tooling preferences
 
