@@ -6,10 +6,12 @@ theme = light:TokyoNight Day,dark:TokyoNight Moon
 window-colorspace = srgb
 macos-option-as-alt = true
 
-# Off: Ghostty's default window (native titlebar and tab bar).
-# `tabs` draws tabs into the titlebar and hid them here
+# Tabs live in the titlebar: one row instead of titlebar + tab bar.
+# Retry alone: it broke tabs before together with the keys below.
+# Default (`transparent`) is the fallback if tabs vanish again.
+macos-titlebar-style = tabs
+
 # window-decoration = auto
-# macos-titlebar-style = tabs
 # macos-window-shadow = false
 # keybind = super+e=toggle_window_decorations
 
