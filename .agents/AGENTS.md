@@ -27,11 +27,14 @@ direct my attention where it needs to be.
 - `pkill -f`/`pgrep -f` also match your own `sh -c` wrapper: bracket a
   char (`'[q]emu'`) or use `-x`/PIDs.
 
-## Scratch files
+## Scratch and served files
 
-- Scratch (downloads, screenshots, reports, builds, test output):
-  `~/tmp`. It survives reboots; create it if missing.
-- Truly throwaway files: `/tmp`. It is wiped on reboot.
+- `~/tmp`: scratch (downloads, screenshots, reports, builds, test
+  output). It survives reboots; create it if missing.
+- `/tmp`: truly throwaway files. It is wiped on reboot.
+- `~/public/`, where it's served to me (MACHINE.md gives its URL):
+  scratch I should open (pages, reports, screenshots, videos). Write
+  it there directly and send me the URL; MUST NOT symlink it in.
 - You MUST NOT put scratch or throwaway files anywhere else: not `~`,
   `~/.cache`, `~/Downloads`, or the repo. Tools' own output dirs
   (`target/`, `node_modules/`) are fine.
@@ -42,9 +45,8 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
-Where `~/public/` is served to me (MACHINE.md gives its URL), that's how
-I want HTML: put the page and its assets in `~/public/` and send me the
-URL. Prefer it over inline previews (e.g. T3 Code's HTML render).
+Where `~/public/` is served, put the page and its assets there.
+Prefer it over inline previews (e.g. T3 Code's HTML render).
 
 ## Dictation
 
