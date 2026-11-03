@@ -228,6 +228,10 @@ Always try to keep the spirit of the given programming language best practices.
 I'm not Uncle Bob. Medium sized functions are ok. But smaller functions are better
 if they don't compromise on readability, conventions or performance.
 
+I have OCD about consistency. Solve the same problem the same way
+everywhere, even when another way also works: one access path to a module,
+one helper per job, one naming pattern for similar things.
+
 ### Secrets & personal info
 
 - NEVER commit secrets or personal info: private keys, API tokens,
