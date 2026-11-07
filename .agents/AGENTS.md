@@ -45,6 +45,10 @@ An HTML request means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
+Simple means the structure, not the looks. Make every page polished:
+color, clear visual hierarchy, some character. It should look designed,
+not like raw HTML, even on the first try.
+
 Where `~/public/` is served, put the page and its assets there.
 Prefer it over inline previews (e.g. T3 Code's HTML render).
 
