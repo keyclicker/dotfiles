@@ -41,7 +41,11 @@ direct my attention where it needs to be.
 
 ## HTML
 
-An HTML request means a static page by default, with a clear layout and
+This section is for when I ask you to answer me in HTML (a report,
+an explainer, a comparison). HTML that's part of a project task follows
+the task and the project, not these defaults.
+
+An HTML answer means a static page by default, with a clear layout and
 tabs if useful. Add navigation, multiple pages, or elaborate interactions
 only when the task calls for them. Prioritize the content and readability.
 
