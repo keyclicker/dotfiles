@@ -31,7 +31,9 @@ direct my attention where it needs to be.
 
 - `~/tmp`: scratch (downloads, screenshots, reports, builds, test
   output). It survives reboots; create it if missing.
-- `/tmp`: truly throwaway files. It is wiped on reboot.
+- `/tmp`: only files you delete before your turn ends. It may be
+  RAM (tmpfs). Anything you look at twice, install into, or might
+  keep goes to `~/tmp`.
 - `~/public/`, where it's served to me (MACHINE.md gives its URL):
   scratch I should open (pages, reports, screenshots, videos). Write
   it there directly and send me the URL; MUST NOT symlink it in.
