@@ -43,20 +43,12 @@ direct my attention where it needs to be.
 
 ## HTML
 
-This section is for when I ask you to answer me in HTML (a report,
-an explainer, a comparison). HTML that's part of a project task follows
-the task and the project, not these defaults.
+When I ask for an answer in HTML (a report, an explainer, a comparison):
 
-An HTML answer means a static page by default, with a clear layout and
-tabs if useful. Add navigation, multiple pages, or elaborate interactions
-only when the task calls for them. Prioritize the content and readability.
-
-Simple means the structure, not the looks. Make every page polished:
-color, clear visual hierarchy, some character. It should look designed,
-not like raw HTML, even on the first try.
-
-Where `~/public/` is served, put the page and its assets there.
-Prefer it over inline previews (e.g. T3 Code's HTML render).
+- Make a static page that looks designed: color, clear visual
+  hierarchy, some character.
+- Where `~/public/` is served, put it there instead of an inline
+  preview (e.g. T3 Code's HTML render).
 
 ## Dictation
 
