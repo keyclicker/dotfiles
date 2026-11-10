@@ -1,9 +1,10 @@
 ---
 name: chief-of-staff
-description: Use when the user asks this thread to be the master or
-  chief of staff, or to orchestrate or split work across subagents,
-  or on /chief-of-staff. Covers which spawn tool to pick and how to
-  keep the master's context clean.
+description: Make this thread the master that delegates to subagents.
+  Covers which spawn tool to pick and how to keep the master's
+  context clean.
+# User-only: Codex reads agents/openai.yaml instead
+disable-model-invocation: true
 ---
 
 # Chief of staff

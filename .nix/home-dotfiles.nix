@@ -43,12 +43,14 @@ let
       builtins.readDir ../.agents/skills
     )
   );
+  # Codex-only skills stay out of Claude's skill list
+  codexOnlySkills = [ "codex-model" ];
   skillLinks =
-    dir:
+    dir: names:
     lib.listToAttrs (
       map (
         name: lib.nameValuePair "${dir}/${name}" { source = link ".agents/skills/${name}"; }
-      ) skillNames
+      ) names
     );
 in
 {
@@ -116,8 +118,8 @@ in
       # per-file: ~/.gnupg holds keys and must stay 700
       ".gnupg/gpg.conf".source = link ".gnupg/gpg.conf";
     }
-    // skillLinks ".claude/skills"
-    // skillLinks ".codex/skills"
+    // skillLinks ".claude/skills" (lib.subtractLists codexOnlySkills skillNames)
+    // skillLinks ".codex/skills" skillNames
     // lib.optionalAttrs isDarwin {
       # brew shellenv
       ".config/zsh/.zprofile".source = link ".config/zsh/.zprofile";

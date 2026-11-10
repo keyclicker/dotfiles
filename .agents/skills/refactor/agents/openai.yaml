@@ -1,0 +1,3 @@
+# User-only: Claude reads `disable-model-invocation` in SKILL.md
+policy:
+  allow_implicit_invocation: false
