@@ -1,7 +1,9 @@
 ---
 name: refactor
 description: Step back and reorganize code so it reads well and is easy
-  to change. Use on /refactor or when asked to refactor or tidy code.
+  to change.
+# User-only: Codex reads agents/openai.yaml instead
+disable-model-invocation: true
 ---
 
 Take a step back from this code and leave it better organized.

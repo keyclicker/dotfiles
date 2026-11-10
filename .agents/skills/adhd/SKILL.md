@@ -1,6 +1,9 @@
 ---
 name: adhd
-description: User is back from thread-hopping and needs a catch-up. Use on /adhd or "what did I miss".
+description: Catch me up after thread-hopping. What's going on, what
+  changed, what you need from me.
+# User-only: Codex reads agents/openai.yaml instead
+disable-model-invocation: true
 ---
 
 Hey, it's me, the user, invoking this skill. I've been ADHD-hopping from
