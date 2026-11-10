@@ -3,10 +3,44 @@
 # dotfiles and adds the tools they call or need newer than a distro
 # ships, plus the system monitors. Everything else is the distro's
 # job.
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
+  # Multi-user installer's shell hook (install.sh installs with --daemon)
+  nixDaemonProfile = "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh";
+
+  # Same bins, in the order the hook prepends them
+  nixBins = [
+    "${config.home.profileDirectory}/bin"
+    "/nix/var/nix/profiles/default/bin"
+  ];
+in
 {
   imports = [ ./home-dotfiles.nix ];
+
+  # ======================================================
+  #            Nix on PATH outside interactive shells
+  # ======================================================
+
+  # The installer hooks only interactive shells (/etc/zshrc,
+  # /etc/bashrc), so `ssh host cmd` and `zsh -c` missed nix bins.
+  # .zshenv sources hm-session-vars.sh in every zsh; the hook's own
+  # guard makes /etc/zshrc a no-op afterwards.
+  home.sessionVariablesExtra = ''
+    if [ -e ${nixDaemonProfile} ]; then
+      . ${nixDaemonProfile}
+    fi
+  '';
+
+  # User units (linger starts them before any shell): same PATH as zsh
+  systemd.user.sessionVariables.PATH = lib.concatStringsSep ":" (
+    nixBins ++ config.home.sessionPath ++ [ "$PATH" ]
+  );
 
   home.packages = with pkgs; [
     # Workspace: configs assume current releases
