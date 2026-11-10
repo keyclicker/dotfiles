@@ -37,10 +37,13 @@ in
     fi
   '';
 
-  # User units (linger starts them before any shell): same PATH as zsh
-  systemd.user.sessionVariables.PATH = lib.concatStringsSep ":" (
-    nixBins ++ config.home.sessionPath ++ [ "$PATH" ]
-  );
+  # User units (linger starts them before any shell): same PATH as zsh.
+  # Not systemd.user.sessionVariables: environment.d applies files by
+  # name, and Ubuntu's 99-environment.conf (/etc/environment) resets
+  # PATH after home-manager's 10-home-manager.conf.
+  xdg.configFile."environment.d/999-nix-path.conf".text = ''
+    PATH=${lib.concatStringsSep ":" (nixBins ++ config.home.sessionPath)}:$PATH
+  '';
 
   home.packages = with pkgs; [
     # Workspace: configs assume current releases
