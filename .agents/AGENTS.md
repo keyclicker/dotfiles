@@ -37,6 +37,8 @@ direct my attention where it needs to be.
 - `~/public/`, where it's served to me (MACHINE.md gives its URL):
   scratch I should open (pages, reports, screenshots, videos). Write
   it there directly and send me the URL; MUST NOT symlink it in.
+  Its URLs are for me only, in chat: MUST NOT put them in commits,
+  PRs, issues, comments, or repo files.
 - You MUST NOT put scratch or throwaway files anywhere else: not `~`,
   `~/.cache`, `~/Downloads`, or the repo. Tools' own output dirs
   (`target/`, `node_modules/`) are fine.
