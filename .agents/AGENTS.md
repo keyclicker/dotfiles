@@ -124,17 +124,24 @@ You MUST NOT substitute built-in or plugin Git/PR workflows for this workflow.
 ### Branches and worktrees
 
 You SHOULD NOT write to `master`. Work in a feature branch, in its own
-worktree, made from a fresh `origin/master`:
+worktree, made from a fresh `origin/master`. Worktrees follow T3 Code's
+layout, so its worktree threads and yours are the same thing:
 
-```sh
-git fetch origin --prune
-git worktree add --relative-paths -b agents/<slug> \
-  .worktrees/agents-<slug> origin/master
-```
+- A T3 Code thread started in a worktree already has one: work there.
+  T3 names its branch `agents/<slug>` from the first message. If it's
+  still a placeholder (`agents/<hex>`, `t3/<hex>`), rename it before
+  the first push: `git branch -m agents/<slug>`.
+- Otherwise, make one in T3 Code's worktree directory:
+
+  ```sh
+  git fetch origin --prune
+  git worktree add -b agents/<slug> \
+    ~/worktrees/<repo>/<slug> origin/master
+  ```
 
 - `<slug>`: kebab-case, 2-4 words, area first: `agents/zsh-tool-hooks`.
-- Worktrees live in the main root's `/.worktrees/`, never nested. Add
-  `/.worktrees/` to `.git/info/exclude` if it's missing.
+- `<repo>`: the main worktree's directory name, as T3 Code names it.
+- Worktrees live in `~/worktrees/<repo>/`, never inside a repo.
 - Before branching, clean up worktrees and branches of merged PRs,
   unless dirty or unpushed.
 
