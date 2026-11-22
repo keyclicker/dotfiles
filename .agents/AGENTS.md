@@ -128,8 +128,9 @@ worktree, made from a fresh `origin/master`. Worktrees follow T3 Code's
 layout, so its worktree threads and yours are the same thing:
 
 - A T3 Code thread started in a worktree already has one: work there.
-  If its branch is still T3's `t3/<hex>`, rename it before the first
-  push: `git branch -m agents/<slug>`.
+  T3 names its branch `agents/<slug>` from the first message. If it's
+  still a placeholder (`agents/<hex>`, `t3/<hex>`), rename it before
+  the first push: `git branch -m agents/<slug>`.
 - Otherwise, make one in T3 Code's worktree directory:
 
   ```sh
