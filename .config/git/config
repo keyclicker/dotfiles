@@ -10,9 +10,6 @@
 	editor = nvim
     ; pager = delta
 
-[worktree]
-	useRelativePaths = true
-
 [init]
 	defaultBranch = master
 
